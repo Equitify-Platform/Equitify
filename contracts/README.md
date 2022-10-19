@@ -34,7 +34,7 @@ class HelloNear {
 You can automatically compile and deploy the contract in the NEAR testnet by running:
 
 ```bash
-npm run deploy
+yarn deploy
 ```
 
 Once finished, check the `neardev/dev-account` file to find the address in which the contract was deployed:
