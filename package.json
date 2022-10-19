@@ -3,12 +3,13 @@
   "version": "0.0.1",
   "description": "Equitify Platform monorepo",
   "private": "true",
-  "workspaces": ["contracts"],
+  "workspaces": ["contracts", "integration-tests"],
   "scripts": {
     "deploy": "cd contracts && yarn deploy",
     "build": "yarn build:contracts",
     "build:contracts": "near-sdk-js build ./contracts/src/contract.ts build/hello_near.wasm",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "yarn test:integration",
+    "test:integration": "yarn build:contracts && cd integration-tests && yarn test"
   },
   "type": "module",
   "repository": {
