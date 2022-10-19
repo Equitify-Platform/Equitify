@@ -1,0 +1,19 @@
+{
+  "name": "contracts",
+  "version": "1.0.0",
+  "description": "Equitify Platform contracts package",
+  "type": "module",
+  "scripts": {
+    "build": "cd .. && yarn build:contracts",
+    "deploy": "./deploy.sh",
+    "test": "echo use integration-tests"
+  },
+  "author": "RedDuck Software <sales@redduck.io>",
+  "license": "ISC",
+  "dependencies": {
+    "near-cli": "^3.4.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.7.4"
+  }
+}
