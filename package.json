@@ -1,0 +1,28 @@
+{
+  "name": "equitify-platform",
+  "version": "0.0.1",
+  "description": "Equitify Platform monorepo",
+  "private": "true",
+  "workspaces": ["contracts"],
+  "scripts": {
+    "deploy": "cd contracts && yarn deploy",
+    "build": "yarn build:contracts",
+    "build:contracts": "near-sdk-js build ./contracts/src/contract.ts build/hello_near.wasm",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RedDuck-Software/equitify-platform.git"
+  },
+  "author": "RedDuck Software <sales@redduck.io>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RedDuck-Software/equitify-platform/issues"
+  },
+  "devDependencies": {
+    "near-cli": "^3.3.0",
+    "near-sdk-js": "0.5.0"
+  },
+  "homepage": "https://github.com/RedDuck-Software/equitify-platform#readme"
+}
