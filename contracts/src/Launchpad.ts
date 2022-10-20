@@ -1,7 +1,8 @@
-import { NearBindgen, near, call, view, initialize, UnorderedMap, LookupMap, NearPromise, assert } from 'near-sdk-js';
+import { NearBindgen, near, call, view, initialize, UnorderedMap, LookupMap, NearPromise, assert, bytes, Bytes } from 'near-sdk-js';
 import { Ownable } from './utils/contracts/Ownable';
+import { Callback, WithCallback } from './utils/contracts/WithCallback';
 
-type IDOData = {
+export type IDOData = {
     members: bigint;
     staticMembers: bigint;
     antagonistMembers: bigint;
@@ -17,7 +18,7 @@ type IDOData = {
     totalUnreleased: bigint; // total amount of unreleased tokens
 }
 
-type Project = {
+export type Project = {
     projectName: string;
     projectSignatures: string;
     projectDescription: string;
@@ -28,23 +29,7 @@ type Project = {
     price: bigint;
 }
 
-
-type UserApplication = {
-    randomedID: number;
-    attempt: boolean;
-    allocation: boolean;
-    gotResult: boolean;
-    registerInIDO: boolean;
-}
-
-type PoolWeights = {
-    staticTier: string;
-    antagonistTier: string;
-    dynamicTier: string;
-    launchpadTier: string;
-}
-
-type IDOParams = {
+export type IDOParams = {
     _deployer: string;
     _launchedToken: string;
     _tokenFounder: string;
@@ -52,27 +37,34 @@ type IDOParams = {
     _nft: string;
     _staking: string;
 }
-class Test { }
+
+
+enum LaunchpadCallbacks {
+    SET_TOTAL_CLAIMABLE_AMOUNT = '_set_totalClaimableAmount_on_balance_of_private_callback',
+    CLAIM_VESTED_TOKENS_GET_NFT_STRUCT = '_claim_vested_tokens_on_nft_struct_private_callback',
+    PURCHASE_TOKENS_GET_OWNER = '_purchase_tokens_on_get_owner_private_callback',
+    PURCHASE_TOKENS_NFT_CHANGE = '_purchase_tokens_on_nft_change_private_callback',
+}
+
 
 @NearBindgen({ requireInit: true })
 class Launchpad extends Ownable {
-    public nft: NFT;
+
+    public nft: string= '';
 
     public project: Project;
     public idoData: IDOData;
 
-    public tokenFounder: string; // the owner of the launched token
+    public tokenFounder: string= ''; // the owner of the launched token
 
-    public token: string; // address of the token to be launched
+    public token: string = ''; // address of the token to be launched
 
     _revocable: boolean = false; // whether or not the vesting is revocable
     _allowRefund: boolean = false; // whether or not the refund is allowed
 
-    // mapping(address => UserApplication) public surveyedAddresses; //mapping with address which applied
     public fundRaisedBalance: Record<string, bigint> = {};
 
     public tokensBought: Record<string, bigint> = {};
-    private readonly _poolWeights = [BigInt(5), BigInt(20), BigInt(30), BigInt(45)] as const;
 
     /* Analog of solidity modifiers. Just a private view functions */
     @view({ privateFunction: true })
@@ -85,32 +77,6 @@ class Launchpad extends Ownable {
     onlyIfSaleEnded() {
         assert((this.project.saleEndTime > 0) && (this.project.saleEndTime < near.blockTimestamp()), "PP: 1")
     }
-
-    @view({ privateFunction: true })
-    onlyIfVestingExists({ _beneficiary, _id }: { _beneficiary: string, _id: BigInt }) {
-        assert(this.nft.getStruct(_beneficiary, _id).initialized == true &&
-            this.ownerOf(_id) == _beneficiary, "PP: 2")
-    }
-
-    @view({ privateFunction: true })
-    onlyIfVestingNotRevoked({ _beneficiary, _id }: { _beneficiary: string, _id: BigInt }) {
-        assert(this.nft.getStruct(_beneficiary, _id).initialized == true &&
-            this.nft.ownerOf(_id) == _beneficiary &&
-            this.nft.getStruct(_beneficiary, _id).revoked == false, "VestingNotRevoked")
-    }
-
-    @view({ privateFunction: true })
-    validSoftHardCap() {
-        assert((this.idoData.totalBNBAmount <= this.project.hardCap) &&
-            (this.idoData.totalBNBAmount >= this.project.softCap), "PP: 4")
-    }
-
-    @view({ privateFunction: true })
-    validTokenAmount({ _beneficiary, _id }: { _beneficiary: string, _id: BigInt }) {
-        assert(this.nft.getStruct(_beneficiary, _id).initialized == true &&
-            this.nft.ownerOf(_id) == _beneficiary, "VestingNotRevoked")
-    }
-
 
     constructor() {
         super();
@@ -160,31 +126,20 @@ class Launchpad extends Ownable {
         this.tokenFounder = _params._tokenFounder;
         this.project = _params._project;
 
-        this.nft = NFT(_params._nft);
+        this.nft = _params._nft;
         this.transferOwnership({ to: _params._deployer });
 
-        this.idoData.totalClaimableAmount = this.token.balanceOf(near.currentAccountId());
-        assert(this.idoData.totalClaimableAmount > 0, "PP: 9");
-    }
-
-    // Make sure the allower has provided the right allowance
-    @view({ privateFunction: true })
-    _verifyAllowance({
-        _allower,
-        _amount,
-        _token
-    }: {
-        _allower: string,
-        _amount: BigInt,
-        _token: string
-    }
-    ) {
-        const ourAllowance = _token.allowance(_allower, near.currentAccountId());
-        assert(_amount <= ourAllowance, "PP: 11");
+        this._getBalanceOfContract({
+            of: near.currentAccountId(), callback: {
+                function: LaunchpadCallbacks.SET_TOTAL_CLAIMABLE_AMOUNT
+            }
+        })
     }
 
     @call({ payableFunction: true })
     purchaseTokens({ _beneficiary, _id }: { _beneficiary: string, _id: bigint }) {
+        this.onlyInitialized()
+
         assert(
             (near.blockTimestamp() > this.project.saleStartTime) &&
             (near.blockTimestamp() < this.project.saleEndTime),
@@ -198,45 +153,24 @@ class Launchpad extends Ownable {
             "PP: 14"
         );
 
-
         this.fundRaisedBalance[near.predecessorAccountId()] += near.attachedDeposit();
+
         this.tokensBought[_beneficiary] += tokenAmount;
 
-        if (_id != BigInt(0) && this.nft.ownerOf(_id) == _beneficiary) {
-            this.nft.changeData(_beneficiary, _id, tokenAmount);
-        } else {
-            this.nft.mintToken(_beneficiary, tokenAmount);
-        }
-
-        this.idoData.totalPurchased += tokenAmount;
-        this.idoData.totalBNBAmount += near.attachedDeposit();
-
-        assert(
-            this.idoData.totalPurchased <= this.idoData.totalClaimableAmount,
-            "PP: 15"
-        );
+        this._nftGetOwner({ id: _id, callback: { function: LaunchpadCallbacks.PURCHASE_TOKENS_GET_OWNER } });
     }
 
 
     // Releases claim for the launched token to the beneficiary
     @call({})
     claimVestedTokens({ _beneficiary, _id }: { _beneficiary: string, _id: bigint }) {
-        this.onlyIfVestingNotRevoked({ _beneficiary, _id });
+        this.onlyInitialized()
 
-        const balance = this.nft.getStruct(_beneficiary, _id).balance;
-        const isBeneficiary = near.predecessorAccountId() === _beneficiary;
-        const isOwner = near.predecessorAccountId() == this.owner();
-
-        assert(
-            this.nft.getStruct(_beneficiary, _id).claimed == false,
-            "Already claimed"
-        );
-
-        assert(isBeneficiary || isOwner, "PP: 21");
-
-        this.idoData.totalVestingAmount = this.idoData.totalVestingAmount + balance;
-        this.token.safeTransfer(_beneficiary, balance);
-        this.nft.makeClaimed(_id);
+        this._getNftStruct({
+            beneficiary: _beneficiary, id: _id, callback: {
+                function: LaunchpadCallbacks.CLAIM_VESTED_TOKENS_GET_NFT_STRUCT
+            }
+        })
     }
 
     // Withdraws payment token
@@ -252,7 +186,7 @@ class Launchpad extends Ownable {
         );
 
         const balanceBNB = near.accountBalance();
-        payable(_recipient).transfer(balanceBNB);
+        NearPromise.new(_recipient).transfer(balanceBNB)
     }
 
     // Withdraws not sold launched tokens back
@@ -264,7 +198,8 @@ class Launchpad extends Ownable {
 
         const notSold = this.idoData.totalClaimableAmount - this.idoData.totalPurchased;
         this.idoData.totalClaimableAmount = BigInt(0);
-        this.token.safeTransfer(_recipient, notSold);
+
+        this._transferTokens({ to: _recipient, amount: notSold })
     }
 
     // Withdraw unreleased launched tokens after revoke or in case emergency
@@ -272,13 +207,14 @@ class Launchpad extends Ownable {
     withdrawTokens({ _recipient, _amount }: { _recipient: string, _amount: bigint }) {
         assert(near.blockTimestamp() > this.idoData.cliff, "PP: 28");
         assert(
-            near.predecessorAccountId() === this.tokenFounder || near.predecessorAccountId() == owner(),
+            near.predecessorAccountId() === this.tokenFounder || near.predecessorAccountId() == this.owner(),
             "PP: 29"
         );
 
         this.idoData.totalUnreleased -= _amount;
         // how to transfer tokens?
-        assert(this.token.transfer(_recipient, _amount), "PP: 30");
+
+        this._transferTokens({ to: _recipient, amount: _amount })
     }
 
     @call({})
@@ -309,5 +245,215 @@ class Launchpad extends Ownable {
     getLatestPrice() {
         // TODO
         return BigInt('1');
+    }
+
+    @call({ privateFunction: true })
+    _getBalanceOfContract({ of, callback }: { of: string, callback?: Callback }) {
+        const promise = near.promiseBatchCreate(this.token);
+
+        near.promiseBatchActionFunctionCall(
+            promise,
+            'balance_of', // TODO
+            bytes(JSON.stringify({ of })),
+            0,
+            30000000000000
+        );
+
+
+        if (callback)
+            this._execute_callback_private({
+                promise,
+                callback,
+            })
+    }
+
+    @call({ privateFunction: true })
+    _transferTokens({ to, amount, callback }: { to: string, amount: bigint, callback?: Callback }) {
+        const promise = near.promiseBatchCreate(this.token);
+
+        near.promiseBatchActionFunctionCall(
+            promise,
+            'transfer', // TODO
+            bytes(JSON.stringify({})),
+            0,
+            30000000000000
+        );
+
+
+        if (callback)
+            this._execute_callback_private({
+                promise,
+                callback,
+            })
+    }
+
+    @call({ privateFunction: true })
+    _getNftStruct({ beneficiary, id, callback }: { beneficiary: string, id: bigint, callback?: Callback }) {
+        const promise = near.promiseBatchCreate(this.nft);
+
+        near.promiseBatchActionFunctionCall(
+            promise,
+            'get_struct', // TODO
+            bytes(JSON.stringify({ beneficiary, id })),
+            0,
+            30000000000000
+        );
+
+        if (callback)
+            this._execute_callback_private({
+                promise,
+                callback,
+            })
+    }
+
+    @call({ privateFunction: true })
+    _nftMakeClaimed({ id, callback }: { id: bigint, callback?: Callback }) {
+        const promise = near.promiseBatchCreate(this.nft);
+
+        near.promiseBatchActionFunctionCall(
+            promise,
+            'make_claimed', // TODO
+            bytes(JSON.stringify({ id })),
+            0,
+            30000000000000
+        );
+
+        if (callback)
+            this._execute_callback_private({
+                promise,
+                callback,
+            })
+    }
+
+    @call({ privateFunction: true })
+    _nftGetOwner({ id, callback }: { id: bigint, callback?: Callback }) {
+        const promise = near.promiseBatchCreate(this.nft);
+
+        near.promiseBatchActionFunctionCall(
+            promise,
+            'get_owner', // TODO
+            bytes(JSON.stringify({ id })),
+            0,
+            30000000000000
+        );
+
+        if (callback)
+            this._execute_callback_private({
+                promise,
+                callback,
+            })
+    }
+
+    @call({ privateFunction: true })
+    _nftChangeData({ id, beneficiary, tokenAmount, attachedDeposit, callback }: { id: bigint, beneficiary: string, tokenAmount: bigint, attachedDeposit: bigint, callback?: Callback }) {
+        const promise = near.promiseBatchCreate(this.nft);
+
+        near.promiseBatchActionFunctionCall(
+            promise,
+            'change_data', // TODO
+            bytes(JSON.stringify({ beneficiary, id, tokenAmount })),
+            0,
+            30000000000000
+        );
+
+
+        if (callback)
+            this._execute_callback_private({
+                promise,
+                callback,
+            })
+    }
+
+
+    @call({ privateFunction: true })
+    _nftMintToken({ beneficiary, tokenAmount, callback }: { beneficiary: string, tokenAmount: bigint, callback?: Callback }) {
+        const promise = near.promiseBatchCreate(this.nft);
+
+        near.promiseBatchActionFunctionCall(
+            promise,
+            'mint_token', // TODO
+            bytes(JSON.stringify({ beneficiary, tokenAmount })),
+            0,
+            30000000000000
+        );
+
+
+        if (callback)
+            this._execute_callback_private({
+                promise,
+                callback,
+            })
+    }
+
+    @call({ privateFunction: true })
+    _set_totalClaimableAmount_on_balance_of_private_callback() {
+        near.log(`_set_totalClaimableAmount_on_balance_of_private_callback callback`);
+
+        const balance = JSON.parse(near.promiseResult(0)) as bigint;
+        this.idoData.totalClaimableAmount = balance;
+
+        assert(this.idoData.totalClaimableAmount > 0, "PP: 9");
+    }
+
+    @call({ privateFunction: true })
+    _claim_vested_tokens_on_nft_struct_private_callback({ beneficiary, id }: { beneficiary: string, id: bigint }) {
+        near.log(`_claim_vested_tokens_on_nft_struct_private_callback callback`);
+
+        type NftGetStructResponse = {
+            balance: bigint,
+            claimed: boolean,
+            initialized: boolean,
+            revoked: boolean
+        }
+
+        const struct = JSON.parse(near.promiseResult(0)) as NftGetStructResponse;
+
+
+        assert(struct.initialized && !struct.revoked, "")
+
+
+
+        const balance = struct.balance;
+        const isBeneficiary = near.predecessorAccountId() === beneficiary;
+        const isOwner = near.predecessorAccountId() == this.owner();
+
+        assert(
+            struct.claimed == false,
+            "Already claimed"
+        );
+
+        assert(isBeneficiary || isOwner, "PP: 21");
+
+        this.idoData.totalVestingAmount = this.idoData.totalVestingAmount + balance;
+
+        this._transferTokens({ to: beneficiary, amount: balance })
+
+        this._nftMakeClaimed({ id });
+    }
+
+    @call({ privateFunction: true })
+    _purchase_tokens_on_get_owner_private_callback({ id, beneficiary, tokenAmount, attachedDeposit }: { id: bigint, beneficiary: string, tokenAmount: bigint, attachedDeposit: bigint }) {
+        near.log(`_purchase_tokens_on_get_owner_private_callback callback`);
+
+        const owner = near.promiseResult(0);
+
+        if (id != BigInt(0) && owner === beneficiary) {
+            this._nftChangeData({ beneficiary, id, tokenAmount, attachedDeposit, callback: { function: LaunchpadCallbacks.PURCHASE_TOKENS_NFT_CHANGE } });
+        } else {
+            this._nftMintToken({ beneficiary, tokenAmount, callback: { function: LaunchpadCallbacks.PURCHASE_TOKENS_NFT_CHANGE } });
+        }
+    }
+
+    @call({ privateFunction: true })
+    _purchase_tokens_on_nft_change_private_callback({ tokenAmount, attachedDeposit }: { tokenAmount: bigint, attachedDeposit: bigint }) {
+        near.log(`_purchase_tokens_on_nft_change_private_callback callback`);
+
+        this.idoData.totalPurchased += tokenAmount;
+        this.idoData.totalBNBAmount += attachedDeposit;
+
+        assert(
+            this.idoData.totalPurchased <= this.idoData.totalClaimableAmount,
+            "PP: 15"
+        );
     }
 }

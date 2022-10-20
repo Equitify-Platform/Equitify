@@ -1,7 +1,8 @@
 
 import { call, near, view } from "near-sdk-js"
+import { WithCallback } from "./WithCallback";
 
-export abstract class Ownable { 
+export abstract class Ownable extends WithCallback { 
     private _owner: string;
 
     @call({ privateFunction: true })
