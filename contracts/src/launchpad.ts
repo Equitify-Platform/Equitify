@@ -39,12 +39,13 @@ export type IDOParams = {
 }
 
 
-enum LaunchpadCallbacks {
-    SET_TOTAL_CLAIMABLE_AMOUNT = '_set_totalClaimableAmount_on_balance_of_private_callback',
-    CLAIM_VESTED_TOKENS_GET_NFT_STRUCT = '_claim_vested_tokens_on_nft_struct_private_callback',
-    PURCHASE_TOKENS_GET_OWNER = '_purchase_tokens_on_get_owner_private_callback',
-    PURCHASE_TOKENS_NFT_CHANGE = '_purchase_tokens_on_nft_change_private_callback',
-}
+// deprecated
+// enum LaunchpadCallbacks {
+//     SET_TOTAL_CLAIMABLE_AMOUNT = '_set_totalClaimableAmount_on_balance_of_private_callback',
+//     CLAIM_VESTED_TOKENS_GET_NFT_STRUCT = '_claim_vested_tokens_on_nft_struct_private_callback',
+//     PURCHASE_TOKENS_GET_OWNER = '_purchase_tokens_on_get_owner_private_callback',
+//     PURCHASE_TOKENS_NFT_CHANGE = '_purchase_tokens_on_nft_change_private_callback',
+// }
 
 
 @NearBindgen({ requireInit: true })
@@ -131,7 +132,7 @@ class Launchpad extends Ownable {
 
         this._getBalanceOfContract({
             of: near.currentAccountId(), callback: {
-                function: LaunchpadCallbacks.SET_TOTAL_CLAIMABLE_AMOUNT
+                function: this._set_totalClaimableAmount_on_balance_of_private_callback.name
             }
         })
     }
@@ -157,9 +158,8 @@ class Launchpad extends Ownable {
 
         this.tokensBought[_beneficiary] += tokenAmount;
 
-        this._nftGetOwner({ id: _id, callback: { function: LaunchpadCallbacks.PURCHASE_TOKENS_GET_OWNER } });
+        this._nftGetOwner({ id: _id, callback: { function: this._purchase_tokens_on_get_owner_private_callback.name } });
     }
-
 
     // Releases claim for the launched token to the beneficiary
     @call({})
@@ -168,7 +168,7 @@ class Launchpad extends Ownable {
 
         this._getNftStruct({
             beneficiary: _beneficiary, id: _id, callback: {
-                function: LaunchpadCallbacks.CLAIM_VESTED_TOKENS_GET_NFT_STRUCT
+                function: this._claim_vested_tokens_on_nft_struct_private_callback.name
             }
         })
     }
@@ -438,9 +438,9 @@ class Launchpad extends Ownable {
         const owner = near.promiseResult(0);
 
         if (id != BigInt(0) && owner === beneficiary) {
-            this._nftChangeData({ beneficiary, id, tokenAmount, attachedDeposit, callback: { function: LaunchpadCallbacks.PURCHASE_TOKENS_NFT_CHANGE } });
+            this._nftChangeData({ beneficiary, id, tokenAmount, attachedDeposit, callback: { function: this._purchase_tokens_on_nft_change_private_callback.name } });
         } else {
-            this._nftMintToken({ beneficiary, tokenAmount, callback: { function: LaunchpadCallbacks.PURCHASE_TOKENS_NFT_CHANGE } });
+            this._nftMintToken({ beneficiary, tokenAmount, callback: { function: this._purchase_tokens_on_nft_change_private_callback.name } });
         }
     }
 
