@@ -2,7 +2,7 @@ import React, { FC } from "react";
 import { BrowserRouter } from "react-router-dom";
 
 import Navbar from "./components/Navbar/Navbar";
-import { ReduxProvider } from './providers/ReduxProvider';
+import { ReduxProvider } from "./providers/ReduxProvider";
 import RenderRoutes from "./routes/RenderRoutes";
 
 const App: FC = () => {

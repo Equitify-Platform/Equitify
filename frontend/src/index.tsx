@@ -6,22 +6,15 @@ import { Buffer } from "buffer";
 import "./globals.scss";
 
 import App from "./App";
-import { HELLO_NEAR_ADDRESS } from "./constants";
-import { HelloNear } from "./contracts/hello-near";
-import { Wallet } from "./near-wallet";
 import reportWebVitals from "./reportWebVitals";
 
 window.Buffer = window.Buffer || Buffer;
-
-const wallet = new Wallet();
-const helloNear = new HelloNear(HELLO_NEAR_ADDRESS, wallet);
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    {/* <App wallet={wallet} helloNear={helloNear} /> */}
     <App />
   </React.StrictMode>
 );
