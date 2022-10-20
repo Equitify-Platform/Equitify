@@ -1,6 +1,6 @@
 import { NearBindgen, near, call, view, initialize, UnorderedMap, LookupMap, NearPromise, assert, bytes, Bytes } from 'near-sdk-js';
-import { Ownable } from './utils/contracts/Ownable';
-import { Callback, WithCallback } from './utils/contracts/WithCallback';
+import { Ownable } from './utils/contracts/ownable';
+import { Callback, WithCallback } from './utils/contracts/withCallback';
 
 export type IDOData = {
     members: bigint;
