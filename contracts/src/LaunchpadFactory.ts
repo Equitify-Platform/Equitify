@@ -24,7 +24,7 @@ interface ProjectParametes{
 // const DEFAULT_CONTRACT = includeBytes('./testContract/hello_near.wasm')
 
 @NearBindgen({})
-class LaunchpadContract {
+class LaunchpadFactory {
     idos:Vector;
     // code: string = DEFAULT_CONTRACT;
     
