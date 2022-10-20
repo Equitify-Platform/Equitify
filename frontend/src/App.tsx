@@ -1,7 +1,8 @@
-import React, {FC, FormEvent, useEffect, useRef, useState} from 'react';
-import type {HelloNear} from "./contracts/hello-near";
-import type {Wallet} from "./near-wallet";
-import {EducationalText, SignInPrompt, SignOutButton} from "./components";
+import React, { FC, FormEvent, useEffect, useRef, useState } from 'react';
+import type { HelloNear } from "./contracts/hello-near";
+import type { Wallet } from "./near-wallet";
+import { EducationalText, SignInPrompt, SignOutButton } from "./components";
+import { ReduxProvider } from './providers/ReduxProvider';
 
 interface AppProps {
     helloNear: HelloNear;
@@ -47,7 +48,7 @@ const App: FC<AppProps> = ({ wallet, helloNear }) => {
     };
 
     return (
-        <>
+        <ReduxProvider>
             <SignOutButton accountId={wallet.accountId || ""} onClick={() => wallet.signOut()} />
             <main className={uiPleaseWait ? 'please-wait' : ''}>
                 <h1>
@@ -70,7 +71,7 @@ const App: FC<AppProps> = ({ wallet, helloNear }) => {
                 </form>
                 <EducationalText />
             </main>
-        </>
+        </ReduxProvider>
     );
 };
 
