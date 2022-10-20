@@ -3,7 +3,11 @@
   "version": "0.0.1",
   "description": "Equitify Platform monorepo",
   "private": "true",
-  "workspaces": ["contracts", "integration-tests", "frontend"],
+  "workspaces": [
+    "contracts",
+    "integration-tests",
+    "frontend"
+  ],
   "scripts": {
     "start": "cd frontend && yarn start",
     "deploy": "cd contracts && yarn deploy",
@@ -27,5 +31,9 @@
     "near-cli": "^3.3.0",
     "near-sdk-js": "0.5.0"
   },
-  "homepage": "https://github.com/RedDuck-Software/equitify-platform#readme"
+  "homepage": "https://github.com/RedDuck-Software/equitify-platform#readme",
+  "dependencies": {
+    "@commitlint/config-conventional": "^17.1.0",
+    "husky": "^8.0.1"
+  }
 }
