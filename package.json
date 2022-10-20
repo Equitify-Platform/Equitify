@@ -6,7 +6,8 @@
   "workspaces": ["contracts", "integration-tests"],
   "scripts": {
     "deploy": "cd contracts && yarn deploy",
-    "build": "yarn build:launchpad",
+    "build": "yarn build:contracts",
+    "build:contracts": "yarn build:launchpad",
     "build:launchpad": "near-sdk-js build ./contracts/src/launchpad.ts build/launchpad/launchpad.wasm",
     "test": "yarn test:integration",
     "test:integration": "yarn build && cd integration-tests && yarn test"
