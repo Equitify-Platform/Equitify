@@ -8,6 +8,7 @@
     "deploy": "cd contracts && yarn deploy",
     "build": "yarn build:launchpad",
     "build:launchpad": "near-sdk-js build ./contracts/src/launchpad.ts build/launchpad.wasm",
+    "build:launchpad-factory": "near-sdk-js build ./contracts/src/launchpadFactory.ts build/launchpad_factory.wasm",
     "test": "yarn test:integration",
     "test:integration": "yarn build && cd integration-tests && yarn test"
   },
