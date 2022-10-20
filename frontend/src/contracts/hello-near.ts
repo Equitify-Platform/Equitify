@@ -1,4 +1,5 @@
 import type { Wallet } from "../near-wallet";
+import { FinalExecutionOutcome } from "near-api-js/lib/providers";
 
 export class HelloNear {
   private readonly contractId: string;
@@ -9,11 +10,11 @@ export class HelloNear {
     this.wallet = wallet;
   }
 
-  public async getGreeting() {
+  public async getGreeting(): Promise<string> {
     return await this.wallet.view<string>(this.contractId, "get_greeting");
   }
 
-  public async setGreeting(greeting: string) {
+  public async setGreeting(greeting: string): Promise<void | FinalExecutionOutcome> {
     return await this.wallet.call(this.contractId, "set_greeting", {
       message: greeting,
     });
