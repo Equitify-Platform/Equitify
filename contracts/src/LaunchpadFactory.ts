@@ -21,7 +21,6 @@ interface ProjectParametes{
     nft:AccountId,
     projectUID:string
 }
-'./'
 // const DEFAULT_CONTRACT = includeBytes('./testContract/hello_near.wasm')
 
 @NearBindgen({})
