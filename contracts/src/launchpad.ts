@@ -63,9 +63,9 @@ class Launchpad extends Ownable {
     _revocable: boolean = false; // whether or not the vesting is revocable
     _allowRefund: boolean = false; // whether or not the refund is allowed
 
-    public fundRaisedBalance: Record<string, bigint> = {};
+    public fundRaisedBalance: LookupMap = new LookupMap('fundRaisedBalance');
 
-    public tokensBought: Record<string, bigint> = {};
+    public tokensBought: LookupMap = new LookupMap('tokensBought');
 
     /* Analog of solidity modifiers. Just a private view functions */
     @view({ privateFunction: true })
@@ -154,9 +154,15 @@ class Launchpad extends Ownable {
             "PP: 14"
         );
 
-        this.fundRaisedBalance[near.predecessorAccountId()] += near.attachedDeposit();
+        this._fundRaisedBalanceSet(
+            near.predecessorAccountId(), 
+            this._fundRaisedBalanceGet(near.predecessorAccountId() + near.attachedDeposit())
+        );
 
-        this.tokensBought[_beneficiary] += tokenAmount;
+        this._tokensBoughtSet(
+            _beneficiary,
+            this._tokensBoughtGet(_beneficiary) + tokenAmount
+        )
 
         this._nftGetOwner({ id: _id, callback: { function: this._purchase_tokens_on_get_owner_private_callback.name } });
     }
@@ -233,13 +239,38 @@ class Launchpad extends Ownable {
         );
 
         assert(this._allowRefund, "Launchpad: refund is not allowed");
-        const amountBNB = this.fundRaisedBalance[near.predecessorAccountId()];
+        const amountBNB = this._fundRaisedBalanceGet(near.predecessorAccountId());
         assert(amountBNB > 0, "Launchpad: no funds to refund");
         this.idoData.totalBNBAmount -= amountBNB;
-        this.fundRaisedBalance[near.predecessorAccountId()] = BigInt(0);
+        this._fundRaisedBalanceSet(near.predecessorAccountId(),BigInt(0));
 
         NearPromise.new(near.predecessorAccountId()).transfer(amountBNB)
     }
+
+    @call({})
+    _fundRaisedBalanceGet(accountId: string){
+        if(this.fundRaisedBalance.containsKey(accountId)) 
+            return this.fundRaisedBalance.get(accountId) as bigint;
+        return BigInt(0);
+    }
+
+    @call({ privateFunction: true })
+    _fundRaisedBalanceSet(accountId: string, value: bigint){
+        this.fundRaisedBalance.set(accountId, value);
+    }
+    
+    @view({})
+    _tokensBoughtGet(accountId: string){
+        if(this.tokensBought.containsKey(accountId)) 
+            return this.tokensBought.get(accountId) as bigint;
+        return BigInt(0);
+    }
+
+    @call({ privateFunction: true })
+    _tokensBoughtSet(accountId: string, value: bigint){
+        this.tokensBought.set(accountId, value);
+    }
+    
 
     @view({})
     getLatestPrice() {
