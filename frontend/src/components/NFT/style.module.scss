@@ -1,0 +1,16 @@
+.nftContainer {
+  height: 100px;
+  width: 100%;
+  padding: 0 5rem;
+  background-color: lightgray;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.buttonsWrapper {
+  display: flex;
+  width: 20%;
+  justify-content: space-between;
+  align-items: center;
+}
