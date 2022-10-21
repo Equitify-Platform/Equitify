@@ -10,9 +10,9 @@
     "build": "yarn build:contracts && yarn build:web",
     "build:web": "cd frontend && yarn build",
     "build:contracts": "yarn build:launchpad",
-    "build:launchpad": "near-sdk-js build ./contracts/src/launchpad.ts build/launchpad/launchpad.wasm",
+    "build:launchpad": "near-sdk-js build ./contracts/src/launchpad.ts build/launchpad.wasm",
     "test": "yarn test:integration",
-    "test:integration": "yarn build && cd integration-tests && yarn test"
+    "test:integration": "yarn build:contracts && cd integration-tests && yarn test"
   },
   "type": "module",
   "repository": {

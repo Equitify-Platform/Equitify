@@ -1,32 +1,30 @@
 import { NearBindgen, near, call, view, initialize, UnorderedMap, LookupMap, NearPromise, assert, bytes, Bytes } from 'near-sdk-js';
+import { log } from './utils';
 import { Ownable } from './utils/contracts/ownable';
 import { Callback, WithCallback } from './utils/contracts/withCallback';
 
 export type IDOData = {
-    members: bigint;
-    staticMembers: bigint;
-    antagonistMembers: bigint;
-    dynamicMembers: bigint;
-    launchpadMembers: bigint;
-    totalClaimableAmount: bigint; // total amount of launched tokens to be claimable by others
-    totalPurchased: bigint; // total amount of tokens already purchased
-    totalBNBAmount: bigint; // total amount of raised payment token
-    start: bigint; // start time of the vesting period
-    cliff: bigint; // cliff duration in seconds of the cliff in which tokens will begin to vest
-    duration: bigint; // duration in seconds of the period in which the tokens will vest
-    totalVestingAmount: bigint; // total amount of vested tokens
-    totalUnreleased: bigint; // total amount of unreleased tokens
+    members: string;
+    staticMembers: string;
+    antagonistMembers: string;
+    dynamicMembers: string;
+    launchpadMembers: string;
+    totalClaimableAmount: string; // total amount of launched tokens to be claimable by others
+    totalPurchased: string; // total amount of tokens already purchased
+    totalNearAmount: string; // total amount of raised payment token
+    start: string; // start time of the vesting period
+    cliff: string; // cliff duration in seconds of the cliff in which tokens will begin to vest
+    duration: string; // duration in seconds of the period in which the tokens will vest
+    totalVestingAmount: string; // total amount of vested tokens
+    totalUnreleased: string; // total amount of unreleased tokens
 }
 
 export type Project = {
-    projectName: string;
-    projectSignatures: string;
-    projectDescription: string;
-    hardCap: bigint;
-    softCap: bigint;
-    saleStartTime: bigint;
-    saleEndTime: bigint;
-    price: bigint;
+    hardCap: string;
+    softCap: string;
+    saleStartTime: string;
+    saleEndTime: string;
+    price: string;
 }
 
 export type IDOParams = {
@@ -35,9 +33,7 @@ export type IDOParams = {
     _tokenFounder: string;
     _project: Project;
     _nft: string;
-    _staking: string;
 }
-
 
 // deprecated
 // enum LaunchpadCallbacks {
@@ -70,43 +66,40 @@ class Launchpad extends Ownable {
     /* Analog of solidity modifiers. Just a private view functions */
     @view({ privateFunction: true })
     onlyInitialized() {
-        if (this.idoData.totalClaimableAmount > 0) return;
+        if (BigInt(this.idoData.totalClaimableAmount) > 0) return;
         throw "PP: 0";
     }
 
     @view({ privateFunction: true })
     onlyIfSaleEnded() {
-        assert((this.project.saleEndTime > 0) && (this.project.saleEndTime < near.blockTimestamp()), "PP: 1")
+        assert((BigInt(this.project.saleEndTime) > 0) && (BigInt(this.project.saleEndTime) < near.blockTimestamp()), "PP: 1")
     }
 
     constructor() {
         super();
 
         this.idoData = {
-            antagonistMembers: BigInt(0),
-            cliff: BigInt(0),
-            duration: BigInt(0),
-            dynamicMembers: BigInt(0),
-            members: BigInt(0),
-            launchpadMembers: BigInt(0),
-            start: BigInt(0),
-            staticMembers: BigInt(0),
-            totalBNBAmount: BigInt(0),
-            totalClaimableAmount: BigInt(0),
-            totalPurchased: BigInt(0),
-            totalUnreleased: BigInt(0),
-            totalVestingAmount: BigInt(0)
+            antagonistMembers: '0',
+            cliff: '0',
+            duration: '0',
+            dynamicMembers: '0',
+            members: '0',
+            launchpadMembers: '0',
+            start: '0',
+            staticMembers: '0',
+            totalNearAmount: '0',
+            totalClaimableAmount: '0',
+            totalPurchased: '0',
+            totalUnreleased: '0',
+            totalVestingAmount: '0'
         }
 
         this.project = {
-            hardCap: BigInt(0),
-            price: BigInt(0),
-            saleEndTime: BigInt(0),
-            saleStartTime: BigInt(0),
-            softCap: BigInt(0),
-            projectDescription: '',
-            projectName: '',
-            projectSignatures: ''
+            hardCap: '0',
+            price: '0',
+            saleEndTime: '0',
+            saleStartTime: '0',
+            softCap: '0',
         }
 
     }
@@ -115,13 +108,13 @@ class Launchpad extends Ownable {
     init(_params: IDOParams) {
         this.__Ownable_init();
 
-        assert(_params._project.hardCap >= _params._project.softCap, "PP: 6");
+        assert(BigInt(_params._project.hardCap) >= BigInt(_params._project.softCap), "PP: 6");
         assert(
-            (_params._project.saleStartTime >= 0) &&
-            (_params._project.saleStartTime < _params._project.saleEndTime),
+            (BigInt(_params._project.saleStartTime) >= 0) &&
+            (BigInt(_params._project.saleStartTime) < BigInt(_params._project.saleEndTime)),
             "PP: 7"
         );
-        assert(_params._project.price > 0, "PP: 8");
+        assert(BigInt(_params._project.price) > 0, "PP: 8");
 
         this.token = _params._launchedToken;
         this.tokenFounder = _params._tokenFounder;
@@ -129,6 +122,14 @@ class Launchpad extends Ownable {
 
         this.nft = _params._nft;
         this.transferOwnership({ to: _params._deployer });
+
+        log('init storage check', JSON.stringify({
+            token: this.token,
+            founder: this.tokenFounder,
+            project: this.project,
+            nft: this.nft,
+            owner: this.owner()
+        }));
 
         this._getBalanceOfContract({
             of: near.currentAccountId(), callback: {
@@ -142,15 +143,15 @@ class Launchpad extends Ownable {
         this.onlyInitialized()
 
         assert(
-            (near.blockTimestamp() > this.project.saleStartTime) &&
-            (near.blockTimestamp() < this.project.saleEndTime),
+            (near.blockTimestamp() > BigInt(this.project.saleStartTime)) &&
+            (near.blockTimestamp() < BigInt(this.project.saleEndTime)),
             "PP: 12"
         );
 
-        const tokenAmount = near.attachedDeposit() * this.project.price;
+        const tokenAmount = near.attachedDeposit() * BigInt(this.project.price);
 
         assert(
-            this.idoData.totalBNBAmount + near.attachedDeposit() <= this.project.hardCap,
+            BigInt(this.idoData.totalNearAmount) + near.attachedDeposit() <= BigInt(this.project.hardCap),
             "PP: 14"
         );
 
@@ -191,8 +192,8 @@ class Launchpad extends Ownable {
             "Launchpad: only tokenFounder or owner can withdraw funds"
         );
 
-        const balanceBNB = near.accountBalance();
-        NearPromise.new(_recipient).transfer(balanceBNB)
+        const balanceNear = near.accountBalance();
+        NearPromise.new(_recipient).transfer(balanceNear)
     }
 
     // Withdraws not sold launched tokens back
@@ -202,8 +203,8 @@ class Launchpad extends Ownable {
 
         assert(near.predecessorAccountId() === this.tokenFounder, "PP: 26");
 
-        const notSold = this.idoData.totalClaimableAmount - this.idoData.totalPurchased;
-        this.idoData.totalClaimableAmount = BigInt(0);
+        const notSold = BigInt(this.idoData.totalClaimableAmount) - BigInt(this.idoData.totalPurchased);
+        this.idoData.totalClaimableAmount = '0';
 
         this._transferTokens({ to: _recipient, amount: notSold })
     }
@@ -211,14 +212,13 @@ class Launchpad extends Ownable {
     // Withdraw unreleased launched tokens after revoke or in case emergency
     @call({})
     withdrawTokens({ _recipient, _amount }: { _recipient: string, _amount: bigint }) {
-        assert(near.blockTimestamp() > this.idoData.cliff, "PP: 28");
+        assert(near.blockTimestamp() > BigInt(this.idoData.cliff), "PP: 28");
         assert(
             near.predecessorAccountId() === this.tokenFounder || near.predecessorAccountId() == this.owner(),
             "PP: 29"
         );
 
-        this.idoData.totalUnreleased -= _amount;
-        // how to transfer tokens?
+        this.idoData.totalUnreleased = (BigInt(this.idoData.totalUnreleased) - _amount).toString();
 
         this._transferTokens({ to: _recipient, amount: _amount })
     }
@@ -234,41 +234,41 @@ class Launchpad extends Ownable {
         this.onlyIfSaleEnded();
 
         assert(
-            this.idoData.totalBNBAmount < this.project.softCap,
+            this.idoData.totalNearAmount < this.project.softCap,
             "Launchpad: token vesting is launched"
         );
 
         assert(this._allowRefund, "Launchpad: refund is not allowed");
-        const amountBNB = this._fundRaisedBalanceGet(near.predecessorAccountId());
-        assert(amountBNB > 0, "Launchpad: no funds to refund");
-        this.idoData.totalBNBAmount -= amountBNB;
+        const amountNear = this._fundRaisedBalanceGet(near.predecessorAccountId());
+        assert(amountNear > 0, "Launchpad: no funds to refund");
+        this.idoData.totalNearAmount = (BigInt(this.idoData.totalNearAmount) - amountNear).toString();
         this._fundRaisedBalanceSet(near.predecessorAccountId(),BigInt(0));
 
-        NearPromise.new(near.predecessorAccountId()).transfer(amountBNB)
+        NearPromise.new(near.predecessorAccountId()).transfer(amountNear)
     }
 
     @call({})
     _fundRaisedBalanceGet(accountId: string){
         if(this.fundRaisedBalance.containsKey(accountId)) 
-            return this.fundRaisedBalance.get(accountId) as bigint;
+            return BigInt(this.fundRaisedBalance.get(accountId) as string);
         return BigInt(0);
     }
 
     @call({ privateFunction: true })
     _fundRaisedBalanceSet(accountId: string, value: bigint){
-        this.fundRaisedBalance.set(accountId, value);
+        this.fundRaisedBalance.set(accountId, value.toString());
     }
     
     @view({})
     _tokensBoughtGet(accountId: string){
         if(this.tokensBought.containsKey(accountId)) 
-            return this.tokensBought.get(accountId) as bigint;
+            return BigInt(this.tokensBought.get(accountId) as string);
         return BigInt(0);
     }
 
     @call({ privateFunction: true })
     _tokensBoughtSet(accountId: string, value: bigint){
-        this.tokensBought.set(accountId, value);
+        this.tokensBought.set(accountId, value.toString());
     }
     
 
@@ -421,9 +421,9 @@ class Launchpad extends Ownable {
         near.log(`_set_totalClaimableAmount_on_balance_of_private_callback callback`);
 
         const balance = JSON.parse(near.promiseResult(0)) as bigint;
-        this.idoData.totalClaimableAmount = balance;
+        this.idoData.totalClaimableAmount = balance.toString();
 
-        assert(this.idoData.totalClaimableAmount > 0, "PP: 9");
+        assert(BigInt(this.idoData.totalClaimableAmount) > 0, "PP: 9");
     }
 
     @call({ privateFunction: true })
@@ -431,7 +431,7 @@ class Launchpad extends Ownable {
         near.log(`_claim_vested_tokens_on_nft_struct_private_callback callback`);
 
         type NftGetStructResponse = {
-            balance: bigint,
+            balance: string,
             claimed: boolean,
             initialized: boolean,
             revoked: boolean
@@ -455,9 +455,9 @@ class Launchpad extends Ownable {
 
         assert(isBeneficiary || isOwner, "PP: 21");
 
-        this.idoData.totalVestingAmount = this.idoData.totalVestingAmount + balance;
+        this.idoData.totalVestingAmount = (BigInt(this.idoData.totalVestingAmount) + BigInt(balance)).toString();
 
-        this._transferTokens({ to: beneficiary, amount: balance })
+        this._transferTokens({ to: beneficiary, amount: BigInt(balance) })
 
         this._nftMakeClaimed({ id });
     }
@@ -479,11 +479,11 @@ class Launchpad extends Ownable {
     _purchase_tokens_on_nft_change_private_callback({ tokenAmount, attachedDeposit }: { tokenAmount: bigint, attachedDeposit: bigint }) {
         near.log(`_purchase_tokens_on_nft_change_private_callback callback`);
 
-        this.idoData.totalPurchased += tokenAmount;
-        this.idoData.totalBNBAmount += attachedDeposit;
+        this.idoData.totalPurchased = (BigInt(this.idoData.totalPurchased) + BigInt(tokenAmount)).toString();
+        this.idoData.totalNearAmount += (BigInt(this.idoData.totalNearAmount) + BigInt(attachedDeposit)).toString();
 
         assert(
-            this.idoData.totalPurchased <= this.idoData.totalClaimableAmount,
+            BigInt(this.idoData.totalPurchased) <= BigInt(this.idoData.totalClaimableAmount),
             "PP: 15"
         );
     }
