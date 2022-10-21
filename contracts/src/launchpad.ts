@@ -1,5 +1,5 @@
 import { NearBindgen, near, call, view, initialize, UnorderedMap, LookupMap, NearPromise, assert, bytes, Bytes } from 'near-sdk-js';
-import { log } from './utils';
+import { log, parseTGas } from './utils';
 import { Ownable } from './utils/contracts/ownable';
 import { Callback, WithCallback } from './utils/contracts/withCallback';
 
@@ -47,31 +47,28 @@ export type IDOParams = {
 @NearBindgen({ requireInit: true })
 class Launchpad extends Ownable {
 
-    public nft: string= '';
+    public nft: string = '';
 
     public project: Project;
     public idoData: IDOData;
 
-    public tokenFounder: string= ''; // the owner of the launched token
+    public tokenFounder: string = ''; // the owner of the launched token
 
     public token: string = ''; // address of the token to be launched
 
     _revocable: boolean = false; // whether or not the vesting is revocable
     _allowRefund: boolean = false; // whether or not the refund is allowed
 
-    public fundRaisedBalance: LookupMap = new LookupMap('fundRaisedBalance');
+    public fundRaisedBalance: LookupMap<bigint> = new LookupMap('fundRaisedBalance');
 
-    public tokensBought: LookupMap = new LookupMap('tokensBought');
+    public tokensBought: LookupMap<bigint> = new LookupMap('tokensBought');
+    public tokenTransfered: LookupMap<bigint> = new LookupMap('tokenTransfered');
 
-    /* Analog of solidity modifiers. Just a private view functions */
-    @view({ privateFunction: true })
-    onlyInitialized() {
-        if (BigInt(this.idoData.totalClaimableAmount) > 0) return;
-        throw "PP: 0";
+    private onlyInitialized() {
+        assert(BigInt(this.idoData.totalClaimableAmount) > 0, "PP: 0")
     }
 
-    @view({ privateFunction: true })
-    onlyIfSaleEnded() {
+    private onlyIfSaleEnded() {
         assert((BigInt(this.project.saleEndTime) > 0) && (BigInt(this.project.saleEndTime) < near.blockTimestamp()), "PP: 1")
     }
 
@@ -131,22 +128,26 @@ class Launchpad extends Ownable {
             owner: this.owner()
         }));
 
+        this.idoData.totalClaimableAmount = '1';
+
         this._getBalanceOfContract({
-            of: near.currentAccountId(), callback: {
-                function: this._set_totalClaimableAmount_on_balance_of_private_callback.name
+            account_id: near.currentAccountId(), 
+            callback: {
+                function: this._set_totalClaimableAmount_on_balance_of_private_callback.name,
+                gas: parseTGas(10)
             }
         })
     }
 
     @call({ payableFunction: true })
-    purchaseTokens({ _beneficiary, _id }: { _beneficiary: string, _id: bigint }) {
+    purchaseTokens({ _beneficiary, _id }: { _beneficiary: string, _id: string }) {
         this.onlyInitialized()
 
         assert(
             (near.blockTimestamp() > BigInt(this.project.saleStartTime)) &&
             (near.blockTimestamp() < BigInt(this.project.saleEndTime)),
             "PP: 12"
-        );
+        )
 
         const tokenAmount = near.attachedDeposit() * BigInt(this.project.price);
 
@@ -155,17 +156,17 @@ class Launchpad extends Ownable {
             "PP: 14"
         );
 
-        this._fundRaisedBalanceSet(
-            near.predecessorAccountId(), 
+        this._internalFundRaisedBalanceSet(
+            near.predecessorAccountId(),
             this._fundRaisedBalanceGet(near.predecessorAccountId() + near.attachedDeposit())
         );
 
-        this._tokensBoughtSet(
+        this._internalTokensBoughtSet(
             _beneficiary,
             this._tokensBoughtGet(_beneficiary) + tokenAmount
         )
 
-        this._nftGetOwner({ id: _id, callback: { function: this._purchase_tokens_on_get_owner_private_callback.name } });
+        //   this._nftGetOwner({ id: _id, callback: { function: this._purchase_tokens_on_get_owner_private_callback.name } });
     }
 
     // Releases claim for the launched token to the beneficiary
@@ -242,35 +243,44 @@ class Launchpad extends Ownable {
         const amountNear = this._fundRaisedBalanceGet(near.predecessorAccountId());
         assert(amountNear > 0, "Launchpad: no funds to refund");
         this.idoData.totalNearAmount = (BigInt(this.idoData.totalNearAmount) - amountNear).toString();
-        this._fundRaisedBalanceSet(near.predecessorAccountId(),BigInt(0));
+        this._internalFundRaisedBalanceSet(near.predecessorAccountId(), BigInt(0));
 
         NearPromise.new(near.predecessorAccountId()).transfer(amountNear)
     }
 
-    @call({})
-    _fundRaisedBalanceGet(accountId: string){
-        if(this.fundRaisedBalance.containsKey(accountId)) 
-            return BigInt(this.fundRaisedBalance.get(accountId) as string);
-        return BigInt(0);
-    }
-
-    @call({ privateFunction: true })
-    _fundRaisedBalanceSet(accountId: string, value: bigint){
-        this.fundRaisedBalance.set(accountId, value.toString());
-    }
-    
     @view({})
-    _tokensBoughtGet(accountId: string){
-        if(this.tokensBought.containsKey(accountId)) 
-            return BigInt(this.tokensBought.get(accountId) as string);
+    _fundRaisedBalanceGet(accountId: string) {
+        if (this.fundRaisedBalance.containsKey(accountId))
+            return this.fundRaisedBalance.get(accountId);
         return BigInt(0);
     }
 
-    @call({ privateFunction: true })
-    _tokensBoughtSet(accountId: string, value: bigint){
-        this.tokensBought.set(accountId, value.toString());
+    private _internalFundRaisedBalanceSet(accountId: string, value: bigint) {
+        this.fundRaisedBalance.set(accountId, value);
     }
-    
+
+    @view({})
+    _tokensBoughtGet(accountId: string) {
+        if (this.tokensBought.containsKey(accountId))
+            return this.tokensBought.get(accountId);
+        return BigInt(0);
+    }
+
+    private _internalTokensBoughtSet(accountId: string, value: bigint) {
+        this.tokensBought.set(accountId, value);
+    }
+
+    @view({})
+    _tokensTransferedGet(accountId: string) {
+        if (this.tokenTransfered.containsKey(accountId))
+            return this.tokenTransfered.get(accountId);
+        return BigInt(0);
+    }
+
+    _internalTokensTransferedSet(accountId: string, value: bigint) {
+        this.tokenTransfered.set(accountId, value);
+    }
+
 
     @view({})
     getLatestPrice() {
@@ -278,24 +288,25 @@ class Launchpad extends Ownable {
         return BigInt('1');
     }
 
-    @call({ privateFunction: true })
-    _getBalanceOfContract({ of, callback }: { of: string, callback?: Callback }) {
+    // @call({ privateFunction: true })
+    private _getBalanceOfContract({ account_id, callback }: { account_id: string, callback?: Callback }) {
         const promise = near.promiseBatchCreate(this.token);
 
         near.promiseBatchActionFunctionCall(
             promise,
-            'balance_of', // TODO
-            bytes(JSON.stringify({ of })),
+            'ft_balance_of',
+            bytes(JSON.stringify({ account_id })),
             0,
-            30000000000000
+            parseTGas(100)
         );
-
 
         if (callback)
             this._execute_callback_private({
                 promise,
                 callback,
             })
+
+        return near.promiseReturn(promise)
     }
 
     @call({ privateFunction: true })
@@ -316,6 +327,7 @@ class Launchpad extends Ownable {
                 promise,
                 callback,
             })
+        return near.promiseReturn(promise)
     }
 
     @call({ privateFunction: true })
@@ -335,6 +347,7 @@ class Launchpad extends Ownable {
                 promise,
                 callback,
             })
+        return near.promiseReturn(promise)
     }
 
     @call({ privateFunction: true })
@@ -354,6 +367,7 @@ class Launchpad extends Ownable {
                 promise,
                 callback,
             })
+        return near.promiseReturn(promise)
     }
 
     @call({ privateFunction: true })
@@ -373,6 +387,7 @@ class Launchpad extends Ownable {
                 promise,
                 callback,
             })
+        return near.promiseReturn(promise)
     }
 
     @call({ privateFunction: true })
@@ -393,6 +408,7 @@ class Launchpad extends Ownable {
                 promise,
                 callback,
             })
+        return near.promiseReturn(promise)
     }
 
 
@@ -414,6 +430,7 @@ class Launchpad extends Ownable {
                 promise,
                 callback,
             })
+        return near.promiseReturn(promise)
     }
 
     @call({ privateFunction: true })
@@ -485,6 +502,28 @@ class Launchpad extends Ownable {
         assert(
             BigInt(this.idoData.totalPurchased) <= BigInt(this.idoData.totalClaimableAmount),
             "PP: 15"
+        );
+    }
+
+    @call({})
+    ft_on_transfer({
+        sender_id,
+        amount,
+        msg,
+        receiver_id,
+    }: {
+        sender_id: string;
+        amount: string;
+        msg: string;
+        receiver_id: string;
+    }) {
+        if(this.tokenTransfered)
+        this.tokenTransfered
+        log(`[${amount} from ${sender_id} to ${receiver_id}] ${msg}`);
+
+        this._internalTokensTransferedSet(
+            sender_id, 
+            this._tokensTransferedGet(sender_id) + BigInt(amount)
         );
     }
 }
