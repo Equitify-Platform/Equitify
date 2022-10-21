@@ -1,7 +1,7 @@
-import { NearBindgen, near, call, view, Vector, NearPromise } from 'near-sdk-js';
-import { AccountId } from 'near-sdk-js/lib/types';
+import { NearBindgen, near, call, view, Vector, NearPromise, assert } from 'near-sdk-js';
+import { AccountId } from 'near-sdk-js/lib/types/account_id';
 
-interface Project{
+interface Project {
     projectName:string,
     projectTicker:string,
     projectDescription:string,
@@ -12,7 +12,7 @@ interface Project{
     price:number
 }
 
-interface ProjectParametes{
+interface ProjectParametes {
     creator:AccountId,
     launchedToken:string,
     founder:AccountId,
@@ -25,33 +25,32 @@ interface ProjectParametes{
 
 @NearBindgen({})
 class LaunchpadFactory {
-    idos:Vector;
-    // code: string = DEFAULT_CONTRACT;
+    idos:Vector<string>;
     
     constructor() {
         this.idos = new Vector('1');
     }
 
     @call({})
-    create_ido({ IDOProperties }: { IDOProperties: ProjectParametes }): void {
+    create_ido({ IDOAddress }: { IDOAddress: string }): void {
 
-        this.idos.push(IDOProperties);
+        this.idos.push(IDOAddress);
     }
 
-    // @call({})
-    // deploy_contract() {
-    // // const promise = NearPromise.new('danildovgal.testnet')
-    // // .deployContract(this.code)
-    // // .then(
-    // //     NearPromise.new(near.currentAccountId())
-    // //     .functionCall("query_greeting_callback", NO_ARGS, NO_DEPOSIT, FIVE_TGAS)
-    // // )
+    @call({})
+    deploy_contract({name}: {name: string;}): NearPromise {
     
-    // return promise.asReturn();
-    // }
+    const currentAccount = near.currentAccountId();
+    const subaccount = `${name}.${currentAccount}`;
+        
+    const promise = NearPromise.new(subaccount)
+    .deployContract('../../build/lauchpad.wasm')
+
+    return promise.asReturn();
+    }
 
     @view({})
-    get_all_idos_info(): Vector {
+    get_all_idos_info(): Vector<any> {
         
         return this.idos;
     }
