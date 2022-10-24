@@ -8,6 +8,7 @@ import {
   assert,
   validateAccountId,
 } from "near-sdk-js";
+import { log } from "./utils";
 
 
 @NearBindgen({ requireInit: true })
@@ -224,6 +225,7 @@ export class FungibleToken {
 
   @view({})
   ft_balance_of({ account_id }: { account_id: string }) {
+    log('Balance of call');
     validateAccountId(account_id);
     return this.internalGetBalance(account_id);
   }

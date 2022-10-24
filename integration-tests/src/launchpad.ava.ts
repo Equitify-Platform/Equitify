@@ -1,7 +1,7 @@
 import testAny from 'ava';
-import { NearAccount, Worker } from 'near-workspaces';
+import { NearAccount, Worker} from 'near-workspaces';
 import { getContractWasmPath, parseUnits, TestFuncWithWorker } from './utils/helpers';
-import { IDOParams} from "../../contracts/src/launchpad";
+import { IDOData, IDOParams} from "../../contracts/src/launchpad";
 import { BN } from 'bn.js';
 
 const launchpadContractPath = getContractWasmPath('launchpad');
@@ -13,6 +13,10 @@ const test = testAny as TestFuncWithWorker<{
   beneficiary: NearAccount,
   idoToken: NearAccount
 }>;
+
+function delay(ms: number) {
+  return new Promise( resolve => setTimeout(resolve, ms) );
+}
 
 test.beforeEach(async (t) => {
   // Init the worker and start a Sandbox server
@@ -73,15 +77,21 @@ test.beforeEach(async (t) => {
       price: '1'
     },
     _nft: root.accountId,
-  });
+},
+{
+   gas: parseUnits(300, 12),
+});
 
   const launchpadBalance: string = await idoToken.view('ft_balance_of', {
     account_id: launchpad.accountId
   });
+  
+  const updIdoData = JSON.parse(await launchpad.view('getIdoData')) as IDOData; 
 
   t.is(launchpadBalance, launchAmount);
+  t.is(updIdoData.totalClaimableAmount, launchAmount)
   
-  // Save state for test runs, it is unique for each test
+  // // Save state for test runs, it is unique for each test
   t.context.worker = worker;
   t.context.accounts = { root, launchpad, beneficiary, idoToken};
 });
@@ -95,16 +105,17 @@ test.afterEach.always(async (t) => {
 
 test('purchase tokens', async (t) => {
   const { launchpad, root, beneficiary } = t.context.accounts;
+  console.log('purchase tokens');
 
   const tx = await root.call(launchpad.accountId, 'purchaseTokens', {
     _beneficiary: beneficiary.accountId,
     _id: '0'
   }, {
     attachedDeposit: new BN('1000'),
-    // gas: new BN('1000').mul(new BN(10).pow(new BN(18)))
+    gas: parseUnits(300, 12)
   })
 
-  console.log(tx);
+  // console.log(tx);
 });
 
 // test('returns the default greeting', async (t) => {

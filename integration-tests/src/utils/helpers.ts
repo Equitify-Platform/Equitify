@@ -15,5 +15,5 @@ export const getContractWasmPath = (contract: Contract) => {
 }
 
 export const parseUnits = (amount: number | string, decimals: number = 18): BN => {
-  return new BN('1000000').mul(new BN(10).pow(new BN(decimals)));
+  return new BN(amount).mul(new BN(10).pow(new BN(decimals)));
 }
