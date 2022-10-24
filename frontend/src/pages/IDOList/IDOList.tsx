@@ -15,7 +15,7 @@ function IDOList() {
   }, [dispatch]);
 
   return (
-    <div className={styles.idoListPage}>
+    <div className="page-wrapper">
       <div>
         Lorem Ipsum is simply dummy text of the printing and typesetting
         industry. Lorem Ipsum has been the industrs standard dummy text ever
@@ -29,7 +29,12 @@ function IDOList() {
       </div>
       <div className={styles.idoSection}>
         {launchpads.projects.map((p) => (
-          <IDOCard key={p.address} tokenName="TEST" {...p.projectStruct} />
+          <IDOCard
+            address={p.address}
+            key={p.address}
+            tokenName="TEST"
+            {...p.projectStruct}
+          />
         ))}
       </div>
     </div>

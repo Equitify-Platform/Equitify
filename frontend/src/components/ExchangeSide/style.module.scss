@@ -1,0 +1,24 @@
+.exchangeSide {
+  width: 550px;
+  height: 650px;
+  border: 2px solid black;
+  text-align: center;
+}
+
+.balanceSection {
+  margin: 3rem;
+
+  div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: gray;
+    padding: 0 1rem;
+    color: white;
+  }
+
+  .balanceSectionTop {
+    background-color: transparent;
+    color: black;
+  }
+}

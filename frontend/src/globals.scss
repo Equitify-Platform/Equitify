@@ -3,7 +3,7 @@
 }
 
 html {
-  --bg: #efefef;
+  --bg: lightgray;
   --fg: #1e1e1e;
   --gray: #555;
   --light-gray: #ccc;
@@ -23,6 +23,12 @@ html {
 body {
   margin: 0;
   padding: 1em;
+}
+
+.page-wrapper {
+  width: 100%;
+  height: 100%;
+  padding: 2rem;
 }
 
 main {
