@@ -29,7 +29,7 @@ function IDOList() {
       </div>
       <div className={styles.idoSection}>
         {launchpads.projects.map((p) => (
-          <IDOCard key={p.address} />
+          <IDOCard key={p.address} tokenName="TEST" {...p.projectStruct} />
         ))}
       </div>
     </div>
