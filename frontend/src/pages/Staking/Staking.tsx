@@ -4,7 +4,7 @@ import styles from "./style.module.scss";
 
 function Staking() {
   return (
-    <div className={styles.stakingPage}>
+    <div className="page-wrapper">
       <h2>Stake your tokens</h2>
       <div className={styles.wrapperTop}>
         <div className={styles.stakingDataWrapper}>
