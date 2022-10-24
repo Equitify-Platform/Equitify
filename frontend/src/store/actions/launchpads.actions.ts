@@ -28,10 +28,16 @@ export type NftContractType = {
   nfts: NftType[];
 };
 
+export type TokenType = {
+  address: string;
+  name: string;
+  symbol: string;
+  ownerAddress: string;
+};
+
 export type ProjectType = {
   address: string;
-  tokenAddress: string;
-  tokenOwnerAddress: string;
+  token: TokenType;
   projectStruct: ProjectStruct;
   nft: NftContractType;
   stakingContract: string;

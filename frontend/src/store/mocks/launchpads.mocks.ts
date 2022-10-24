@@ -29,7 +29,11 @@ export const getLaunchpadsMock = (): Promise<ProjectType[]> =>
         softCap: "",
       },
       stakingContract: "test_staking_address",
-      tokenAddress: "test_token_address",
-      tokenOwnerAddress: "test_token_owner_address",
+      token: {
+        address: "test_token_address",
+        name: "test_token_name",
+        symbol: "TTS",
+        ownerAddress: "test_token_owner_address",
+      },
     },
   ]);

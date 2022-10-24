@@ -32,7 +32,7 @@ function IDOList() {
           <IDOCard
             address={p.address}
             key={p.address}
-            tokenName="TEST"
+            tokenName={p.token.name}
             {...p.projectStruct}
           />
         ))}
