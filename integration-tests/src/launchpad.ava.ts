@@ -1,7 +1,7 @@
 import testAny from 'ava';
-import { NearAccount, Worker} from 'near-workspaces';
+import { NearAccount, Worker } from 'near-workspaces';
 import { getContractWasmPath, parseUnits, TestFuncWithWorker } from './utils/helpers';
-import { IDOData, IDOParams} from "../../contracts/src/launchpad";
+import { IDOData, IDOParams } from "../../contracts/src/launchpad";
 import { BN } from 'bn.js';
 
 const launchpadContractPath = getContractWasmPath('launchpad');
@@ -12,11 +12,12 @@ const test = testAny as TestFuncWithWorker<{
   launchpad: NearAccount,
   root: NearAccount,
   beneficiary: NearAccount,
-  idoToken: NearAccount
+  idoToken: NearAccount,
+  nft: NearAccount
 }>;
 
 function delay(ms: number) {
-  return new Promise( resolve => setTimeout(resolve, ms) );
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 test.beforeEach(async (t) => {
@@ -33,12 +34,12 @@ test.beforeEach(async (t) => {
   const launchpad = await root.createSubAccount('launchpad');
 
   await idoToken.deploy(idoTokenContractPath);
-  
+
   await idoToken.call(idoToken, 'init', {
-    owner_id: root.accountId, 
+    owner_id: root.accountId,
     total_supply: parseUnits(1000000).toString()
   });
-  
+
   console.log('balance owner', await idoToken.view('ft_balance_of', {
     account_id: root.accountId
   }))
@@ -62,6 +63,11 @@ test.beforeEach(async (t) => {
     attachedDeposit: parseUnits('1', 24)
   })
 
+  await nft.deploy(nftContractPath);
+
+  await nft.call(nft.accountId, 'init', {
+    owner_id: launchpad.accountId
+  })
 
   console.log('balance owner after transfer', await idoToken.view('ft_balance_of', {
     account_id: root.accountId
@@ -70,32 +76,32 @@ test.beforeEach(async (t) => {
   await launchpad.call(launchpad, 'init', {
     _deployer: root.accountId,
     _launchedToken: idoToken.accountId,
+    _nft: nft.accountId,
     _tokenFounder: root.accountId,
     _project: {
       hardCap: '1000',
       softCap: '100',
-      saleStartTime:  '0',// Math.floor(new Date().getTime() / 1000).toString(),
-      saleEndTime: (Math.floor(new Date().getTime()* 1_000_000) + 1_000_000_000_000).toString(),
+      saleStartTime: '0',// Math.floor(new Date().getTime() / 1000).toString(),
+      saleEndTime: (Math.floor(new Date().getTime() * 1_000_000) + 1_000_000_000_000).toString(),
       price: '1'
     },
-    _nft: root.accountId,
-},
-{
-   gas: parseUnits(300, 12),
-});
+  },
+    {
+      gas: parseUnits(300, 12),
+    });
 
   const launchpadBalance: string = await idoToken.view('ft_balance_of', {
     account_id: launchpad.accountId
   });
-  
-  const updIdoData = JSON.parse(await launchpad.view('getIdoData')) as IDOData; 
+
+  const updIdoData = JSON.parse(await launchpad.view('getIdoData')) as IDOData;
 
   t.is(launchpadBalance, launchAmount);
   t.is(updIdoData.totalClaimableAmount, launchAmount)
-  
+
   // // Save state for test runs, it is unique for each test
   t.context.worker = worker;
-  t.context.accounts = { root, launchpad, beneficiary, idoToken};
+  t.context.accounts = { root, launchpad, beneficiary, idoToken, nft };
 });
 
 test.afterEach.always(async (t) => {
@@ -110,8 +116,8 @@ test('purchase tokens', async (t) => {
   console.log('purchase tokens');
 
   const tx = await root.call(launchpad.accountId, 'purchaseTokens', {
-    _beneficiary: beneficiary.accountId,
-    _id: '0'
+    beneficiary: beneficiary.accountId,
+    token_id: '0'
   }, {
     attachedDeposit: new BN('1000'),
     gas: parseUnits(300, 12)

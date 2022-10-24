@@ -1,5 +1,6 @@
 import { NearBindgen, near, call, view, initialize, UnorderedMap, LookupMap, NearPromise, assert, bytes, Bytes, validateAccountId } from 'near-sdk-js';
 import { AccountId } from 'near-sdk-js/lib/types';
+import { LaunchpadJsonToken } from './nft';
 import { log, parseTGas, promiseResult } from './utils';
 import { Ownable } from './utils/contracts/ownable';
 import { PromiseCall, WithCallback } from './utils/contracts/withCallback';
@@ -142,45 +143,44 @@ class Launchpad extends Ownable {
     }
 
     @call({ payableFunction: true })
-    purchaseTokens({ _beneficiary, _id }: { _beneficiary: string, _id: string }) {
+    purchaseTokens({ beneficiary, token_id }: { beneficiary: string, token_id: string }) {
         this.onlyInitialized()
 
-        log('1')
         assert(
             (near.blockTimestamp() > BigInt(this.project.saleStartTime)) &&
             (near.blockTimestamp() < BigInt(this.project.saleEndTime)),
             "PP: 12"
         )
-        log('2')
-
 
         const tokenAmount = near.attachedDeposit() * BigInt(this.project.price);
-
-        log('3')
 
         assert(
             BigInt(this.idoData.totalNearAmount) + near.attachedDeposit() <= BigInt(this.project.hardCap),
             "PP: 14"
         );
 
-        log('4')
-
         this._internalFundRaisedBalanceSet(
             near.predecessorAccountId(),
             this._fundRaisedBalanceGet(near.predecessorAccountId() + near.attachedDeposit())
         );
-        log('5')
-
 
         this._internalTokensBoughtSet(
-            _beneficiary,
-            this._tokensBoughtGet(_beneficiary) + tokenAmount
+            beneficiary,
+            this._tokensBoughtGet(beneficiary) + tokenAmount
         )
 
-        log('6')
-
-
-        // this._nftGetOwner({ id: _id, callback: { function: '_purchase_tokens_on_get_owner_private_callback' } });
+        return this._getTokenData({
+            token_id,
+            callback: {
+                function: '_purchase_tokens_on_get_owner_private_callback',
+                args: JSON.stringify({
+                    id: token_id,
+                    beneficiary,
+                    tokenAmount: tokenAmount.toString(),
+                    attachedDeposit: near.attachedDeposit().toString()
+                })
+            }
+        }).asReturn();
     }
 
     // Releases claim for the launched token to the beneficiary
@@ -188,8 +188,9 @@ class Launchpad extends Ownable {
     claimVestedTokens({ _beneficiary, _id }: { _beneficiary: string, _id: bigint }) {
         this.onlyInitialized()
 
-        this._getNftStruct({
-            beneficiary: _beneficiary, id: _id.toString(), callback: {
+        this._getTokenData({
+            token_id: _id.toString(),
+            callback: {
                 function: this._claim_vested_tokens_on_nft_struct_private_callback.name
             }
         })
@@ -321,8 +322,7 @@ class Launchpad extends Ownable {
         })
     }
 
-    @call({ privateFunction: true })
-    _transferTokens({ receiver_id, amount, callback }: { receiver_id: string, amount: string, callback?: PromiseCall }) {
+    private _transferTokens({ receiver_id, amount, callback }: { receiver_id: string, amount: string, callback?: PromiseCall }) {
         return this._executePromise({
             call: {
                 accountId: this.token,
@@ -335,22 +335,20 @@ class Launchpad extends Ownable {
         })
     }
 
-    @call({ privateFunction: true })
-    _getNftStruct({ beneficiary, id, callback }: { beneficiary: string, id: string, callback?: PromiseCall }) {
-
+    private _getTokenData({ token_id, callback }: { token_id: string, callback?: PromiseCall }) {
+        log('Token Id: ', token_id)
         return this._executePromise({
             call: {
                 accountId: this.nft,
-                function: 'get_struct',
-                args: JSON.stringify({ beneficiary, id }),
+                function: 'get_token_data',
+                args: JSON.stringify({ token_id }),
                 gas: parseTGas(30)
             },
             callback
         })
     }
 
-    @call({ privateFunction: true })
-    _nftMakeClaimed({ id, callback }: { id: string, callback?: PromiseCall }) {
+    private _nftMakeClaimed({ id, callback }: { id: string, callback?: PromiseCall }) {
         return this._executePromise({
             call: {
                 accountId: this.nft,
@@ -376,12 +374,12 @@ class Launchpad extends Ownable {
     }
 
     @call({ privateFunction: true })
-    _nftChangeData({ id, beneficiary, tokenAmount, attachedDeposit, callback }: { id: string, beneficiary: string, tokenAmount: string, attachedDeposit: string, callback?: PromiseCall }) {
+    _nftChangeData({ token_id, beneficiary, increase_amount, callback }: { token_id: string, beneficiary: string, increase_amount: string, callback?: PromiseCall }) {
         return this._executePromise({
             call: {
                 accountId: this.nft,
-                function: 'change_data',
-                args: JSON.stringify({ beneficiary, id, tokenAmount }),
+                function: 'change_balance',
+                args: JSON.stringify({ owner_id: beneficiary, token_id, increase_amount }),
                 gas: parseTGas(30)
             },
             callback
@@ -395,8 +393,8 @@ class Launchpad extends Ownable {
             call: {
                 accountId: this.nft,
                 function: 'mint_token',
-                args: JSON.stringify({ beneficiary, tokenAmount }),
-                gas: parseTGas(30)
+                args: JSON.stringify({ receiver_id: beneficiary, balance: tokenAmount }),
+            gas: parseTGas(50)
             },
             callback
         })
@@ -408,12 +406,12 @@ class Launchpad extends Ownable {
 
         let { result, success } = promiseResult()
 
-        log('callback', result);
+        log('callback', result); 
         assert(success, "PromiseCall !success")
 
         const balance = JSON.parse(result);
 
-        this.idoData.totalClaimableAmount = balance; 
+        this.idoData.totalClaimableAmount = balance;
 
         assert(BigInt(this.idoData.totalClaimableAmount) > 0, "PP: 9");
     }
@@ -458,20 +456,27 @@ class Launchpad extends Ownable {
     _purchase_tokens_on_get_owner_private_callback({ id, beneficiary, tokenAmount, attachedDeposit }: { id: string, beneficiary: string, tokenAmount: string, attachedDeposit: string }) {
         near.log(`_purchase_tokens_on_get_owner_private_callback callback`);
 
-        const {result, success} = promiseResult();
+        const { result, success } = promiseResult();
 
-        assert(success, 'Not successful callback');
+        if (success) {
+            const tokenData = JSON.parse(result) as LaunchpadJsonToken;
 
-        const owner = JSON.parse(result);
-
-        if (BigInt(id) != BigInt(0) && owner === beneficiary) {
-            this._nftChangeData({ beneficiary, id, tokenAmount, attachedDeposit, callback: { function: '_purchase_tokens_on_nft_change_private_callback' } });
-        } else {
-            this._nftMintToken({ beneficiary, tokenAmount, callback: { function: '_purchase_tokens_on_nft_change_private_callback' } });
+            if (BigInt(id) != BigInt(0) && tokenData.owner_id === beneficiary)
+                return this._nftChangeData({ beneficiary, token_id: id, increase_amount: tokenAmount, callback: { function: '_purchase_tokens_on_nft_change_private_callback' } });
         }
+
+        return this._nftMintToken({
+            beneficiary,
+            tokenAmount,
+            callback: {
+                function: '_purchase_tokens_on_nft_change_private_callback',
+                args: JSON.stringify({ attachedDeposit, tokenAmount }),
+                gas: parseTGas(30)
+            }
+        });
     }
 
-    @call({ privateFunction: true })
+    @call({ privateFunction: false })
     _purchase_tokens_on_nft_change_private_callback({ tokenAmount, attachedDeposit }: { tokenAmount: string, attachedDeposit: string }) {
         near.log(`_purchase_tokens_on_nft_change_private_callback callback`);
 

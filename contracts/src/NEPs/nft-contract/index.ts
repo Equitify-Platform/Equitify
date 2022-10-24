@@ -25,16 +25,19 @@ export default abstract class Contract{
         this initializes the contract with metadata that was passed in and
         the owner_id. 
     */
-    @initialize({})
-    init({
+    protected __NEP_NFt_init({
         owner_id, 
         metadata = {
             spec: "nft-1.0.0",
             name: "NFT Tutorial Contract",
             symbol: "GOTEAM"
         }
-    }: { owner_id: string, metadata?: any }) {
-        validateAccountId(owner_id);
+    }: { owner_id: string, metadata?: {
+        spec: string,
+        name: string,
+        symbol: string
+    } }) {
+        validateAccountId(owner_id ?? '');
 
         this.owner_id = owner_id;
         this.tokensPerOwner = new LookupMap("tokensPerOwner");
