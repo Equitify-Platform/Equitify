@@ -1,5 +1,5 @@
 
-import { NearBindgen, near, call, view, LookupMap, UnorderedMap, Vector, UnorderedSet } from 'near-sdk-js'
+import { NearBindgen, near, call, view, LookupMap, UnorderedMap, Vector, UnorderedSet, validateAccountId , initialize, assert} from 'near-sdk-js'
 import { NFTContractMetadata, Token, TokenMetadata, internalNftMetadata } from './metadata';
 import { internalMint } from './mint';
 import { internalNftTokens, internalSupplyForOwner, internalTokensForOwner, internalTotalSupply } from './enumeration';
@@ -12,8 +12,8 @@ export const NFT_METADATA_SPEC = "nft-1.0.0";
 
 /// This is the name of the NFT standard we're using
 export const NFT_STANDARD_NAME = "nep171";
-@NearBindgen({})
-export class Contract{
+
+export default abstract class Contract{
     owner_id: string;
     tokensPerOwner: LookupMap<any>;
     tokensById: LookupMap<any>;
@@ -25,32 +25,35 @@ export class Contract{
         this initializes the contract with metadata that was passed in and
         the owner_id. 
     */
-    constructor({
+    @initialize({})
+    init({
         owner_id, 
         metadata = {
             spec: "nft-1.0.0",
             name: "NFT Tutorial Contract",
             symbol: "GOTEAM"
-        } 
-    }) {
+        }
+    }: { owner_id: string, metadata?: any }) {
+        validateAccountId(owner_id);
+
         this.owner_id = owner_id;
         this.tokensPerOwner = new LookupMap("tokensPerOwner");
         this.tokensById = new LookupMap("tokensById");
         this.tokenMetadataById = new UnorderedMap("tokenMetadataById");
         this.metadata = metadata;
     }
-
-    default() {
-        return new Contract({owner_id: ''})
-    }
-
+    
     /*
         MINT
     */
     @call({})
     nft_mint({ token_id, metadata, receiver_id, perpetual_royalties }) {
-        return internalMint({ contract: this, tokenId: token_id, metadata: metadata, receiverId: receiver_id, perpetualRoyalties: perpetual_royalties });
+        assert(false, 'nft_mint is not available')
+        // assert(near.predecessorAccountId() === this.owner_id, 'Caller not an owner');
+        // return internalMint({ contract: this, tokenId: token_id, metadata: metadata, receiverId: receiver_id, perpetualRoyalties: perpetual_royalties });
     }
+
+    @call({})
 
     /*
         CORE

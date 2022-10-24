@@ -1,6 +1,6 @@
 import { assert, near, UnorderedSet, Vector } from "near-sdk-js";
 import { deserialize } from "near-sdk-js/lib/utils";
-import { Contract, NFT_METADATA_SPEC, NFT_STANDARD_NAME } from ".";
+import Contract, { NFT_METADATA_SPEC, NFT_STANDARD_NAME } from ".";
 import { Token } from "./metadata";
 
 // Gets a collection and deserializes it into a set that can be used.

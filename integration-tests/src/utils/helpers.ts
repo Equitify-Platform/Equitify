@@ -8,7 +8,7 @@ export type TestFuncWithWorker<TAccounts = Record<string, NearAccount>> = TestFn
   accounts: TAccounts;
 }>
 
-type Contract = 'launchpad' | 'fungibleToken'
+type Contract = 'launchpad' | 'fungibleToken' | 'nft'
 
 export const getContractWasmPath = (contract: Contract) => {
     return path.join('build', `${contract}.wasm`);

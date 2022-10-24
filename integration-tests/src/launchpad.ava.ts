@@ -6,6 +6,7 @@ import { BN } from 'bn.js';
 
 const launchpadContractPath = getContractWasmPath('launchpad');
 const idoTokenContractPath = getContractWasmPath('fungibleToken');
+const nftContractPath = getContractWasmPath('nft');
 
 const test = testAny as TestFuncWithWorker<{
   launchpad: NearAccount,
@@ -27,6 +28,7 @@ test.beforeEach(async (t) => {
 
   const beneficiary = await root.createSubAccount('beneficiary');
   const idoToken = await root.createSubAccount('idotoken');
+  const nft = await root.createSubAccount('nft');
 
   const launchpad = await root.createSubAccount('launchpad');
 

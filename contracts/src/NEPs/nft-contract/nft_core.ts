@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { assert, bytes, near } from "near-sdk-js";
-import { Contract, NFT_METADATA_SPEC, NFT_STANDARD_NAME } from ".";
+import Contract, {  NFT_METADATA_SPEC, NFT_STANDARD_NAME } from ".";
 import { assertOneYocto, internalAddTokenToOwner, internalRemoveTokenFromOwner, internalTransfer, refundDeposit, refundApprovedAccountIds } from "./internal";
 import { JsonToken, Token, TokenMetadata } from "./metadata";
 
