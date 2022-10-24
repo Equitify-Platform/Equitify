@@ -7,10 +7,12 @@ import {
 
 import { launchpadsReducer } from "./reducers/launchpads.reducer";
 import { stakingReducer } from "./reducers/staking.reducer";
+import { walletReducer } from "./reducers/wallet.reducer";
 
 const rootReducer = combineReducers({
   launchpads: launchpadsReducer,
   staking: stakingReducer,
+  wallet: walletReducer,
 });
 
 export const store = configureStore({
