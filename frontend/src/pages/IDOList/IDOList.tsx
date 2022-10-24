@@ -6,7 +6,7 @@ import IDOCard from "../../components/IDOCard/IDOCard";
 
 function IDOList() {
   return (
-    <div className={styles.idoListPage}>
+    <div className="page-wrapper">
       <div>
         Lorem Ipsum is simply dummy text of the printing and typesetting
         industry. Lorem Ipsum has been the industrs standard dummy text ever
@@ -19,9 +19,9 @@ function IDOList() {
         of Lorem Ipsum.
       </div>
       <div className={styles.idoSection}>
-        <IDOCard />
-        <IDOCard />
-        <IDOCard />
+        <IDOCard address={"111"} projectName={"Project name"} />
+        <IDOCard address={"222"} projectName={"Project name 2"} />
+        <IDOCard address={"333"} projectName={"Project name 3"} />
       </div>
     </div>
   );
