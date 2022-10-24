@@ -1,10 +1,19 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import styles from "./style.module.scss";
 
 import IDOCard from "../../components/IDOCard/IDOCard";
+import { getLaunchpads } from "../../store/actions/launchpads.actions";
+import { useAppDispatch, useLaunchpads } from "../../store/hooks";
 
 function IDOList() {
+  const dispatch = useAppDispatch();
+  const launchpads = useLaunchpads();
+
+  useEffect(() => {
+    dispatch(getLaunchpads());
+  }, [dispatch]);
+
   return (
     <div className={styles.idoListPage}>
       <div>
@@ -19,9 +28,9 @@ function IDOList() {
         of Lorem Ipsum.
       </div>
       <div className={styles.idoSection}>
-        <IDOCard />
-        <IDOCard />
-        <IDOCard />
+        {launchpads.projects.map((p) => (
+          <IDOCard key={p.address} tokenName="TEST" {...p.projectStruct} />
+        ))}
       </div>
     </div>
   );

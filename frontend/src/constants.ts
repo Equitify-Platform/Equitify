@@ -1,2 +1,4 @@
+export const NETWORK = "testnet";
+
 export const HELLO_NEAR_ADDRESS = "dev-1666191057769-59817066669753";
 export const STAKING_ADDRESS = "dev-1666191057769-59817066669753";
