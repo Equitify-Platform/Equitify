@@ -12,7 +12,7 @@ export const ROUTES_CONFIG: RouteObject[] = [
     element: <IDOList />,
   },
   {
-    path: "/ido:address",
+    path: "/ido/:address",
     element: <IDO />,
   },
   {
