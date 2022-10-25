@@ -3,10 +3,13 @@ import BN from 'bn.js';
 import { NearAccount, Worker } from 'near-workspaces';
 import path from 'path';
 
-export type TestFuncWithWorker<TAccounts = Record<string, NearAccount>> = TestFn<{
+export type TestContext<TAccounts> = {
   worker: Worker;
   accounts: TAccounts;
-}>
+}
+
+
+export type TestFuncWithWorker<TAccounts = Record<string, NearAccount>> = TestFn<TestContext<TAccounts>>
 
 type Contract = 'launchpad' | 'fungibleToken' | 'nft'
 

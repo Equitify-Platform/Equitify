@@ -1,4 +1,4 @@
-import Contract from ".";
+import { LaunchpadNft } from "../../nft";
 
 //defines the payout type we'll be returning as a part of the royalty standards.
 export class Payout {
@@ -168,7 +168,7 @@ export class JsonToken {
 export function internalNftMetadata({
     contract
 }:{
-    contract: Contract
+    contract: LaunchpadNft
 }): NFTContractMetadata {
     return contract.metadata;
 }

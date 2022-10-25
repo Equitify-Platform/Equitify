@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { assert, bytes, near } from "near-sdk-js";
-import Contract, {  NFT_METADATA_SPEC, NFT_STANDARD_NAME } from ".";
+import {  NFT_METADATA_SPEC, NFT_STANDARD_NAME } from ".";
 import { assertAtLeastOneYocto, assertOneYocto, bytesForApprovedAccountId, internalAddTokenToOwner, refundDeposit, refundApprovedAccountIds, refundApprovedAccountIdsIter } from "./internal";
 import { Token } from "./metadata";
 
@@ -13,7 +13,7 @@ export function internalNftApprove({
     accountId,
     msg
 }:{ 
-    contract: Contract, 
+    contract: LaunchpadNft, 
     tokenId: string, 
     accountId: string, 
     msg: string 
@@ -79,7 +79,7 @@ export function internalNftIsApproved({
     approvedAccountId,
     approvalId
 }:{ 
-    contract: Contract, 
+    contract: LaunchpadNft, 
     tokenId: string,
     approvedAccountId: string, 
     approvalId: number 
@@ -115,7 +115,7 @@ export function internalNftRevoke({
     tokenId,
     accountId
 }:{ 
-    contract: Contract, 
+    contract: LaunchpadNft, 
     tokenId: string, 
     accountId: string 
 }) {
@@ -149,7 +149,7 @@ export function internalNftRevokeAll({
     contract,
     tokenId
 }:{ 
-    contract: Contract, 
+    contract: LaunchpadNft, 
     tokenId: string 
 }) {
     //assert that the caller attached exactly 1 yoctoNEAR for security

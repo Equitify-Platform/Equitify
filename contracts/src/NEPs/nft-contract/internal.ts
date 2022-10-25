@@ -1,6 +1,8 @@
 import { assert, near, UnorderedSet, Vector } from "near-sdk-js";
 import { deserialize } from "near-sdk-js/lib/utils";
-import Contract, { NFT_METADATA_SPEC, NFT_STANDARD_NAME } from ".";
+import  { NFT_METADATA_SPEC, NFT_STANDARD_NAME } from ".";
+import { LaunchpadNft } from "../../nft";
+import { log } from "../../utils";
 import { Token } from "./metadata";
 
 // Gets a collection and deserializes it into a set that can be used.
@@ -8,8 +10,8 @@ export function restoreOwners(collection) {
     if (collection == null) {
         return null;
     }
-   
-    return  deserialize(collection);
+
+    return  UnorderedSet.reconstruct<any>(collection)  //  deserialize(collection);
 }
 
 //convert the royalty percentage and amount to pay into a payout (U128)
@@ -76,7 +78,7 @@ export function assertOneYocto() {
 }
 
 //add a token to the set of tokens an owner has
-export function internalAddTokenToOwner(contract: Contract, accountId: string, tokenId: string) {
+export function internalAddTokenToOwner(contract: LaunchpadNft, accountId: string, tokenId: string) {
     //get the set of tokens for the given account
     let tokenSet = restoreOwners(contract.tokensPerOwner.get(accountId)) as UnorderedSet<any>;
 
@@ -93,7 +95,7 @@ export function internalAddTokenToOwner(contract: Contract, accountId: string, t
 }
 
 //remove a token from an owner (internal method and can't be called directly via CLI).
-export function internalRemoveTokenFromOwner(contract: Contract, accountId: string, tokenId: string) {
+export function internalRemoveTokenFromOwner(contract: LaunchpadNft, accountId: string, tokenId: string) {
     //we get the set of tokens that the owner has
     let tokenSet = restoreOwners(contract.tokensPerOwner.get(accountId)) as UnorderedSet<any>;
     //if there is no set of tokens for the owner, we panic with the following message:
@@ -113,7 +115,7 @@ export function internalRemoveTokenFromOwner(contract: Contract, accountId: stri
 }
 
 //transfers the NFT to the receiver_id (internal method and can't be called directly via CLI).
-export function internalTransfer(contract: Contract, senderId: string, receiverId: string, tokenId: string, approvalId: number, memo: string): Token {
+export function internalTransfer(contract: LaunchpadNft, senderId: string, receiverId: string, tokenId: string, approvalId: number, memo: string): Token {
     //get the token object by passing in the token_id
     let token = contract.tokensById.get(tokenId) as Token;
     if (token == null) {

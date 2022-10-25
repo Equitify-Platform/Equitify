@@ -1,8 +1,9 @@
 // @ts-nocheck
 import { assert, bytes, near } from "near-sdk-js";
-import Contract, {  NFT_METADATA_SPEC, NFT_STANDARD_NAME } from ".";
+import {  NFT_METADATA_SPEC, NFT_STANDARD_NAME } from ".";
 import { assertOneYocto, internalAddTokenToOwner, internalRemoveTokenFromOwner, internalTransfer, refundDeposit, refundApprovedAccountIds } from "./internal";
 import { JsonToken, Token, TokenMetadata } from "./metadata";
+import { LaunchpadNft } from "../../nft";
 
 const GAS_FOR_RESOLVE_TRANSFER = 40_000_000_000_000;
 const GAS_FOR_NFT_ON_TRANSFER = 35_000_000_000_000;
@@ -12,7 +13,7 @@ export function internalNftToken({
     contract,
     tokenId
 }:{ 
-    contract: Contract, 
+    contract: LaunchpadNft, 
     tokenId: string 
 }) {
     let token = contract.tokensById.get(tokenId) as Token;
@@ -44,7 +45,7 @@ export function internalNftTransfer({
     approvalId,
     memo,
 }:{
-    contract: Contract, 
+    contract: LaunchpadNft, 
     receiverId: string, 
     tokenId: string, 
     approvalId: number
@@ -81,7 +82,7 @@ export function internalNftTransferCall({
     memo,
     msg
 }:{
-    contract: Contract,
+    contract: LaunchpadNft,
     receiverId: string, 
     tokenId: string, 
     approvalId: number,
@@ -146,7 +147,7 @@ export function internalResolveTransfer({
     approvedAccountIds,
     memo
 }:{
-    contract: Contract,
+    contract: LaunchpadNft,
     authorizedId: string,
     ownerId: string,
     receiverId: string,

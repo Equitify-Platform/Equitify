@@ -1,23 +1,38 @@
-import testAny from 'ava';
+import testAny, { ExecutionContext } from 'ava';
 import { NearAccount, Worker } from 'near-workspaces';
-import { getContractWasmPath, parseUnits, TestFuncWithWorker } from './utils/helpers';
+import { getContractWasmPath, parseUnits, TestContext, TestFuncWithWorker } from './utils/helpers';
 import { IDOData, IDOParams } from "../../contracts/src/launchpad";
 import { BN } from 'bn.js';
+import { LaunchpadJsonToken } from '../../contracts/src/nft';
 
 const launchpadContractPath = getContractWasmPath('launchpad');
 const idoTokenContractPath = getContractWasmPath('fungibleToken');
 const nftContractPath = getContractWasmPath('nft');
 
-const test = testAny as TestFuncWithWorker<{
+type Context = {
   launchpad: NearAccount,
   root: NearAccount,
   beneficiary: NearAccount,
   idoToken: NearAccount,
   nft: NearAccount
-}>;
+}
+
+type TestExecutionContext = ExecutionContext<TestContext<Context>>;
+
+const test = testAny as TestFuncWithWorker<Context>;
 
 function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+const ftDeposit = async (t: TestExecutionContext, of: string ) =>{
+  const { root, idoToken } = t.context.accounts;
+  
+  await root.call(idoToken.accountId, 'storage_deposit', {
+    account_id: of,
+  }, {
+    attachedDeposit: parseUnits('1', 24)
+  })
 }
 
 test.beforeEach(async (t) => {
@@ -26,19 +41,21 @@ test.beforeEach(async (t) => {
 
   // Deploy contract
   const root = worker.rootAccount;
-
+  
   const beneficiary = await root.createSubAccount('beneficiary');
   const idoToken = await root.createSubAccount('idotoken');
   const nft = await root.createSubAccount('nft');
-
   const launchpad = await root.createSubAccount('launchpad');
 
+  t.context.accounts = { root, launchpad, beneficiary, idoToken, nft };
+  
   await idoToken.deploy(idoTokenContractPath);
 
   await idoToken.call(idoToken, 'init', {
     owner_id: root.accountId,
     total_supply: parseUnits(1000000).toString()
   });
+
 
   console.log('balance owner', await idoToken.view('ft_balance_of', {
     account_id: root.accountId
@@ -49,11 +66,9 @@ test.beforeEach(async (t) => {
 
   const launchAmount = parseUnits(100).toString()
 
-  await root.call(idoToken.accountId, 'storage_deposit', {
-    account_id: launchpad.accountId,
-  }, {
-    attachedDeposit: parseUnits('1', 24)
-  })
+  await ftDeposit(t, launchpad.accountId);
+  await ftDeposit(t, beneficiary.accountId);
+  await ftDeposit(t, root.accountId);
 
   await root.call(idoToken.accountId, 'ft_transfer', {
     receiver_id: launchpad.accountId,
@@ -90,6 +105,7 @@ test.beforeEach(async (t) => {
       gas: parseUnits(300, 12),
     });
 
+  await root.transfer(launchpad.accountId, parseUnits(4, 24));
   const launchpadBalance: string = await idoToken.view('ft_balance_of', {
     account_id: launchpad.accountId
   });
@@ -101,7 +117,6 @@ test.beforeEach(async (t) => {
 
   // // Save state for test runs, it is unique for each test
   t.context.worker = worker;
-  t.context.accounts = { root, launchpad, beneficiary, idoToken, nft };
 });
 
 test.afterEach.always(async (t) => {
@@ -111,8 +126,8 @@ test.afterEach.always(async (t) => {
   });
 });
 
-test('purchase tokens', async (t) => {
-  const { launchpad, root, beneficiary } = t.context.accounts;
+const testPurchaseToken = async (t: TestExecutionContext) => {
+  const { launchpad, root, beneficiary, nft } = t.context.accounts;
   console.log('purchase tokens');
 
   const tx = await root.call(launchpad.accountId, 'purchaseTokens', {
@@ -123,18 +138,68 @@ test('purchase tokens', async (t) => {
     gas: parseUnits(300, 12)
   })
 
-  // console.log(tx);
+  const ownerTokens = await nft.view('nft_tokens_for_owner', {
+    account_id: beneficiary.accountId,
+    from_index: '0',
+    limit: '5'
+  }) as Array<any>;
+
+  console.log('All tokens for owner', ownerTokens)
+
+  console.log('Get token data', await nft.view('get_token_data', {
+    token_id: 0,
+  }))
+
+  t.is(ownerTokens.length, 1)
+  t.is(ownerTokens[0].owner_id, beneficiary.accountId);
+}
+
+const getNftData = async (t: TestExecutionContext, nftId: number) => {
+  const { launchpad, root, beneficiary, nft } = t.context.accounts;
+  
+  return  await nft.view('get_token_data', {
+    token_id: 0,
+  }) as LaunchpadJsonToken
+}
+
+const getFtBalance = async (t: TestExecutionContext, of: string) => {
+  const { idoToken } = t.context.accounts;
+  
+  return new BN(await idoToken.view('ft_balance_of', {
+    account_id: of,
+  }).catch(err=> { console.log(err); return '0'}) as string) 
+}
+
+const testClaim = async (t: TestExecutionContext, claimTokenId: number) => {
+  const { launchpad, root, beneficiary, nft } = t.context.accounts;
+  console.log('testClaim');
+
+  const token = await getNftData(t, claimTokenId);
+  
+  const balanceBefore = await getFtBalance(t, beneficiary.accountId);
+
+  const tx = await beneficiary.call(launchpad.accountId, 'claimVestedTokens', {
+    beneficiary: beneficiary.accountId,
+    token_id: claimTokenId.toString()
+  }, {
+    gas: parseUnits(300, 12)
+  })
+
+  const balanceAfter = await getFtBalance(t, beneficiary.accountId);
+
+  console.log({
+    balanceAfter,
+    balanceBefore,
+    token
+  })
+  t.is(balanceAfter.eq(balanceBefore.add(new BN(token?.token_data?.balance ?? '0'))), true);
+}
+
+test('purchase tokens', async (t) => {
+  await testPurchaseToken(t);
 });
 
-// test('returns the default greeting', async (t) => {
-//   const { contract } = t.context.accounts;
-//   const message: string = await contract.view('get_greeting', {});
-//   t.is(message, 'Hello');
-// });
-
-// test('changes the message', async (t) => {
-//   const { root, contract } = t.context.accounts;
-//   await root.call(contract, 'set_greeting', { message: 'Howdy' });
-//   const message: string = await contract.view('get_greeting', {});
-//   t.is(message, 'Howdy');
-// });
+test('purchase tokens and claim', async (t) => {
+  await testPurchaseToken(t);
+  await testClaim(t, 0);
+});

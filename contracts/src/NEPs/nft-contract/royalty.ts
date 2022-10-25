@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { assert, near } from "near-sdk-js";
-import Contract, {  NFT_METADATA_SPEC, NFT_STANDARD_NAME } from ".";
+import {  NFT_METADATA_SPEC, NFT_STANDARD_NAME } from ".";
+import { LaunchpadNft } from "../../nft";
 import { assertAtLeastOneYocto, assertOneYocto, bytesForApprovedAccountId, internalAddTokenToOwner, internalTransfer, refundDeposit, refundApprovedAccountIds, refundApprovedAccountIdsIter, royaltyToPayout } from "./internal";
 import { Token } from "./metadata";
 
@@ -11,7 +12,7 @@ export function internalNftPayout({
     balance,
     maxLenPayout
 }:{
-    contract: Contract, 
+    contract: LaunchpadNft, 
     tokenId: string,
     balance: bigint, 
     maxLenPayout: number,
@@ -62,7 +63,7 @@ export function internalNftTransferPayout({
     balance,
     maxLenPayout
 }:{
-    contract: Contract, 
+    contract: LaunchpadNft, 
     receiverId: string, 
     tokenId: string,
     approvalId: number,

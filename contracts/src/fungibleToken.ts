@@ -174,6 +174,7 @@ export class FungibleToken {
       "Transfer " + amount + " token from " + senderId + " to " + receiver_id
     );
     this.internalTransfer(senderId, receiver_id, amount, memo);
+    log('Transfer completed', this.ft_balance_of({account_id:receiver_id}));
   }
 
   @call({ payableFunction: true })

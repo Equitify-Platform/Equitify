@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { assert, near } from "near-sdk-js";
-import Contract, { NFT_METADATA_SPEC, NFT_STANDARD_NAME } from ".";
+import  { NFT_METADATA_SPEC, NFT_STANDARD_NAME } from ".";
+import { LaunchpadNft } from "../../nft";
 import { internalAddTokenToOwner, refundDeposit } from "./internal";
 import { Token, TokenMetadata } from "./metadata";
 
@@ -11,7 +12,7 @@ export function internalMint({
     receiverId,
     perpetualRoyalties
 }:{ 
-    contract: Contract, 
+    contract: LaunchpadNft, 
     tokenId: string, 
     metadata: TokenMetadata, 
     receiverId: string 

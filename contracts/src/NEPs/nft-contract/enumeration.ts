@@ -1,15 +1,17 @@
 // @ts-nocheck
 import { near, UnorderedSet } from "near-sdk-js";
-import Contract, { NFT_METADATA_SPEC, NFT_STANDARD_NAME } from ".";
+import { NFT_METADATA_SPEC, NFT_STANDARD_NAME } from ".";
 import { restoreOwners } from "./internal";
 import { JsonToken } from "./metadata";
 import { internalNftToken } from "./nft_core";
+import {log} from "../../utils"
+import {LaunchpadNft} from "../../nft";
 
 //Query for the total supply of NFTs on the contract
 export function internalTotalSupply({
     contract
 }:{
-    contract: Contract
+    contract: LaunchpadNft
 }): number {
     //return the length of the token metadata by ID
     return contract.tokenMetadataById.len();
@@ -21,7 +23,7 @@ export function internalNftTokens({
     fromIndex,
     limit
 }:{ 
-    contract: Contract, 
+    contract: LaunchpadNft, 
     fromIndex?: string, 
     limit?: number
 }): JsonToken[] {
@@ -47,7 +49,7 @@ export function internalSupplyForOwner({
     contract,
     accountId
 }:{
-    contract: Contract, 
+    contract: LaunchpadNft, 
     accountId: string
 }): number {
     //get the set of tokens for the passed in owner
@@ -68,11 +70,12 @@ export function internalTokensForOwner({
     fromIndex,
     limit
 }:{
-    contract: Contract, 
+    contract: LaunchpadNft, 
     accountId: string, 
     fromIndex?: string, 
     limit?: number
 }): JsonToken[] {
+    log(contract.tokensPerOwner.get(accountId))
     //get the set of tokens for the passed in owner
     let tokenSet = restoreOwners(contract.tokensPerOwner.get(accountId));
 
