@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 import { Wallet } from "../../near-wallet";
 import {
+  getBalance,
   signInWallet,
   signOutWallet,
   startUpWallet,
@@ -11,11 +12,17 @@ import {
 interface InitialState {
   wallet: Wallet;
   isSignedIn: boolean;
+  balance: {
+    available: string;
+  };
 }
 
 const initialState: InitialState = {
   wallet,
   isSignedIn: false,
+  balance: {
+    available: "0",
+  },
 };
 
 export const walletSlice = createSlice({
@@ -32,6 +39,9 @@ export const walletSlice = createSlice({
     });
     builder.addCase(signOutWallet.fulfilled, (state) => {
       state.isSignedIn = false;
+    });
+    builder.addCase(getBalance.fulfilled, (state, action) => {
+      state.balance.available = action.payload;
     });
   },
 });

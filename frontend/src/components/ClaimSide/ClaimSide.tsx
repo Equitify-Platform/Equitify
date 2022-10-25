@@ -50,9 +50,10 @@ export const ClaimSide: FC<ClaimSideProps> = ({
 
   useEffect(() => {
     if (clockRef?.current) {
+      clockRef.current.stop();
       clockRef.current.start();
     }
-  }, [clockRef, date]);
+  }, [clockRef, date, idoStage]);
 
   const nextStageFn = useCallback<() => void>(() => {
     setIdoStage(nextStage[idoStage]);
@@ -61,24 +62,26 @@ export const ClaimSide: FC<ClaimSideProps> = ({
   return (
     <div className={styles.claimSide}>
       <h2>{text[idoStage]}</h2>
-      <Countdown
-        ref={clockRef}
-        date={date}
-        onComplete={nextStageFn}
-        renderer={({ formatted: f }) => (
-          <ClaimCountdown
-            days={f.days}
-            hours={f.hours}
-            minutes={f.minutes}
-            seconds={f.seconds}
-          />
-        )}
-      />
+      {idoStage !== IdoStage.CLAIM && (
+        <Countdown
+          ref={clockRef}
+          date={date}
+          onComplete={nextStageFn}
+          renderer={({ formatted: f }) => (
+            <ClaimCountdown
+              days={f.days}
+              hours={f.hours}
+              minutes={f.minutes}
+              seconds={f.seconds}
+            />
+          )}
+        />
+      )}
       <h4>Total raised: ${totalRaised.toFixed(4)}</h4>
       <h4>Soft cap: ${softCap.toFixed(4)}</h4>
       <h4>Hard cap: ${hardCap.toFixed(4)}</h4>
       <h4>
-        1 {symbol} = {price.toFixed(4)} NEAR
+        1 NEAR = {price.toFixed(4)} {symbol}
       </h4>
     </div>
   );

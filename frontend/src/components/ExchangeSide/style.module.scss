@@ -5,20 +5,25 @@
   text-align: center;
 }
 
-.balanceSection {
-  margin: 3rem;
+.balances {
+  display: flex;
+  flex-direction: column;
+  margin: 1rem;
+}
 
-  div {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: gray;
-    padding: 0 1rem;
-    color: white;
-  }
+.totalBalance {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
-  .balanceSectionTop {
-    background-color: transparent;
-    color: black;
-  }
+.tokens {
+  background-color: #444444;
+  padding: 1rem;
+}
+
+.space {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }

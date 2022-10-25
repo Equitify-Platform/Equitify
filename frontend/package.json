@@ -15,6 +15,7 @@
     "@near-wallet-selector/sender": "^7.0.0",
     "@near-wallet-selector/wallet-connect": "^7.0.0",
     "@reduxjs/toolkit": "^1.8.6",
+    "bn.js": "^5.2.1",
     "buffer": "^6.0.3",
     "eslint": "^8.25.0",
     "eslint-config-prettier": "^8.5.0",
@@ -28,6 +29,8 @@
     "react-dom": "^18.2.0",
     "react-redux": "^8.0.4",
     "react-router-dom": "^6.4.2",
+    "react-select": "^5.5.6",
+    "react-spinners": "^0.13.6",
     "web-vitals": "^2.1.0"
   },
   "devDependencies": {

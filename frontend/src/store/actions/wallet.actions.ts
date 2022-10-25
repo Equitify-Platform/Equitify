@@ -27,3 +27,10 @@ export const signOutWallet = createAsyncThunk<void, Wallet>(
     await wallet.signOut();
   }
 );
+
+export const getBalance = createAsyncThunk<string, Wallet>(
+  "getBalance",
+  async (wallet) => {
+    return (await wallet.getBalance()).available;
+  }
+);
