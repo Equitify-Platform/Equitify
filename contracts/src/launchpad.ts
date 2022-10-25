@@ -272,7 +272,7 @@ class Launchpad extends Ownable {
 
     @view({})
     getIdoData() {
-        return JSON.stringify(this.idoData);
+        return this.idoData;
     }
 
 
@@ -307,13 +307,6 @@ class Launchpad extends Ownable {
 
     _internalTokensTransferedSet(accountId: string, value: bigint) {
         this.tokenTransferedUnused.set(accountId, value);
-    }
-
-
-    @view({})
-    getLatestPrice() {
-        // TODO
-        return BigInt('1');
     }
 
     // @call({ privateFunction: true })

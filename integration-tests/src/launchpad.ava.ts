@@ -114,7 +114,7 @@ test.beforeEach(async (t) => {
     account_id: launchpad.accountId
   });
 
-  const updIdoData = JSON.parse(await launchpad.view('getIdoData')) as IDOData;
+  const updIdoData = await launchpad.view('getIdoData') as IDOData;
 
   t.is(launchpadBalance, launchAmount);
   t.is(updIdoData.totalClaimableAmount, launchAmount)
