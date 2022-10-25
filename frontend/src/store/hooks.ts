@@ -7,5 +7,11 @@ export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 export const useAppDispatch = () => useDispatch<AppDispatch>();
 
 export const useLaunchpads = () => useAppSelector((store) => store.launchpads);
+export const useLaunchpad = (address: string) =>
+  useAppSelector((store) =>
+    store.launchpads.projects.find(
+      (p) => p.address.toLowerCase() === address.toLowerCase()
+    )
+  );
 export const useStaking = () => useAppSelector((store) => store.staking);
 export const useWallet = () => useAppSelector((store) => store.wallet);

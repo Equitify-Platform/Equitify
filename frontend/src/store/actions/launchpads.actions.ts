@@ -1,6 +1,10 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
-import { getLaunchpadsMock } from "../mocks/launchpads.mocks";
+import {
+  claimTokensMock,
+  getLaunchpadsMock,
+  purchaseTokensMock,
+} from "../mocks/launchpads.mocks";
 
 export type ProjectStruct = {
   projectName: string;
@@ -28,18 +32,39 @@ export type NftContractType = {
   nfts: NftType[];
 };
 
+export type TokenType = {
+  address: string;
+  name: string;
+  symbol: string;
+  ownerAddress: string;
+};
+
 export type ProjectType = {
   address: string;
-  tokenAddress: string;
-  tokenOwnerAddress: string;
+  token: TokenType;
   projectStruct: ProjectStruct;
   nft: NftContractType;
   stakingContract: string;
+  totalRaised: string;
 };
 
 export const getLaunchpads = createAsyncThunk<ProjectType[]>(
   "getLaunchpads",
   async () => {
     return await getLaunchpadsMock();
+  }
+);
+
+export const purchaseTokens = createAsyncThunk<void, string>(
+  "purchaseTokens",
+  async (launchpad) => {
+    return await purchaseTokensMock();
+  }
+);
+
+export const claimTokens = createAsyncThunk<void, string>(
+  "claimTokens",
+  async (launchpad) => {
+    return await claimTokensMock();
   }
 );

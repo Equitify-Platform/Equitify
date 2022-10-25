@@ -24,10 +24,10 @@ export const IDOCard: FC<IDOCardProps> = ({
     <div className={styles.idoCard}>
       <NavLink to={`/ido/${address}`}>
         <h2>{projectSignatures}</h2>
-        <p>Price: {price} NEAR</p>
-        <p>Token: $ {tokenName}</p>
-        <p>{projectDescription}</p>
-        <p>Starts in: {saleStartTime}</p>
+        <div>Price: {price} NEAR</div>
+        <div>Token: $ {tokenName}</div>
+        <div>{projectDescription}</div>
+        <div>Starts in: {saleStartTime}</div>
       </NavLink>
     </div>
   );

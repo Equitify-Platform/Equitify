@@ -1,62 +1,88 @@
-import React, { Dispatch, SetStateAction, useEffect, useRef } from "react";
+import React, {
+  Dispatch,
+  FC,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useRef,
+} from "react";
 import Countdown from "react-countdown";
 
 import styles from "./style.module.scss";
 
+import { IdoStage } from "../../types/IdoStage";
 import ClaimCountdown from "../ClaimCountdown";
 
 interface ClaimSideProps {
-  timestamp: number;
+  idoStage: IdoStage;
+  setIdoStage: Dispatch<SetStateAction<IdoStage>>;
+  date: Date;
   totalRaised: number;
-  hardcap: number;
+  hardCap: number;
+  softCap: number;
   price: number;
   symbol: string;
-  isClaim: boolean;
-  setIsClaim: Dispatch<SetStateAction<boolean>>;
 }
 
-function ClaimSide({
-  timestamp,
+const text: Record<IdoStage, string> = {
+  [IdoStage.PRESALE]: "SALE STARTS IN",
+  [IdoStage.SALE]: "SALE ENDS IN",
+  [IdoStage.CLAIM]: "CLAIM STAGE",
+};
+
+const nextStage: Record<IdoStage, IdoStage> = {
+  [IdoStage.PRESALE]: IdoStage.SALE,
+  [IdoStage.SALE]: IdoStage.CLAIM,
+  [IdoStage.CLAIM]: IdoStage.CLAIM,
+};
+
+export const ClaimSide: FC<ClaimSideProps> = ({
+  idoStage,
+  setIdoStage,
+  date,
   totalRaised,
-  hardcap,
+  hardCap,
+  softCap,
   symbol,
   price,
-  isClaim,
-  setIsClaim,
-}: ClaimSideProps) {
-  const TIMESTAMP = Date.parse(new Date().toUTCString());
-  const clockRef = useRef<any>();
+}) => {
+  const clockRef = useRef<Countdown>(null);
 
   useEffect(() => {
     if (clockRef?.current) {
+      clockRef.current.stop();
       clockRef.current.start();
     }
-  }, [clockRef, TIMESTAMP, timestamp]);
+  }, [clockRef, date, idoStage]);
+
+  const nextStageFn = useCallback<() => void>(() => {
+    setIdoStage(nextStage[idoStage]);
+  }, [idoStage, setIdoStage]);
+
   return (
     <div className={styles.claimSide}>
-      <h2>Claim side</h2>
-      <Countdown
-        ref={clockRef}
-        date={TIMESTAMP + timestamp}
-        renderer={({ formatted: f, total }) => {
-          if (total === 0 && !isClaim) {
-            setIsClaim(true);
-            if (clockRef?.current) {
-              clockRef.current.stop();
-            }
-          }
-          return (
+      <h2>{text[idoStage]}</h2>
+      {idoStage !== IdoStage.CLAIM && (
+        <Countdown
+          ref={clockRef}
+          date={date}
+          onComplete={nextStageFn}
+          renderer={({ formatted: f }) => (
             <ClaimCountdown
               days={f.days}
               hours={f.hours}
               minutes={f.minutes}
               seconds={f.seconds}
             />
-          );
-        }}
-      />
+          )}
+        />
+      )}
+      <h4>Total raised: ${totalRaised.toFixed(4)}</h4>
+      <h4>Soft cap: ${softCap.toFixed(4)}</h4>
+      <h4>Hard cap: ${hardCap.toFixed(4)}</h4>
+      <h4>
+        1 NEAR = {price.toFixed(4)} {symbol}
+      </h4>
     </div>
   );
-}
-
-export default ClaimSide;
+};

@@ -1,5 +1,6 @@
 /* A helper file that simplifies using the wallet selector */
 
+import { formatUnits } from "@ethersproject/units";
 import {
   setupWalletSelector,
   WalletSelector,
@@ -8,9 +9,15 @@ import {
 import { setupModal } from "@near-wallet-selector/modal-ui";
 import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
 import MyNearIconUrl from "@near-wallet-selector/my-near-wallet/assets/my-near-wallet-icon.png";
+import BN from "bn.js";
 import { providers } from "near-api-js";
 import "@near-wallet-selector/modal-ui/styles.css";
-import type { CodeResult } from "near-api-js/lib/providers/provider";
+import type {
+  AccountView,
+  CodeResult,
+} from "near-api-js/lib/providers/provider";
+
+import { NATIVE_DECIMALS } from "./constants";
 
 const THIRTY_TGAS = "30000000000000";
 const NO_DEPOSIT = "0";
@@ -60,6 +67,36 @@ export class Wallet {
     }
     this.wallet = this.accountId = null;
     window.location.replace(window.location.origin + window.location.pathname);
+  }
+
+  public async getBalance() {
+    if (!this.walletSelector)
+      throw new Error("Wallet selector is null or undefined.");
+
+    const { network } = this.walletSelector.options;
+    const provider = new providers.JsonRpcProvider({ url: network.nodeUrl });
+    const state = await provider.query<AccountView>({
+      request_type: "view_account",
+      account_id: this.accountId,
+      finality: "optimistic",
+    });
+    const protocolConfig = await provider.experimental_protocolConfig({
+      finality: "final",
+    });
+    const costPerByte = new BN(
+      protocolConfig.runtime_config.storage_amount_per_byte
+    );
+    const stateStaked = new BN(state.storage_usage).mul(costPerByte);
+    const staked = new BN(state.locked);
+    const totalBalance = new BN(state.amount).add(staked);
+    const availableBalance = totalBalance.sub(BN.max(staked, stateStaked));
+
+    return {
+      total: formatUnits(totalBalance.toString(), NATIVE_DECIMALS),
+      stateStaked: formatUnits(stateStaked.toString(), NATIVE_DECIMALS),
+      staked: formatUnits(staked.toString(), NATIVE_DECIMALS),
+      available: formatUnits(availableBalance.toString(), NATIVE_DECIMALS),
+    };
   }
 
   // Make a read-only call to retrieve information from the network
