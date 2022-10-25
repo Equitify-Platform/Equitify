@@ -1,26 +1,21 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { Buffer } from 'buffer';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React from "react";
+import ReactDOM from "react-dom/client";
+
+import { Buffer } from "buffer";
+
 import "./globals.scss";
 
-import { HelloNear } from './contracts/hello-near';
-import { Wallet } from './near-wallet';
-import { HELLO_NEAR_ADDRESS } from './constants';
-
+import App from "./App";
+import reportWebVitals from "./reportWebVitals";
 
 window.Buffer = window.Buffer || Buffer;
 
-const wallet = new Wallet();
-const helloNear = new HelloNear(HELLO_NEAR_ADDRESS, wallet);
-
 const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
+  document.getElementById("root") as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <App wallet={wallet} helloNear={helloNear} />
+    <App />
   </React.StrictMode>
 );
 
