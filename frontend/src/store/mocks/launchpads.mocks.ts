@@ -8,10 +8,10 @@ export const getLaunchpadsMock = (): Promise<ProjectType[]> =>
         address: "test_nft_address",
         nfts: [
           {
-            balance: "100.00",
+            balance: "100",
             claimed: false,
             initialized: true,
-            released: "0.00",
+            released: "0",
             revoked: false,
             tokenId: "0",
             tokenUri: "",
@@ -19,14 +19,14 @@ export const getLaunchpadsMock = (): Promise<ProjectType[]> =>
         ],
       },
       projectStruct: {
-        hardCap: "100.00",
+        hardCap: "100",
         price: "10",
         projectDescription: "The best project",
         projectName: "TEST1",
         projectSignatures: "T1",
-        saleEndTime: "1668961747",
+        saleEndTime: "1666701852",
         saleStartTime: "1",
-        softCap: "",
+        softCap: "0.1",
       },
       stakingContract: "test_staking_address",
       token: {

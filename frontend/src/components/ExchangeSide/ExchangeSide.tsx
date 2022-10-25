@@ -2,8 +2,11 @@ import React, { FC } from "react";
 
 import styles from "./style.module.scss";
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface ExchangeSideProps {}
+import { IdoStage } from "../../types/IdoStage";
+
+interface ExchangeSideProps {
+  idoStage: IdoStage;
+}
 
 export const ExchangeSide: FC<ExchangeSideProps> = () => {
   return (
