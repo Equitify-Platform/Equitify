@@ -9000,7 +9000,7 @@ near-sandbox@^0.0.14:
     got "^11.8.2"
     tar "^6.1.0"
 
-near-sdk-js@0.6.0:
+near-sdk-js@0.6.0-0:
   version "0.6.0-0"
   resolved "https://registry.yarnpkg.com/near-sdk-js/-/near-sdk-js-0.6.0-0.tgz#e71b45b0243093c073adc6027e2292aa161489f5"
   integrity sha512-ifkzMPOD44WJ/uXRlulrloinbM8NHwrWg7Z7soTqK+4Ig5aIWufpkl1JoojDFjkZwkOKhuWh7uEAUBnObs3LbQ==

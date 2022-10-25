@@ -160,6 +160,12 @@ export class LaunchpadNft {
         );
     }
 
+    @view({})
+    nft_tokens_detailed_for_owner({ account_id, from_index, limit }: { account_id: string, from_index?: string, limit?: number }) {
+        const tokens = internalTokensForOwner({ contract: this, accountId: account_id, fromIndex: from_index, limit: limit });
+        return tokens.map(v => new LaunchpadJsonToken(v, this._getTokenDataInternal({ token_id: v.token_id })))
+    }
+
     private _onlyFromOwner() {
         assert(near.predecessorAccountId() == this.owner_id, "caller not a contract owner");
     }
@@ -256,7 +262,7 @@ export class LaunchpadNft {
     /*
         ENUMERATION
     */
-   //Query for the total supply of NFTs on the contract
+    //Query for the total supply of NFTs on the contract
     @view({})
     nft_total_supply() {
         return internalTotalSupply({ contract: this });

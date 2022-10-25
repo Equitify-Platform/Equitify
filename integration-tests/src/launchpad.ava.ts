@@ -35,6 +35,10 @@ const ftDeposit = async (t: TestExecutionContext, of: string ) =>{
   })
 }
 
+const config = {
+  price: '1'
+}
+
 test.beforeEach(async (t) => {
   // Init the worker and start a Sandbox server
   const worker = await Worker.init();
@@ -98,7 +102,7 @@ test.beforeEach(async (t) => {
       softCap: '100',
       saleStartTime: '0',// Math.floor(new Date().getTime() / 1000).toString(),
       saleEndTime: (Math.floor(new Date().getTime() * 1_000_000) + 1_000_000_000_000).toString(),
-      price: '1'
+      price: config.price
     },
   },
     {
@@ -126,13 +130,18 @@ test.afterEach.always(async (t) => {
   });
 });
 
-const testPurchaseToken = async (t: TestExecutionContext) => {
+const testPurchaseToken = async (
+  t: TestExecutionContext,
+  tokenId: number = 0
+) => {
   const { launchpad, root, beneficiary, nft } = t.context.accounts;
   console.log('purchase tokens');
 
+  const deposit = new BN('1000');
+
   const tx = await root.call(launchpad.accountId, 'purchaseTokens', {
     beneficiary: beneficiary.accountId,
-    token_id: '0'
+    token_id: tokenId.toString()
   }, {
     attachedDeposit: new BN('1000'),
     gas: parseUnits(300, 12)
@@ -140,14 +149,14 @@ const testPurchaseToken = async (t: TestExecutionContext) => {
 
   const ownerTokens = await nft.view('nft_tokens_for_owner', {
     account_id: beneficiary.accountId,
-    from_index: '0',
+    from_index: tokenId.toString(),
     limit: '5'
   }) as Array<any>;
 
   console.log('All tokens for owner', ownerTokens)
 
   console.log('Get token data', await nft.view('get_token_data', {
-    token_id: 0,
+    token_id: tokenId.toString(),
   }))
 
   t.is(ownerTokens.length, 1)
@@ -155,7 +164,7 @@ const testPurchaseToken = async (t: TestExecutionContext) => {
 }
 
 const getNftData = async (t: TestExecutionContext, nftId: number) => {
-  const { launchpad, root, beneficiary, nft } = t.context.accounts;
+  const { nft } = t.context.accounts;
   
   return  await nft.view('get_token_data', {
     token_id: 0,
@@ -178,7 +187,7 @@ const testClaim = async (t: TestExecutionContext, claimTokenId: number) => {
   
   const balanceBefore = await getFtBalance(t, beneficiary.accountId);
 
-  const tx = await beneficiary.call(launchpad.accountId, 'claimVestedTokens', {
+  await beneficiary.call(launchpad.accountId, 'claimVestedTokens', {
     beneficiary: beneficiary.accountId,
     token_id: claimTokenId.toString()
   }, {
@@ -187,11 +196,6 @@ const testClaim = async (t: TestExecutionContext, claimTokenId: number) => {
 
   const balanceAfter = await getFtBalance(t, beneficiary.accountId);
 
-  console.log({
-    balanceAfter,
-    balanceBefore,
-    token
-  })
   t.is(balanceAfter.eq(balanceBefore.add(new BN(token?.token_data?.balance ?? '0'))), true);
 }
 
