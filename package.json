@@ -13,9 +13,14 @@
     "deploy": "cd contracts && yarn deploy",
     "build": "yarn build:contracts && yarn build:web",
     "build:web": "cd frontend && yarn build",
-    "build:contracts": "near-sdk-js build ./contracts/src/contract.ts build/hello_near.wasm",
+    "build:contracts": "run-s build:contract:*",
+    "build:contract:launchpad": "near-sdk-js build ./contracts/src/launchpad.ts build/launchpad.wasm",
+    "build:contract:launchpadFactory": "near-sdk-js build ./contracts/src/LaunchpadFactory.ts build/launchpad_factory.wasm",
+    "build:contract:nft": "near-sdk-js build ./contracts/src/nft.ts build/nft.wasm",
+    "build:contract:fungibleToken": "near-sdk-js build ./contracts/src/fungibleToken.ts build/fungibleToken.wasm",
     "test": "yarn test:integration",
-    "test:integration": "yarn build:contracts && cd integration-tests && yarn test"
+    "test:integration": "yarn build:contracts && cd integration-tests && yarn test",
+    "test:integration:noBuild": "cd integration-tests && yarn test"
   },
   "type": "module",
   "repository": {
@@ -29,7 +34,8 @@
   },
   "devDependencies": {
     "near-cli": "^3.3.0",
-    "near-sdk-js": "0.5.0"
+    "near-sdk-js": "0.6.0-0",
+    "npm-run-all": "^4.1.5"
   },
   "homepage": "https://github.com/RedDuck-Software/equitify-platform#readme",
   "dependencies": {
