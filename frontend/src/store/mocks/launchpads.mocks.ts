@@ -35,5 +35,6 @@ export const getLaunchpadsMock = (): Promise<ProjectType[]> =>
         symbol: "TTS",
         ownerAddress: "test_token_owner_address",
       },
+      totalRaised: "1",
     },
   ]);

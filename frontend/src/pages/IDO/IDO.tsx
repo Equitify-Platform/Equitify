@@ -1,32 +1,29 @@
 import React, { useState } from "react";
+import { useParams } from "react-router-dom";
 
 import styles from "./style.module.scss";
 
-import ClaimSide from "../../components/ClaimSide/ClaimSide";
-import ExachangeSide from "../../components/ExchangeSide/ExachangeSide";
+import { ClaimSide } from "../../components/ClaimSide/ClaimSide";
+import { ExchangeSide } from "../../components/ExchangeSide/ExchangeSide";
+import { useLaunchpad, useWallet } from "../../store/hooks";
 
 function IDO() {
+  const { address } = useParams<{ address: string }>();
+  const launchpad = useLaunchpad(address ?? "");
+  const { wallet } = useWallet();
+
   const [isClaim, setIsClaim] = useState<boolean>(false);
 
   return (
     <div className="page-wrapper">
       <div className={styles.topWrapper}>
-        <ExachangeSide
-          name={"Name"}
-          symbol={"TST"}
-          balance={"123"}
-          address={"0x12121..."}
-          account={"0x14141..."}
-          id={"0"}
-          isClaim={false}
-          price={0}
-        />
+        <ExchangeSide />
         <ClaimSide
-          timestamp={0}
-          totalRaised={0}
-          hardcap={0}
-          price={0}
-          symbol={""}
+          timestamp={launchpad ? +launchpad.projectStruct.saleEndTime : 0}
+          totalRaised={launchpad ? +launchpad.totalRaised : 0}
+          hardcap={launchpad ? +launchpad.projectStruct.hardCap : 0}
+          price={launchpad ? +launchpad.projectStruct.price : 0}
+          symbol={launchpad ? launchpad.token.symbol : ""}
           isClaim={isClaim}
           setIsClaim={setIsClaim}
         />

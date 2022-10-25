@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useEffect, useRef } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useRef, FC } from "react";
 import Countdown from "react-countdown";
 
 import styles from "./style.module.scss";
@@ -15,7 +15,7 @@ interface ClaimSideProps {
   setIsClaim: Dispatch<SetStateAction<boolean>>;
 }
 
-function ClaimSide({
+export const ClaimSide: FC<ClaimSideProps> = ({
   timestamp,
   totalRaised,
   hardcap,
@@ -23,7 +23,7 @@ function ClaimSide({
   price,
   isClaim,
   setIsClaim,
-}: ClaimSideProps) {
+}) => {
   const TIMESTAMP = Date.parse(new Date().toUTCString());
   const clockRef = useRef<any>();
 
@@ -57,6 +57,4 @@ function ClaimSide({
       />
     </div>
   );
-}
-
-export default ClaimSide;
+};

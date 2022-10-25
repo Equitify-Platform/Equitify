@@ -41,6 +41,7 @@ export type ProjectType = {
   projectStruct: ProjectStruct;
   nft: NftContractType;
   stakingContract: string;
+  totalRaised: string;
 };
 
 export const getLaunchpads = createAsyncThunk<ProjectType[]>(

@@ -1,36 +1,11 @@
-import React, { Dispatch, SetStateAction } from "react";
+import React, { FC } from "react";
 
 import styles from "./style.module.scss";
 
-interface ExchangeSideProps {
-  name: string;
-  symbol: string;
-  balance: string;
-  address: string;
-  account: string;
-  id: string;
-  /*setIsLoading: Dispatch<SetStateAction<boolean>>;
-  updateData: () => Promise<void>;
-  options: Option[];
-  onChange: (id: string) => void | Promise<void>;*/
-  isClaim: boolean;
-  price: number;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface ExchangeSideProps {}
 
-function ExachangeSide({
-  symbol,
-  name,
-  balance,
-  id,
-  account,
-  address,
-  /*setIsLoading,
-  updateData,
-  options,
-  onChange,*/
-  isClaim,
-  price,
-}: ExchangeSideProps) {
+export const ExchangeSide: FC<ExchangeSideProps> = () => {
   return (
     <div className={styles.exchangeSide}>
       <h2>Exchange side</h2>
@@ -55,6 +30,4 @@ function ExachangeSide({
       <button>Purchase/Claim</button>
     </div>
   );
-}
-
-export default ExachangeSide;
+};
