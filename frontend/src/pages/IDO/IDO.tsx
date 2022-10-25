@@ -1,25 +1,39 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import styles from "./style.module.scss";
 
 import { ClaimSide } from "../../components/ClaimSide/ClaimSide";
 import { ExchangeSide } from "../../components/ExchangeSide/ExchangeSide";
-import { useLaunchpad, useWallet } from "../../store/hooks";
+import { getLaunchpads } from "../../store/actions/launchpads.actions";
+import { useAppDispatch, useLaunchpad, useWallet } from "../../store/hooks";
 
 function IDO() {
   const { address } = useParams<{ address: string }>();
   const launchpad = useLaunchpad(address ?? "");
   const { wallet } = useWallet();
-
+  const dispatch = useAppDispatch();
   const [isClaim, setIsClaim] = useState<boolean>(false);
+  const [timestamp, setTimestamp] = useState<number>(0);
+
+  useEffect(() => {
+    dispatch(getLaunchpads());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (launchpad) {
+      const now = new Date().toUTCString();
+      console.log(now);
+      // setTimestamp()
+    }
+  }, [launchpad]);
 
   return (
     <div className="page-wrapper">
       <div className={styles.topWrapper}>
         <ExchangeSide />
         <ClaimSide
-          timestamp={launchpad ? +launchpad.projectStruct.saleEndTime : 0}
+          timestamp={launchpad ? +launchpad.projectStruct.saleStartTime : 0}
           totalRaised={launchpad ? +launchpad.totalRaised : 0}
           hardcap={launchpad ? +launchpad.projectStruct.hardCap : 0}
           price={launchpad ? +launchpad.projectStruct.price : 0}
