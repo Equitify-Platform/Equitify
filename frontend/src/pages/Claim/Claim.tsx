@@ -1,18 +1,19 @@
 import React, { useEffect } from "react";
 
-import styles from "./style.module.scss";
+import "./style.module.scss";
 
 import NFT from "../../components/NFT/NFT";
 import { getLaunchpads } from "../../store/actions/launchpads.actions";
-import { useAppDispatch, useLaunchpads } from "../../store/hooks";
+import { useAppDispatch, useLaunchpads, useWallet } from "../../store/hooks";
 
 function Claim() {
   const launchpads = useLaunchpads();
   const dispatch = useAppDispatch();
+  const { wallet } = useWallet();
 
   useEffect(() => {
-    dispatch(getLaunchpads());
-  }, [dispatch]);
+    dispatch(getLaunchpads(wallet));
+  }, [dispatch, wallet]);
 
   return (
     <div>

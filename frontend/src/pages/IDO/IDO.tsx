@@ -18,6 +18,7 @@ function IDO() {
   const launchpad = useLaunchpad(address ?? "");
   const {
     wallet,
+    isSignedIn,
     balance: { available: balance },
   } = useWallet();
   const dispatch = useAppDispatch();
@@ -42,12 +43,12 @@ function IDO() {
   useEffect(() => {
     setIsLoading(true);
     Promise.allSettled([
-      dispatch(getLaunchpads()),
+      dispatch(getLaunchpads(wallet)),
       dispatch(getBalance(wallet)),
     ])
       .then(() => setIsLoading(false))
       .catch((e) => console.error("Error while loading IDO:", e));
-  }, [dispatch, wallet]);
+  }, [dispatch, wallet, isSignedIn]);
 
   useEffect(() => {
     if (launchpad) {

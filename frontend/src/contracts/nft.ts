@@ -46,8 +46,8 @@ export class NonFungibleToken {
 
   public async nftTokensDetailedForOwner(
     account_id: string
-  ): Promise<LaunchpadJsonToken> {
-    return this.wallet.view<LaunchpadJsonToken>(
+  ): Promise<LaunchpadJsonToken[]> {
+    return this.wallet.view<LaunchpadJsonToken[]>(
       this.contractId,
       "nft_tokens_detailed_for_owner",
       {
