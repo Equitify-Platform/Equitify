@@ -4,18 +4,45 @@ import { FinalExecutionOutcome } from "near-api-js/lib/providers";
 import { NATIVE_DECIMALS } from "../constants";
 import { Wallet, THIRTY_TGAS } from "../near-wallet";
 
+interface IdoData {
+  members: string;
+  staticMembers: string;
+  antagonistMembers: string;
+  dynamicMembers: string;
+  launchpadMembers: string;
+  totalClaimableAmount: string;
+  totalPurchased: string;
+  totalNearAmount: string;
+  start: string;
+  cliff: string;
+  duration: string;
+  totalVestingAmount: string;
+  totalUnreleased: string;
+}
+
+interface Project {
+  hardCap: string;
+  softCap: string;
+  saleStartTime: string;
+  saleEndTime: string;
+  price: string;
+}
+
+interface GetIdoDataResult {
+  project: Project;
+  idoData: IdoData;
+  nftContract: string;
+  idoToken: string;
+}
+
 export class Launchpad {
   constructor(
     private readonly contractId: string,
     private readonly wallet: Wallet
   ) {}
 
-  public async nft(): Promise<string> {
-    return this.wallet.view<string>(this.contractId, "l_nft");
-  }
-
-  public async ft(): Promise<string> {
-    return this.wallet.view<string>(this.contractId, "l_ft");
+  public async getIdoInfo(): Promise<GetIdoDataResult> {
+    return this.wallet.view<GetIdoDataResult>(this.contractId, "get_ido_info");
   }
 
   public async purchaseTokens(
