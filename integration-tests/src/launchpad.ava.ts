@@ -1,7 +1,7 @@
 import testAny, { ExecutionContext } from 'ava';
 import { NearAccount, Worker } from 'near-workspaces';
 import { getContractWasmPath, parseUnits, TestContext, TestFuncWithWorker } from './utils/helpers';
-import { IDOData, IDOParams } from "../../contracts/src/launchpad";
+import { GetIdoDataResult, IDOData, IDOParams } from "../../contracts/src/launchpad";
 import { BN } from 'bn.js';
 import { LaunchpadJsonToken } from '../../contracts/src/nft';
 import { FTContractMetadata } from '../../contracts/src/ft';
@@ -121,10 +121,10 @@ test.beforeEach(async (t) => {
     account_id: launchpad.accountId
   });
 
-  const updIdoData = await launchpad.view('getIdoData') as IDOData;
+  const updIdoData = await launchpad.view('get_ido_info') as GetIdoDataResult;
 
   t.is(launchpadBalance, launchAmount);
-  t.is(updIdoData.totalClaimableAmount, launchAmount)
+  t.is(updIdoData.idoData.totalClaimableAmount, launchAmount)
 
   // // Save state for test runs, it is unique for each test
   t.context.worker = worker;
