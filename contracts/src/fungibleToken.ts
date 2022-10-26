@@ -71,6 +71,8 @@ export class FungibleToken {
     this.totalSupply = BigInt(total_supply);
     this.accounts.set(owner_id, this.totalSupply);
     this.metadata = metadata;
+
+    log(metadata)
   }
 
   internalGetAccountStorageUsage(accountLength: number): bigint {

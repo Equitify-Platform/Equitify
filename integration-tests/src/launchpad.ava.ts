@@ -4,6 +4,7 @@ import { getContractWasmPath, parseUnits, TestContext, TestFuncWithWorker } from
 import { IDOData, IDOParams } from "../../contracts/src/launchpad";
 import { BN } from 'bn.js';
 import { LaunchpadJsonToken } from '../../contracts/src/nft';
+import { FTContractMetadata } from '../../contracts/src/fungibleToken';
 
 const launchpadContractPath = getContractWasmPath('launchpad');
 const idoTokenContractPath = getContractWasmPath('fungibleToken');
@@ -62,10 +63,10 @@ test.beforeEach(async (t) => {
       decimals: 18,
       name: 'Test FT',
       symbol: 'TFT'
-    }
+    } as FTContractMetadata
   });
 
-  console.log('Token Metadata', idoToken.view('ft_metadata'));
+  console.log('Token Metadata', await idoToken.view('ft_metadata'));
 
   console.log('balance owner', await idoToken.view('ft_balance_of', {
     account_id: root.accountId
