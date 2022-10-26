@@ -6,7 +6,7 @@ import {
   claimTokens,
   purchaseTokens,
 } from "../../store/actions/launchpads.actions";
-import { useAppDispatch } from "../../store/hooks";
+import { useAppDispatch, useWallet } from "../../store/hooks";
 import { IdoStage } from "../../types/IdoStage";
 import { BuyInput } from "../BuyInput";
 import { NftSelect, Option } from "../NftSelect";
@@ -35,6 +35,7 @@ export const ExchangeSide: FC<ExchangeSideProps> = ({
   launchpadAddress,
 }) => {
   const dispatch = useAppDispatch();
+  const { wallet } = useWallet();
   const [nativeAmount, setNativeAmount] = useState<number>(0);
   const [tokenAmount, setTokenAmount] = useState<number>(0);
   const option = useMemo(() => options.find((o) => o.id === id), [options, id]);
@@ -50,7 +51,14 @@ export const ExchangeSide: FC<ExchangeSideProps> = ({
   const purchase = async (): Promise<void> => {
     try {
       setIsLoading(true);
-      await dispatch(purchaseTokens(launchpadAddress));
+      await dispatch(
+        purchaseTokens({
+          amount: nativeAmount.toString(),
+          tokenId: option?.id || "0",
+          launchpadAddress,
+          wallet,
+        })
+      );
     } catch (e) {
       console.error("Error while purchasing tokens:", e);
     } finally {
@@ -61,7 +69,9 @@ export const ExchangeSide: FC<ExchangeSideProps> = ({
   const claim = async (): Promise<void> => {
     try {
       setIsLoading(true);
-      await dispatch(claimTokens(launchpadAddress));
+      await dispatch(
+        claimTokens({ tokenId: option?.id || "0", wallet, launchpadAddress })
+      );
     } catch (e) {
       console.error("Error while claiming tokens:", e);
     } finally {
