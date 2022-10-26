@@ -10,13 +10,36 @@ import {
 } from "near-sdk-js";
 import { log } from "./utils";
 
+export class FTContractMetadata {
+  name: string;
+  symbol: string;
+  decimals: number;
+
+  constructor(
+    {
+      name,
+      symbol,
+      decimals,
+    }: {
+      name: string,
+      symbol: string,
+      decimals: number,
+
+    }) {
+    this.name = name
+    this.symbol = symbol
+    this.decimals = decimals
+  }
+}
+
 
 @NearBindgen({ requireInit: true })
 export class FungibleToken {
-  accounts: LookupMap<bigint>;
-  accountRegistrants: LookupMap<string>;
-  accountDeposits: LookupMap<bigint>;
-  totalSupply: bigint;
+  public accounts: LookupMap<bigint>;
+  public accountRegistrants: LookupMap<string>;
+  public accountDeposits: LookupMap<bigint>;
+  public totalSupply: bigint;
+  public metadata: FTContractMetadata;
 
   constructor() {
     this.accounts = new LookupMap("a");
@@ -26,11 +49,28 @@ export class FungibleToken {
   }
 
   @initialize({})
-  init({ owner_id, total_supply }: { owner_id: string; total_supply: string }) {
+  init({ 
+    owner_id, 
+    total_supply, 
+    metadata 
+  }: { 
+    owner_id: string; 
+    total_supply: string, 
+    metadata: FTContractMetadata 
+  }) {
     Assertions.isLeftGreaterThanRight(total_supply, 0);
     validateAccountId(owner_id);
+    
+    assert(
+      metadata.decimals !== undefined &&
+      metadata.name != undefined &&
+      metadata.symbol !== undefined,
+      'Invalid metadata'
+    );
+
     this.totalSupply = BigInt(total_supply);
     this.accounts.set(owner_id, this.totalSupply);
+    this.metadata = metadata;
   }
 
   internalGetAccountStorageUsage(accountLength: number): bigint {
@@ -174,7 +214,7 @@ export class FungibleToken {
       "Transfer " + amount + " token from " + senderId + " to " + receiver_id
     );
     this.internalTransfer(senderId, receiver_id, amount, memo);
-    log('Transfer completed', this.ft_balance_of({account_id:receiver_id}));
+    log('Transfer completed', this.ft_balance_of({ account_id: receiver_id }));
   }
 
   @call({ payableFunction: true })
@@ -229,6 +269,11 @@ export class FungibleToken {
     log('Balance of call');
     validateAccountId(account_id);
     return this.internalGetBalance(account_id);
+  }
+
+  @view({})
+  ft_metadata() {
+    return this.metadata;
   }
 }
 

@@ -57,9 +57,15 @@ test.beforeEach(async (t) => {
 
   await idoToken.call(idoToken, 'init', {
     owner_id: root.accountId,
-    total_supply: parseUnits(1000000).toString()
+    total_supply: parseUnits(1000000).toString(),
+    metadata: {
+      decimals: 18,
+      name: 'Test FT',
+      symbol: 'TFT'
+    }
   });
 
+  console.log('Token Metadata', idoToken.view('ft_metadata'));
 
   console.log('balance owner', await idoToken.view('ft_balance_of', {
     account_id: root.accountId
