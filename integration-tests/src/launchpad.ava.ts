@@ -7,10 +7,12 @@ import { LaunchpadJsonToken } from '../../contracts/src/nft';
 import { FTContractMetadata } from '../../contracts/src/ft';
 
 const launchpadContractPath = getContractWasmPath('launchpad');
+const launchpadFactoryContractPath = getContractWasmPath('launchpad_factory');
 const idoTokenContractPath = getContractWasmPath('ft');
 const nftContractPath = getContractWasmPath('nft');
 
 type Context = {
+  launchpadFactory: NearAccount,
   launchpad: NearAccount,
   root: NearAccount,
   beneficiary: NearAccount,
@@ -50,9 +52,12 @@ test.beforeEach(async (t) => {
   const beneficiary = await root.createSubAccount('beneficiary');
   const idoToken = await root.createSubAccount('idotoken');
   const nft = await root.createSubAccount('nft');
-  const launchpad = await root.createSubAccount('launchpad');
+  const launchpadFactory = await root.createSubAccount('factory');
+  const launchpad = await launchpadFactory.createSubAccount('testido');
 
-  t.context.accounts = { root, launchpad, beneficiary, idoToken, nft };
+  t.context.accounts = { root, launchpad, beneficiary, idoToken, nft, launchpadFactory };
+  
+  await launchpadFactory.deploy(launchpadFactoryContractPath);
   
   await idoToken.deploy(idoTokenContractPath);
 
@@ -115,6 +120,12 @@ test.beforeEach(async (t) => {
     {
       gas: parseUnits(300, 12),
     });
+  
+  await launchpadFactory.call(launchpadFactory.accountId, 'add_ido', {
+    account_id: launchpad.accountId
+  })
+
+  console.log('All idos', await launchpadFactory.view('get_all_idos'));
 
   await root.transfer(launchpad.accountId, parseUnits(4, 24));
   const launchpadBalance: string = await idoToken.view('ft_balance_of', {
