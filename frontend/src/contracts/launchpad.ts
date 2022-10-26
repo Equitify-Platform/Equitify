@@ -1,7 +1,6 @@
-import { parseUnits } from "@ethersproject/units";
+import BN from "bn.js";
 import { FinalExecutionOutcome } from "near-api-js/lib/providers";
 
-import { NATIVE_DECIMALS } from "../constants";
 import { Wallet, THIRTY_TGAS } from "../near-wallet";
 
 interface IdoData {
@@ -26,6 +25,9 @@ interface Project {
   saleStartTime: string;
   saleEndTime: string;
   price: string;
+  projectName: string;
+  projectDescription: string;
+  projectSignatures: string;
 }
 
 interface GetIdoDataResult {
@@ -54,8 +56,8 @@ export class Launchpad {
       this.contractId,
       "purchaseTokens",
       { beneficiary, token_id },
-      THIRTY_TGAS,
-      parseUnits(amount, NATIVE_DECIMALS).toString()
+      new BN(THIRTY_TGAS).muln(2).toString(),
+      amount
     );
   }
 

@@ -34,7 +34,7 @@ export const getLaunchpadsMock = (): Promise<ProjectType[]> =>
         address: "test_token_address",
         name: "test_token_name",
         symbol: "TTS",
-        decimals: "24",
+        decimals: 24,
       },
       totalRaised: "1",
     },

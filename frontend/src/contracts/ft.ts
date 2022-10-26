@@ -3,7 +3,7 @@ import { Wallet } from "../near-wallet";
 interface FtContractMetadata {
   name: string;
   symbol: string;
-  decimals: string;
+  decimals: number;
 }
 
 export class FungibleToken {
@@ -17,6 +17,12 @@ export class FungibleToken {
       this.contractId,
       "ft_metadata"
     );
+  }
+
+  public async balanceOf(address: string): Promise<string> {
+    return await this.wallet.view(this.contractId, "ft_balance_of", {
+      account_id: address,
+    });
   }
 
   public async totalSupply(): Promise<string> {

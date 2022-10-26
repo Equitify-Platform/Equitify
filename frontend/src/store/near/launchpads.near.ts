@@ -1,4 +1,5 @@
 import { formatUnits, parseUnits } from "@ethersproject/units";
+import BN from "bn.js";
 
 import { LAUNCHPADS_ADDRESSES, NATIVE_DECIMALS } from "../../constants";
 import { FungibleToken } from "../../contracts/ft";
@@ -17,10 +18,13 @@ export const getLaunchpadsNear = async (
       const ft = new FungibleToken(data.idoToken, wallet);
       const nft = new NonFungibleToken(data.nftContract, wallet);
       const { idoData, project } = data;
+      console.log(idoData);
 
       const [metadata, nfts] = await Promise.all([
         ft.metadata(),
-        nft.nftTokensDetailedForOwner(wallet.accountId ?? ""),
+        wallet.accountId
+          ? nft.nftTokensDetailedForOwner(wallet.accountId)
+          : Promise.resolve([]),
       ]);
 
       return {
@@ -46,14 +50,20 @@ export const getLaunchpadsNear = async (
             })),
         },
         projectStruct: {
-          hardCap: project.hardCap,
-          softCap: project.softCap,
-          price: project.price,
-          projectDescription: "",
-          projectName: "",
-          projectSignatures: "",
-          saleEndTime: project.saleEndTime,
-          saleStartTime: project.saleStartTime,
+          hardCap: formatUnits(project.hardCap, NATIVE_DECIMALS),
+          softCap: formatUnits(project.softCap, NATIVE_DECIMALS),
+          price: new BN(project.price)
+            .mul(new BN(10).pow(new BN(NATIVE_DECIMALS - metadata.decimals)))
+            .toString(),
+          projectDescription: project.projectDescription,
+          projectName: project.projectName,
+          projectSignatures: project.projectSignatures,
+          saleEndTime: new BN(project.saleEndTime)
+            .div(new BN(1_000_000_000))
+            .toString(),
+          saleStartTime: new BN(project.saleStartTime)
+            .div(new BN(1_000_000_000))
+            .toString(),
         },
         stakingContract: "",
         token: {
@@ -62,7 +72,7 @@ export const getLaunchpadsNear = async (
           symbol: metadata.symbol,
           decimals: metadata.decimals,
         },
-        totalRaised: idoData.totalPurchased,
+        totalRaised: formatUnits(idoData.totalNearAmount, NATIVE_DECIMALS),
       };
     })
   );

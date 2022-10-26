@@ -37,7 +37,7 @@ export type TokenType = {
   address: string;
   name: string;
   symbol: string;
-  decimals: string;
+  decimals: number;
 };
 
 export type ProjectType = {
