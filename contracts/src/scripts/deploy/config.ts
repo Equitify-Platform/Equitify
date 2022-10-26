@@ -11,6 +11,9 @@ type Config = {
 export const testnetConfig: Config = {
     idos: [{
         name: 'default',
-        idoTokenAccountId: 'ido-token-default.launchpad-deployer.testnet'
+        idoTokenAccountId: 'ido-token-default.launchpad-deployer.testnet',
+        
+    },{
+        name: 'test7',
     }]
 }

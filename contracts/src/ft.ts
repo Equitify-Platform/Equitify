@@ -46,6 +46,11 @@ export class FungibleToken {
     this.accountRegistrants = new LookupMap("r");
     this.accountDeposits = new LookupMap("d");
     this.totalSupply = BigInt("0");
+    this.metadata = {
+      decimals: 0,
+      name: '',
+      symbol: ''
+    }
   }
 
   @initialize({})
@@ -63,7 +68,7 @@ export class FungibleToken {
     
     assert(
       metadata.decimals !== undefined &&
-      metadata.name != undefined &&
+      metadata.name !== undefined &&
       metadata.symbol !== undefined,
       'Invalid metadata'
     );

@@ -4,9 +4,10 @@ import * as fs from "fs";
 import { FTContractMetadata } from "../../ft";
 import { parseUnits } from "../utils";
 import { testnetConfig } from "./config";
+import { Project } from "../../launchpad";
 const { keyStores, KeyPair, connect } = nearAPI;
 
-const KEY_STORE_PATH = process.env.KEY_STORE ?? "~/near/keystore";
+const KEY_STORE_PATH = '/home/kostya/near/keystore' // process.env.KEY_STORE ?? "~/near/keystore";
 const keyStore = new keyStores.UnencryptedFileSystemKeyStore(KEY_STORE_PATH);
 
 console.log("keystore path is ", KEY_STORE_PATH);
@@ -21,26 +22,21 @@ const connectionConfig = {
 };
 
 let nearConnection: Near;
-let walletConnection: WalletConnection;
 
-const DEPLOYER_PK = "<>"; //process.env.SIGNER_PK;
-const DEPLOYER_NAME = "launchpad-deployer.testnet"; //process.env.SIGNER_PK;
+const DEPLOYER_PK = '<pk>' //process.env.SIGNER_PK;
+const DEPLOYER_NAME = 'launchpad-deployer.testnet' //process.env.SIGNER_PK;
 
 const globalDeployPrefix = process.argv[2] ?? "default";
 
-const init = async () => {
-  // TODO: move to env
+console.log('globalDeployPrefix', globalDeployPrefix)
 
+const init = async () => {
   // creates a public / private key pair using the provided private key
   const keyPair = KeyPair.fromString(DEPLOYER_PK);
   // adds the keyPair you created to keyStore
   await keyStore.setKey(connectionConfig.networkId, DEPLOYER_NAME, keyPair);
 
   nearConnection = await connect(connectionConfig);
-
-  // walletConnection = new WalletConnection(nearConnection, 'deploy');
-
-  // const walletAccountId = walletConnection.getAccountId();
 
   console.log("account id", await nearConnection.account(DEPLOYER_NAME));
 };
@@ -76,6 +72,8 @@ async function createAccountAndDeploy(
   amount: string
 ) {
   const newAccountFullId = `${newAccountId}-${globalDeployPrefix}.${creatorAccountId}`;
+  // return await nearConnection.account(newAccountFullId);
+
   const creatorAccount = await nearConnection.account(creatorAccountId);
   const keyPair = KeyPair.fromRandom("ed25519");
   const publicKey = keyPair.getPublicKey().toString();
@@ -116,7 +114,7 @@ const main = async () => {
     (v) => v.name.toLowerCase() === globalDeployPrefix
   );
   if (!config) throw "Config is not found";
-
+  else console.log('Config found')
   const deployer = await nearConnection.account(DEPLOYER_NAME);
 
   const idoToken = await createAccountAndDeploy(
@@ -147,7 +145,7 @@ const main = async () => {
     "10"
   );
 
-  const launchAmount = parseUnits(100).toString();
+  const launchAmount = parseUnits(2500).toString();
 
   await ftDeposit(idoToken.accountId, launchpad.accountId);
   await ftDeposit(idoToken.accountId, deployer.accountId);
@@ -178,6 +176,8 @@ const main = async () => {
     },
   });
 
+  const saleStart = (Math.floor((new Date().getTime() + 60 * 60 * 0.5 * 1000) * 1_000_000));
+
   await launchpad.functionCall({
     contractId: launchpad.accountId,
     methodName: "init",
@@ -187,18 +187,20 @@ const main = async () => {
       _nft: nft.accountId,
       _tokenFounder: deployer.accountId,
       _project: {
-        hardCap: "1000",
-        softCap: "100",
-        saleStartTime: "0", // Math.floor(new Date().getTime() / 1000).toString(),
-        saleEndTime: (
-          Math.floor(new Date().getTime() * 1_000_000) + 1_000_000_000_000
-        ).toString(),
-        price: "1",
-      },
+        hardCap: utils.format.parseNearAmount("10"),
+        softCap: utils.format.parseNearAmount("1"),
+        saleStartTime: saleStart.toString(),
+        saleEndTime: (saleStart + 60 * 60 * 2 * 1000 * 1_000_000).toString(),
+        price: "1" ,
+        projectDescription: 'Its aboba project for aboba people',
+        projectName: 'ABOBA project',
+        projectSignature: 'ABOBA'
+      } as Project,
     },
 
     gas: parseUnits(300, 12),
   });
+
 };
 
 main().catch((e) => console.log("Error", e));

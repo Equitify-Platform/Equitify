@@ -12,7 +12,7 @@ const idoTokenContractPath = getContractWasmPath('ft');
 const nftContractPath = getContractWasmPath('nft');
 
 type Context = {
-  launchpadFactory: NearAccount,
+  // launchpadFactory: NearAccount,
   launchpad: NearAccount,
   root: NearAccount,
   beneficiary: NearAccount,
@@ -52,12 +52,12 @@ test.beforeEach(async (t) => {
   const beneficiary = await root.createSubAccount('beneficiary');
   const idoToken = await root.createSubAccount('idotoken');
   const nft = await root.createSubAccount('nft');
-  const launchpadFactory = await root.createSubAccount('factory');
-  const launchpad = await launchpadFactory.createSubAccount('testido');
+  // const launchpadFactory = await root.createSubAccount('factory');
+  const launchpad = await root.createSubAccount('testido');
 
-  t.context.accounts = { root, launchpad, beneficiary, idoToken, nft, launchpadFactory };
+  t.context.accounts = { root, launchpad, beneficiary, idoToken, nft};
   
-  await launchpadFactory.deploy(launchpadFactoryContractPath);
+  // await launchpadFactory.deploy(launchpadFactoryContractPath);
   
   await idoToken.deploy(idoTokenContractPath);
 
@@ -121,11 +121,11 @@ test.beforeEach(async (t) => {
       gas: parseUnits(300, 12),
     });
   
-  await launchpadFactory.call(launchpadFactory.accountId, 'add_ido', {
-    account_id: launchpad.accountId
-  })
+  // await launchpadFactory.call(launchpadFactory.accountId, 'add_ido', {
+  //   account_id: launchpad.accountId
+  // })
 
-  console.log('All idos', await launchpadFactory.view('get_all_idos'));
+  // console.log('All idos', await launchpadFactory.view('get_all_idos'));
 
   await root.transfer(launchpad.accountId, parseUnits(4, 24));
   const launchpadBalance: string = await idoToken.view('ft_balance_of', {
@@ -185,7 +185,7 @@ const getNftData = async (t: TestExecutionContext, nftId: number) => {
   const { nft } = t.context.accounts;
   
   return  await nft.view('get_token_data', {
-    token_id: 0,
+    token_id: nftId.toString(),
   }) as LaunchpadJsonToken
 }
 
@@ -214,6 +214,10 @@ const testClaim = async (t: TestExecutionContext, claimTokenId: number) => {
 
   const balanceAfter = await getFtBalance(t, beneficiary.accountId);
 
+  console.log({
+    balanceAfter,
+    balanceBefore
+  })
   t.is(balanceAfter.eq(balanceBefore.add(new BN(token?.token_data?.balance ?? '0'))), true);
 }
 
@@ -223,5 +227,5 @@ test('purchase tokens', async (t) => {
 
 test('purchase tokens and claim', async (t) => {
   await testPurchaseToken(t);
-  await testClaim(t, 0);
+  await testClaim(t, 1);
 });
