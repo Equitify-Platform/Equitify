@@ -4,10 +4,10 @@ import { getContractWasmPath, parseUnits, TestContext, TestFuncWithWorker } from
 import { IDOData, IDOParams } from "../../contracts/src/launchpad";
 import { BN } from 'bn.js';
 import { LaunchpadJsonToken } from '../../contracts/src/nft';
-import { FTContractMetadata } from '../../contracts/src/fungibleToken';
+import { FTContractMetadata } from '../../contracts/src/ft';
 
 const launchpadContractPath = getContractWasmPath('launchpad');
-const idoTokenContractPath = getContractWasmPath('fungibleToken');
+const idoTokenContractPath = getContractWasmPath('ft');
 const nftContractPath = getContractWasmPath('nft');
 
 type Context = {

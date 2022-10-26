@@ -17,7 +17,7 @@
     "build:contract:launchpad": "near-sdk-js build ./contracts/src/launchpad.ts build/launchpad.wasm",
     "build:contract:launchpadFactory": "near-sdk-js build ./contracts/src/LaunchpadFactory.ts build/launchpad_factory.wasm",
     "build:contract:nft": "near-sdk-js build ./contracts/src/nft.ts build/nft.wasm",
-    "build:contract:fungibleToken": "near-sdk-js build ./contracts/src/fungibleToken.ts build/fungibleToken.wasm",
+    "build:contract:ft": "near-sdk-js build ./contracts/src/ft.ts build/ft.wasm",
     "test": "yarn test:integration",
     "test:integration": "yarn build:contracts && cd integration-tests && yarn test",
     "test:integration:noBuild": "cd integration-tests && yarn test"
