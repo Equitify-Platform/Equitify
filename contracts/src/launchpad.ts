@@ -28,6 +28,9 @@ export type Project = {
     saleStartTime: string;
     saleEndTime: string;
     price: string;
+    projectName: string;
+    projectDescription: string;
+    projectSignature: string;
 }
 
 export type IDOParams = {
@@ -107,6 +110,9 @@ class Launchpad extends Ownable {
             saleEndTime: '0',
             saleStartTime: '0',
             softCap: '0',
+            projectDescription: '',
+            projectName: '',
+            projectSignature: ''
         }
 
     }
@@ -138,6 +144,7 @@ class Launchpad extends Ownable {
             owner: this.owner()
         }));
 
+        log('')
         log('call _getBalanceOfContract');
 
         return this._getBalanceOfContract({
@@ -166,15 +173,11 @@ class Launchpad extends Ownable {
             "PP: 14"
         );
 
-        this._internalFundRaisedBalanceSet(
-            near.predecessorAccountId(),
-            this._fundRaisedBalanceGet(near.predecessorAccountId() + near.attachedDeposit())
+        assert(
+            BigInt(this.idoData.totalPurchased) + BigInt(tokenAmount) <= 
+                BigInt(this.idoData.totalNearAmount) + BigInt(near.attachedDeposit()),
+            "PP: 15"
         );
-
-        this._internalTokensBoughtSet(
-            beneficiary,
-            this._tokensBoughtGet(beneficiary) + tokenAmount
-        )
 
         return this._getTokenData({
             token_id,
@@ -184,7 +187,8 @@ class Launchpad extends Ownable {
                     id: token_id,
                     beneficiary,
                     tokenAmount: tokenAmount.toString(),
-                    attachedDeposit: near.attachedDeposit().toString()
+                    attachedDeposit: near.attachedDeposit().toString(),
+                    original_predecessor: near.predecessorAccountId()
                 }),
                 gas: parseTGas(100)
             }
@@ -465,7 +469,7 @@ class Launchpad extends Ownable {
     }
 
     @call({ privateFunction: true })
-    _purchase_tokens_on_get_owner_private_callback({ id, beneficiary, tokenAmount, attachedDeposit }: { id: string, beneficiary: string, tokenAmount: string, attachedDeposit: string }) {
+    _purchase_tokens_on_get_owner_private_callback({ id, beneficiary, tokenAmount, attachedDeposit, original_predecessor }: { id: string, beneficiary: string, tokenAmount: string, attachedDeposit: string, original_predecessor: string }) {
         near.log(`_purchase_tokens_on_get_owner_private_callback callback`);
 
         const { result, success } = promiseResult();
@@ -484,14 +488,13 @@ class Launchpad extends Ownable {
             tokenAmount,
             callback: {
                 function: '_purchase_tokens_on_nft_change_private_callback',
-                args: JSON.stringify({ attachedDeposit, tokenAmount }),
-                // gas: parseTGas(100)
+                args: JSON.stringify({ attachedDeposit, tokenAmount, beneficiary, original_predecessor }),
             }
         });
     }
 
     @call({ privateFunction: false })
-    _purchase_tokens_on_nft_change_private_callback({ tokenAmount, attachedDeposit }: { tokenAmount: string, attachedDeposit: string }) {
+    _purchase_tokens_on_nft_change_private_callback({ tokenAmount, attachedDeposit, original_predecessor, beneficiary}: { tokenAmount: string, attachedDeposit: string, beneficiary: string, original_predecessor: string }) {
         near.log(`_purchase_tokens_on_nft_change_private_callback callback`);
         const { result, success } = promiseResult();
 
@@ -499,11 +502,17 @@ class Launchpad extends Ownable {
 
         this.idoData.totalPurchased = (BigInt(this.idoData.totalPurchased) + BigInt(tokenAmount)).toString();
         this.idoData.totalNearAmount += (BigInt(this.idoData.totalNearAmount) + BigInt(attachedDeposit)).toString();
-
-        assert(
-            BigInt(this.idoData.totalPurchased) <= BigInt(this.idoData.totalClaimableAmount),
-            "PP: 15"
+        
+        this._internalFundRaisedBalanceSet(
+            original_predecessor,
+            this._fundRaisedBalanceGet(original_predecessor) + BigInt(attachedDeposit)
         );
+
+        this._internalTokensBoughtSet(
+            beneficiary,
+            this._tokensBoughtGet(beneficiary) + BigInt(tokenAmount)
+        )
+
     }
 
     @call({})

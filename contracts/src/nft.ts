@@ -122,10 +122,10 @@ export class LaunchpadNft {
         let token_id: string;
 
         try {
-            token_id = internalTotalSupply({ contract: this }).toString();
+            token_id = (internalTotalSupply({ contract: this }) + 1).toString();
         } catch {
             log('tts error, set tokenId to 0')
-            token_id = '0'
+            token_id = '1'
         }
 
         log(`Token id`, token_id);
