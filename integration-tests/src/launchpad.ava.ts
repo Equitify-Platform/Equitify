@@ -1,12 +1,13 @@
 import testAny, { ExecutionContext } from 'ava';
 import { NearAccount, Worker } from 'near-workspaces';
 import { getContractWasmPath, parseUnits, TestContext, TestFuncWithWorker } from './utils/helpers';
-import { IDOData, IDOParams } from "../../contracts/src/launchpad";
+import { GetIdoDataResult, IDOData, IDOParams } from "../../contracts/src/launchpad";
 import { BN } from 'bn.js';
 import { LaunchpadJsonToken } from '../../contracts/src/nft';
+import { FTContractMetadata } from '../../contracts/src/ft';
 
 const launchpadContractPath = getContractWasmPath('launchpad');
-const idoTokenContractPath = getContractWasmPath('fungibleToken');
+const idoTokenContractPath = getContractWasmPath('ft');
 const nftContractPath = getContractWasmPath('nft');
 
 type Context = {
@@ -57,9 +58,15 @@ test.beforeEach(async (t) => {
 
   await idoToken.call(idoToken, 'init', {
     owner_id: root.accountId,
-    total_supply: parseUnits(1000000).toString()
+    total_supply: parseUnits(1000000).toString(),
+    metadata: {
+      decimals: 18,
+      name: 'Test FT',
+      symbol: 'TFT'
+    } as FTContractMetadata
   });
 
+  console.log('Token Metadata', await idoToken.view('ft_metadata'));
 
   console.log('balance owner', await idoToken.view('ft_balance_of', {
     account_id: root.accountId
@@ -114,10 +121,10 @@ test.beforeEach(async (t) => {
     account_id: launchpad.accountId
   });
 
-  const updIdoData = await launchpad.view('getIdoData') as IDOData;
+  const updIdoData = await launchpad.view('get_ido_info') as GetIdoDataResult;
 
   t.is(launchpadBalance, launchAmount);
-  t.is(updIdoData.totalClaimableAmount, launchAmount)
+  t.is(updIdoData.idoData.totalClaimableAmount, launchAmount)
 
   // // Save state for test runs, it is unique for each test
   t.context.worker = worker;

@@ -163,20 +163,13 @@ export class LaunchpadNft {
     @view({})
     nft_tokens_detailed_for_owner({ account_id, from_index, limit }: { account_id: string, from_index?: string, limit?: number }) {
         const tokens = internalTokensForOwner({ contract: this, accountId: account_id, fromIndex: from_index, limit: limit });
-        return tokens.map(v => new LaunchpadJsonToken(v, this._getTokenDataInternal({ token_id: v.token_id })))
+        return this._tokensToDetailed({tokens})
     }
 
-    private _onlyFromOwner() {
-        assert(near.predecessorAccountId() == this.owner_id, "caller not a contract owner");
-    }
-
-    private _setTokenData({ token_id, data }: { token_id: string, data: TokenData }) {
-        this.tokenData.set(token_id, data);
-    }
-
-    private _getTokenDataInternal({ token_id }: { token_id: string }) {
-        assert(this.tokenData.containsKey(token_id), 'token data doesn\'t exists')
-        return this.tokenData.get(token_id);
+    @view({})
+    nft_tokens_detailed({ from_index, limit }) {
+        const tokens = internalNftTokens({ contract: this, fromIndex: from_index, limit: limit });
+        return this._tokensToDetailed({tokens})
     }
 
     /*
@@ -293,5 +286,22 @@ export class LaunchpadNft {
     //Query for all the tokens for an owner
     nft_metadata() {
         return internalNftMetadata({ contract: this });
+    }
+
+    private _onlyFromOwner() {
+        assert(near.predecessorAccountId() == this.owner_id, "caller not a contract owner");
+    }
+
+    private _setTokenData({ token_id, data }: { token_id: string, data: TokenData }) {
+        this.tokenData.set(token_id, data);
+    }
+
+    private _getTokenDataInternal({ token_id }: { token_id: string }) {
+        assert(this.tokenData.containsKey(token_id), 'token data doesn\'t exists')
+        return this.tokenData.get(token_id);
+    }
+
+    private _tokensToDetailed({tokens}: {tokens: JsonToken[]}) {
+        return tokens.map(v => new LaunchpadJsonToken(v, this._getTokenDataInternal({ token_id: v.token_id })))
     }
 }
