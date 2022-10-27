@@ -56,8 +56,8 @@ export class Launchpad {
       this.contractId,
       "purchaseTokens",
       { beneficiary, token_id },
-      new BN(THIRTY_TGAS).muln(2).toString(),
-      amount
+      new BN(THIRTY_TGAS).muln(10).toString(),
+      amount,
     );
   }
 

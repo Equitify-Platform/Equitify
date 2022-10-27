@@ -14,6 +14,7 @@ export const testnetConfig: Config = {
         idoTokenAccountId: 'ido-token-default.launchpad-deployer.testnet',
         
     },{
-        name: 'test8',
+        name: 'test12',
     }]
 }
+accountId: 'launchpad-deployer.testnet'

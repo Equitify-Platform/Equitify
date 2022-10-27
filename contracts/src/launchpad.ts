@@ -369,7 +369,8 @@ class Launchpad extends Ownable {
                 accountId: this.nft,
                 function: 'make_claimed',
                 args: JSON.stringify({ token_id: id }),
-                gas: parseTGas(30)
+                gas: parseTGas(30),
+                deposit: BigInt('20000000000000000000000')
             },
             callback
         })
@@ -381,7 +382,8 @@ class Launchpad extends Ownable {
                 accountId: this.nft,
                 function: 'change_balance',
                 args: JSON.stringify({ owner_id: beneficiary, token_id, increase_amount }),
-                gas: parseTGas(30)
+                gas: parseTGas(30),
+                deposit: BigInt('20000000000000000000000')
             },
             callback
         })
@@ -393,7 +395,7 @@ class Launchpad extends Ownable {
                 accountId: this.nft,
                 function: 'mint_token',
                 args: JSON.stringify({ receiver_id: beneficiary, balance: tokenAmount }),
-                deposit: BigInt('7000000000000000000000')
+                deposit: BigInt('20000000000000000000000')
                 // gas: parseTGas(60)
             },
             callback
@@ -497,7 +499,7 @@ class Launchpad extends Ownable {
         assert(success, 'callback is not successful')
 
         this.idoData.totalPurchased = (BigInt(this.idoData.totalPurchased) + BigInt(tokenAmount)).toString();
-        this.idoData.totalNearAmount += (BigInt(this.idoData.totalNearAmount) + BigInt(attachedDeposit)).toString();
+        this.idoData.totalNearAmount = (BigInt(this.idoData.totalNearAmount) + BigInt(attachedDeposit)).toString();
 
         this._internalFundRaisedBalanceSet(
             original_predecessor,

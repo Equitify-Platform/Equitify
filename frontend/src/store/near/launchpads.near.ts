@@ -26,7 +26,7 @@ export const getLaunchpadsNear = async (
           ? nft.nftTokensDetailedForOwner(wallet.accountId)
           : Promise.resolve([]),
       ]);
-
+      console.log(idoData)
       return {
         address,
         nft: {

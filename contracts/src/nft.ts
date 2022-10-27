@@ -67,7 +67,7 @@ export class LaunchpadNft {
 
     }
 
-    @call({})
+    @call({ payableFunction: true })
     make_revoked({ token_id }: { token_id: string }) {
         this._onlyFromOwner();
         const data = this._getTokenDataInternal({ token_id });
@@ -76,7 +76,7 @@ export class LaunchpadNft {
         this._setTokenData({ token_id, data });
     }
 
-    @call({})
+    @call({ payableFunction: true })
     make_claimed({ token_id }: { token_id: string }) {
         log('make_claimed', token_id)
         this._onlyFromOwner();
@@ -86,7 +86,7 @@ export class LaunchpadNft {
         this._setTokenData({ token_id, data });
     }
 
-    @call({})
+    @call({ payableFunction: true })
     change_balance({
         owner_id,
         token_id,
