@@ -87,11 +87,11 @@ export const NftSelect: FC<NftSelectProps> = (props) => {
         })
       : [];
 
-    if (props.options.length && props.idoStage !== IdoStage.CLAIM) {
+    if (props.idoStage !== IdoStage.CLAIM) {
       res.push({ value: "0", label: <div>Mint new NFT</div> });
     }
 
-    return res;
+    return res.sort((a, b) => parseInt(a.value) - parseInt(b.value));
   }, [props.options, props.idoStage]);
 
   const colourStyles = useMemo(

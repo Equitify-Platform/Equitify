@@ -77,9 +77,9 @@ export const ClaimSide: FC<ClaimSideProps> = ({
           )}
         />
       )}
-      <h4>Total raised: ${totalRaised.toFixed(4)}</h4>
-      <h4>Soft cap: ${softCap.toFixed(4)}</h4>
-      <h4>Hard cap: ${hardCap.toFixed(4)}</h4>
+      <h4>Total raised: {totalRaised.toFixed(4)} NEAR</h4>
+      <h4>Soft cap: {softCap.toFixed(4)} NEAR</h4>
+      <h4>Hard cap: {hardCap.toFixed(4)} NEAR</h4>
       <h4>
         1 NEAR = {price.toFixed(4)} {symbol}
       </h4>

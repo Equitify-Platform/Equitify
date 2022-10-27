@@ -19,8 +19,8 @@ import type {
 
 import { NATIVE_DECIMALS } from "./constants";
 
-const THIRTY_TGAS = "30000000000000";
-const NO_DEPOSIT = "0";
+export const THIRTY_TGAS = "30000000000000";
+export const NO_DEPOSIT = "0";
 
 export class Wallet {
   private walletSelector: WalletSelector | null = null;

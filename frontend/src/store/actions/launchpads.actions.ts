@@ -1,10 +1,11 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
+import { Wallet } from "../../near-wallet";
 import {
-  claimTokensMock,
-  getLaunchpadsMock,
-  purchaseTokensMock,
-} from "../mocks/launchpads.mocks";
+  claimTokensNear,
+  getLaunchpadsNear,
+  purchaseTokensNear,
+} from "../near/launchpads.near";
 
 export type ProjectStruct = {
   projectName: string;
@@ -36,7 +37,7 @@ export type TokenType = {
   address: string;
   name: string;
   symbol: string;
-  ownerAddress: string;
+  decimals: number;
 };
 
 export type ProjectType = {
@@ -48,23 +49,36 @@ export type ProjectType = {
   totalRaised: string;
 };
 
-export const getLaunchpads = createAsyncThunk<ProjectType[]>(
+export const getLaunchpads = createAsyncThunk<ProjectType[], Wallet>(
   "getLaunchpads",
-  async () => {
-    return await getLaunchpadsMock();
+  async (wallet: Wallet) => {
+    return await getLaunchpadsNear(wallet);
   }
 );
 
-export const purchaseTokens = createAsyncThunk<void, string>(
+export type PurchaseTokensParams = {
+  wallet: Wallet;
+  launchpadAddress: string;
+  tokenId: string;
+  amount: string;
+};
+
+export const purchaseTokens = createAsyncThunk<void, PurchaseTokensParams>(
   "purchaseTokens",
-  async (launchpad) => {
-    return await purchaseTokensMock();
+  async ({ wallet, launchpadAddress, tokenId, amount }) => {
+    return await purchaseTokensNear(wallet, launchpadAddress, tokenId, amount);
   }
 );
 
-export const claimTokens = createAsyncThunk<void, string>(
+export type ClaimTokensParams = {
+  wallet: Wallet;
+  launchpadAddress: string;
+  tokenId: string;
+};
+
+export const claimTokens = createAsyncThunk<void, ClaimTokensParams>(
   "claimTokens",
-  async (launchpad) => {
-    return await claimTokensMock();
+  async ({ wallet, launchpadAddress, tokenId }) => {
+    return await claimTokensNear(wallet, launchpadAddress, tokenId);
   }
 );
