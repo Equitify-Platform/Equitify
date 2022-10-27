@@ -155,20 +155,17 @@ const testPurchaseToken = async (
   const { launchpad, root, beneficiary, nft } = t.context.accounts;
   console.log('purchase tokens');
 
-  const deposit = new BN('1000');
-
   const tx = await root.call(launchpad.accountId, 'purchaseTokens', {
     beneficiary: beneficiary.accountId,
     token_id: tokenId.toString()
   }, {
-    attachedDeposit: new BN('1000'),
+    attachedDeposit: new BN('500'),
     gas: parseUnits(300, 12)
   })
 
   const ownerTokens = await nft.view('nft_tokens_for_owner', {
     account_id: beneficiary.accountId,
-    from_index: tokenId.toString(),
-    limit: '5'
+    from_index: '0',
   }) as Array<any>;
 
   console.log('All tokens for owner', ownerTokens)
@@ -177,7 +174,7 @@ const testPurchaseToken = async (
     token_id: tokenId.toString(),
   }))
 
-  t.is(ownerTokens.length, 1)
+  // t.is(ownerTokens.length, 1)
   t.is(ownerTokens[0].owner_id, beneficiary.accountId);
 }
 
@@ -221,11 +218,17 @@ const testClaim = async (t: TestExecutionContext, claimTokenId: number) => {
   t.is(balanceAfter.eq(balanceBefore.add(new BN(token?.token_data?.balance ?? '0'))), true);
 }
 
-test('purchase tokens', async (t) => {
-  await testPurchaseToken(t);
-});
+// test('purchase tokens', async (t) => {
+//   await testPurchaseToken(t);
+// });
 
-test('purchase tokens and claim', async (t) => {
+// test('purchase tokens and claim', async (t) => {
+//   await testPurchaseToken(t);
+//   await testClaim(t, 1);
+// });
+
+test('purchase tokens and make another purchase on the same id', async (t) => {
   await testPurchaseToken(t);
-  await testClaim(t, 1);
+  await testPurchaseToken(t, 1);
+
 });

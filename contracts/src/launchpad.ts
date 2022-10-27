@@ -174,8 +174,8 @@ class Launchpad extends Ownable {
         );
 
         assert(
-            BigInt(this.idoData.totalPurchased) + BigInt(tokenAmount) <= 
-                BigInt(this.idoData.totalNearAmount) + BigInt(near.attachedDeposit()),
+            BigInt(this.idoData.totalPurchased) + BigInt(tokenAmount) <=
+            BigInt(this.idoData.totalNearAmount) + BigInt(near.attachedDeposit()),
             "PP: 15"
         );
 
@@ -375,21 +375,7 @@ class Launchpad extends Ownable {
         })
     }
 
-    @call({ privateFunction: true })
-    _nftGetOwner({ id, callback }: { id: string, callback?: PromiseCall }) {
-        return this._executePromise({
-            call: {
-                accountId: this.nft,
-                function: 'get_owner',
-                args: JSON.stringify({ id }),
-                gas: parseTGas(30)
-            },
-            callback
-        })
-    }
-
-    @call({ privateFunction: true })
-    _nftChangeData({ token_id, beneficiary, increase_amount, callback }: { token_id: string, beneficiary: string, increase_amount: string, callback?: PromiseCall }) {
+    private _nftChangeData({ token_id, beneficiary, increase_amount, callback }: { token_id: string, beneficiary: string, increase_amount: string, callback?: PromiseCall }) {
         return this._executePromise({
             call: {
                 accountId: this.nft,
@@ -401,9 +387,7 @@ class Launchpad extends Ownable {
         })
     }
 
-
-    @call({ privateFunction: true })
-    _nftMintToken({ beneficiary, tokenAmount, callback }: { beneficiary: string, tokenAmount: string, callback?: PromiseCall }) {
+    private _nftMintToken({ beneficiary, tokenAmount, callback }: { beneficiary: string, tokenAmount: string, callback?: PromiseCall }) {
         return this._executePromise({
             call: {
                 accountId: this.nft,
@@ -474,12 +458,24 @@ class Launchpad extends Ownable {
 
         const { result, success } = promiseResult();
 
+        assert(success, 'Callback is not successful');
+
         const tokenData = JSON.parse(result) as LaunchpadJsonToken;
 
         log('success: ', JSON.stringify(tokenData));
 
+        const callbackArgs = JSON.stringify({ attachedDeposit, tokenAmount, beneficiary, original_predecessor });
+
         if (id && BigInt(id) != BigInt(0) && tokenData && tokenData.token && tokenData.token.owner_id === beneficiary)
-            return this._nftChangeData({ beneficiary, token_id: id, increase_amount: tokenAmount, callback: { function: '_purchase_tokens_on_nft_change_private_callback' } });
+            return this._nftChangeData({
+                beneficiary,
+                token_id: id,
+                increase_amount: tokenAmount,
+                callback: {
+                    function: '_purchase_tokens_on_nft_change_private_callback',
+                    args: callbackArgs
+                }
+            });
 
         log('not success, mint token');
 
@@ -488,13 +484,13 @@ class Launchpad extends Ownable {
             tokenAmount,
             callback: {
                 function: '_purchase_tokens_on_nft_change_private_callback',
-                args: JSON.stringify({ attachedDeposit, tokenAmount, beneficiary, original_predecessor }),
+                args: callbackArgs
             }
         });
     }
 
-    @call({ privateFunction: false })
-    _purchase_tokens_on_nft_change_private_callback({ tokenAmount, attachedDeposit, original_predecessor, beneficiary}: { tokenAmount: string, attachedDeposit: string, beneficiary: string, original_predecessor: string }) {
+    @call({ privateFunction: true })
+    _purchase_tokens_on_nft_change_private_callback({ tokenAmount, attachedDeposit, original_predecessor, beneficiary }: { tokenAmount: string, attachedDeposit: string, beneficiary: string, original_predecessor: string }) {
         near.log(`_purchase_tokens_on_nft_change_private_callback callback`);
         const { result, success } = promiseResult();
 
@@ -502,7 +498,7 @@ class Launchpad extends Ownable {
 
         this.idoData.totalPurchased = (BigInt(this.idoData.totalPurchased) + BigInt(tokenAmount)).toString();
         this.idoData.totalNearAmount += (BigInt(this.idoData.totalNearAmount) + BigInt(attachedDeposit)).toString();
-        
+
         this._internalFundRaisedBalanceSet(
             original_predecessor,
             this._fundRaisedBalanceGet(original_predecessor) + BigInt(attachedDeposit)
