@@ -4,16 +4,15 @@ import styles from "./style.module.scss";
 
 import IDOCard from "../../components/IDOCard/IDOCard";
 import { getLaunchpads } from "../../store/actions/launchpads.actions";
-import { useAppDispatch, useLaunchpads, useWallet } from "../../store/hooks";
+import { useAppDispatch, useLaunchpads } from "../../store/hooks";
 
 function IDOList() {
   const dispatch = useAppDispatch();
   const launchpads = useLaunchpads();
-  const { wallet } = useWallet();
 
   useEffect(() => {
-    dispatch(getLaunchpads(wallet));
-  }, [dispatch, wallet]);
+    dispatch(getLaunchpads());
+  }, [dispatch]);
 
   return (
     <div className="page-wrapper">

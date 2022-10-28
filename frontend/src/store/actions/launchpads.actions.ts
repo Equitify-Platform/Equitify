@@ -1,11 +1,12 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
-import { Wallet } from "../../near-wallet";
 import {
   claimTokensNear,
   getLaunchpadsNear,
   purchaseTokensNear,
+  transferNftNear,
 } from "../near/launchpads.near";
+import { store } from "../store";
 
 export type ProjectStruct = {
   projectName: string;
@@ -49,15 +50,14 @@ export type ProjectType = {
   totalRaised: string;
 };
 
-export const getLaunchpads = createAsyncThunk<ProjectType[], Wallet>(
+export const getLaunchpads = createAsyncThunk<ProjectType[]>(
   "getLaunchpads",
-  async (wallet: Wallet) => {
-    return await getLaunchpadsNear(wallet);
+  async () => {
+    return await getLaunchpadsNear(store.getState().wallet.wallet);
   }
 );
 
 export type PurchaseTokensParams = {
-  wallet: Wallet;
   launchpadAddress: string;
   tokenId: string;
   amount: string;
@@ -65,20 +65,46 @@ export type PurchaseTokensParams = {
 
 export const purchaseTokens = createAsyncThunk<void, PurchaseTokensParams>(
   "purchaseTokens",
-  async ({ wallet, launchpadAddress, tokenId, amount }) => {
-    return await purchaseTokensNear(wallet, launchpadAddress, tokenId, amount);
+  async ({ launchpadAddress, tokenId, amount }) => {
+    return await purchaseTokensNear(
+      store.getState().wallet.wallet,
+      launchpadAddress,
+      tokenId,
+      amount
+    );
   }
 );
 
 export type ClaimTokensParams = {
-  wallet: Wallet;
   launchpadAddress: string;
   tokenId: string;
 };
 
 export const claimTokens = createAsyncThunk<void, ClaimTokensParams>(
   "claimTokens",
-  async ({ wallet, launchpadAddress, tokenId }) => {
-    return await claimTokensNear(wallet, launchpadAddress, tokenId);
+  async ({ launchpadAddress, tokenId }) => {
+    return await claimTokensNear(
+      store.getState().wallet.wallet,
+      launchpadAddress,
+      tokenId
+    );
+  }
+);
+
+export type TransferNftParams = {
+  nftAddress: string;
+  receiverId: string;
+  tokenId: string;
+};
+
+export const transferNft = createAsyncThunk<void, TransferNftParams>(
+  "transferNft",
+  async ({ nftAddress, tokenId, receiverId }) => {
+    return await transferNftNear(
+      store.getState().wallet.wallet,
+      nftAddress,
+      receiverId,
+      tokenId
+    );
   }
 );
