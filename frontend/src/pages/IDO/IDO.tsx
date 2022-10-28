@@ -43,7 +43,7 @@ function IDO() {
   useEffect(() => {
     setIsLoading(true);
     Promise.allSettled([
-      dispatch(getLaunchpads(wallet)),
+      dispatch(getLaunchpads()),
       dispatch(getBalance(wallet)),
     ])
       .then(() => setIsLoading(false))

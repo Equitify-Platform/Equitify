@@ -26,7 +26,7 @@ export const getLaunchpadsNear = async (
           ? nft.nftTokensDetailedForOwner(wallet.accountId)
           : Promise.resolve([]),
       ]);
-      console.log(idoData)
+      console.log(idoData);
       return {
         address,
         nft: {
@@ -99,4 +99,14 @@ export const claimTokensNear = async (
 ): Promise<void> => {
   const launchpad = new Launchpad(launchpadAddress, wallet);
   await launchpad.claimVestedTokens(wallet.accountId ?? "", tokenId);
+};
+
+export const transferNftNear = async (
+  wallet: Wallet,
+  nftAddress: string,
+  receiverId: string,
+  tokenId: string
+): Promise<void> => {
+  const nft = new NonFungibleToken(nftAddress, wallet);
+  await nft.transferNft(receiverId, tokenId);
 };

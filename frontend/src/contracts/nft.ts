@@ -1,4 +1,4 @@
-import { Wallet } from "../near-wallet";
+import { THIRTY_TGAS, Wallet } from "../near-wallet";
 
 export interface TokenData {
   tokenId: string;
@@ -43,6 +43,19 @@ export class NonFungibleToken {
     private readonly contractId: string,
     private readonly wallet: Wallet
   ) {}
+
+  public async transferNft(receiver_id: string, token_id: string) {
+    return this.wallet.call(
+      this.contractId,
+      "nft_transfer",
+      {
+        receiver_id,
+        token_id,
+      },
+      THIRTY_TGAS,
+      "1"
+    );
+  }
 
   public async nftTokensDetailedForOwner(
     account_id: string
