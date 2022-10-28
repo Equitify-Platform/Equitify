@@ -44,6 +44,7 @@ export class Launchpad {
   ) {}
 
   public async getIdoInfo(): Promise<GetIdoDataResult> {
+    console.log(this.contractId)
     return this.wallet.view<GetIdoDataResult>(this.contractId, "get_ido_info");
   }
 

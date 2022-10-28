@@ -69,6 +69,7 @@ test.beforeEach(async (t) => {
   // await launchpadFactory.deploy(launchpadFactoryContractPath);
 
   await platform.deploy(platformContractPath)
+  await platform.call(platform, 'init', {})
 
   await idoToken.deploy(idoTokenContractPath);
 
@@ -241,9 +242,9 @@ const postOffer = async (t: TestExecutionContext, tokenId: number) => {
   await offerer.call(platform.accountId, 'create_offer', {
     nft_contract_id: nft.accountId,
     nft_id: tokenId.toString(),
-    near_fee_amount: parseUnits('1', 24),
-    near_guarantee_amount: parseUnits('10', 24),
-    duration: 1
+    near_fee_amount: parseUnits('1', 24).toString(),
+    near_guarantee_amount: parseUnits('10', 24).toString(),
+    duration: '1'
   }, {
     attachedDeposit: parseUnits('10', 24),
   })
@@ -258,6 +259,30 @@ const cancelOffer = async (t: TestExecutionContext, orderId: number) => {
     attachedDeposit: parseUnits('1', 20),
   })
 }
+
+const acceptOffer = async (t: TestExecutionContext, approvalId: number, orderId: number) => {
+  const { offerer, platform, beneficiary } = t.context.accounts;
+
+  await beneficiary.call(platform.accountId, 'accept_offer', {
+    order_id: orderId.toString(),
+    approval_id: approvalId.toString()
+  }, {
+    attachedDeposit: parseUnits('1', 20),
+  })
+}
+
+const approveNft = async (t: TestExecutionContext, nftId: number, approveTo: string) => {
+  const { offerer, nft, beneficiary } = t.context.accounts;
+
+  await beneficiary.call(nft.accountId, 'nft_approve', {
+    token_id: nftId.toString(),
+    account_id: approveTo,
+    msg: ''
+  }, {
+    attachedDeposit: parseUnits('1', 20),
+  })
+}
+
 
 // test('purchase tokens', async (t) => {
 //   await testPurchaseToken(t);
@@ -284,4 +309,11 @@ test('post offer', async (t) => {
 test('post offer and cancel', async (t) => {
   postOffer(t, 1)
   cancelOffer(t, 0);
+})
+
+test('post offer and accept offer', async (t) => {
+  await testPurchaseToken(t);
+  approveNft(t, 1, t.context.accounts.nft.accountId);
+  postOffer(t, 1)
+  acceptOffer(t, 0, 0)
 })

@@ -5,16 +5,16 @@ import { WithCallback } from './utils/contracts/withCallback';
 export type Offer = {
     nftContractId: string,
     makerId: string,
-    nftId: bigint,
-    nearFeeAmount: bigint,
-    nearGuaranteeAmount: bigint,
-    protectionDuration: bigint,
+    nftId: string,
+    nearFeeAmount: string,
+    nearGuaranteeAmount: string,
+    protectionDuration: string,
     isActive: boolean,
     isCancelled: boolean
 }
 
 export type Protection = {
-    offerId: bigint,
+    offerId: string,
     isGuaranteeClaimed: boolean;
     isNftClaimed: boolean;
     takerId: string
@@ -30,10 +30,10 @@ export class EquitifyPlatform extends WithCallback {
 
     // }
 
-    // @initialize({})
-    // init() {
+    @initialize({})
+    init() {
 
-    // }
+    }
 
     @call({ payableFunction: true })
     create_offer({
@@ -62,11 +62,11 @@ export class EquitifyPlatform extends WithCallback {
 
         const offer = {
             nftContractId: nft_contract_id,
-            nftId: BigInt(nft_id),
+            nftId: nft_id,
             makerId: near.predecessorAccountId(),
-            nearFeeAmount: BigInt(near_fee_amount),
-            nearGuaranteeAmount: BigInt(near_fee_amount),
-            protectionDuration: BigInt(duration),
+            nearFeeAmount: near_fee_amount,
+            nearGuaranteeAmount: near_fee_amount,
+            protectionDuration: duration,
             isActive: true,
             isCancelled: false
         } as Offer
@@ -94,7 +94,7 @@ export class EquitifyPlatform extends WithCallback {
 
         log('cancel_order end');
 
-        return NearPromise.new(offer.makerId).transfer(offer.nearGuaranteeAmount);
+        return NearPromise.new(offer.makerId).transfer(BigInt(offer.nearGuaranteeAmount));
     }
 
     @call({ payableFunction: true })
@@ -105,15 +105,17 @@ export class EquitifyPlatform extends WithCallback {
         offer_id: string,
         approval_id: string
     }) {
+        log('accept_order end');
+
         const offer = this.offers.get(offer_id)
 
         assert(near.predecessorAccountId() !== offer.makerId, "Maker cannot accept offer");
         assert(!offer.isCancelled, "Offer is cancelled");
         assert(offer.isActive, "Offer is not active");
-        assert(near.attachedDeposit() >= offer.nearFeeAmount, "Insufficient fee provided");
+        assert(near.attachedDeposit() >= BigInt(offer.nearFeeAmount), "Insufficient fee provided");
 
         const protection = {
-            offerId: BigInt(offer_id),
+            offerId: offer_id,
             isGuaranteeClaimed: false,
             isNftClaimed: false,
             takerId: near.predecessorAccountId()
@@ -121,6 +123,8 @@ export class EquitifyPlatform extends WithCallback {
 
         this.protections.set(offer_id, protection);
 
+        log('accept_order end');
+        
         return this._transferNftInternal({
             receiver_id: near.currentAccountId(),
             nft_contract_id: offer.nftContractId,
@@ -138,7 +142,7 @@ export class EquitifyPlatform extends WithCallback {
         const { offer, protection } = this._takerClaimVerify({ offer_id });
 
         return NearPromise.new(offer.makerId)
-            .transfer(offer.nearGuaranteeAmount)
+            .transfer(BigInt(offer.nearGuaranteeAmount))
             .then(this._transferNftInternal({
                 receiver_id: protection.takerId,
                 nft_contract_id: offer.nftContractId,
@@ -155,7 +159,7 @@ export class EquitifyPlatform extends WithCallback {
         const { offer, protection } = this._takerClaimVerify({ offer_id });
 
         return NearPromise.new(protection.takerId)
-            .transfer(offer.nearGuaranteeAmount)
+            .transfer(BigInt(offer.nearGuaranteeAmount))
             .then(this._transferNftInternal({
                 receiver_id: offer.makerId,
                 nft_contract_id: offer.nftContractId,
