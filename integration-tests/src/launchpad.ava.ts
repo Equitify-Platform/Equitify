@@ -10,14 +10,17 @@ const launchpadContractPath = getContractWasmPath('launchpad');
 const launchpadFactoryContractPath = getContractWasmPath('launchpad_factory');
 const idoTokenContractPath = getContractWasmPath('ft');
 const nftContractPath = getContractWasmPath('nft');
+const platformContractPath = getContractWasmPath('equitify_platform');
 
 type Context = {
   // launchpadFactory: NearAccount,
   launchpad: NearAccount,
   root: NearAccount,
   beneficiary: NearAccount,
+  offerer: NearAccount,
   idoToken: NearAccount,
-  nft: NearAccount
+  nft: NearAccount,
+  platform: NearAccount
 }
 
 type TestExecutionContext = ExecutionContext<TestContext<Context>>;
@@ -50,14 +53,22 @@ test.beforeEach(async (t) => {
   const root = worker.rootAccount;
 
   const beneficiary = await root.createSubAccount('beneficiary');
+  const offerer = await root.createSubAccount('offerer');
+
   const idoToken = await root.createSubAccount('idotoken');
   const nft = await root.createSubAccount('nft');
+  const platform = await root.createSubAccount('platform');
+
+
+
   // const launchpadFactory = await root.createSubAccount('factory');
   const launchpad = await root.createSubAccount('testido');
 
-  t.context.accounts = { root, launchpad, beneficiary, idoToken, nft };
+  t.context.accounts = { root, launchpad, beneficiary, idoToken, nft, platform, offerer };
 
   // await launchpadFactory.deploy(launchpadFactoryContractPath);
+
+  await platform.deploy(platformContractPath)
 
   await idoToken.deploy(idoTokenContractPath);
 
@@ -131,10 +142,7 @@ test.beforeEach(async (t) => {
 
   // await launchpadFactory.call(launchpadFactory.accountId, 'add_ido', {
   //   account_id: launchpad.accountId
-  // })
-
-  // console.log('All idos', await launchpadFactory.view('get_all_idos'));
-
+  // })platformContractPath
   await root.transfer(launchpad.accountId, parseUnits(4, 24));
   const launchpadBalance: string = await idoToken.view('ft_balance_of', {
     account_id: launchpad.accountId
@@ -226,6 +234,31 @@ const testClaim = async (t: TestExecutionContext, claimTokenId: number) => {
   // t.is(balanceAfter.eq(balanceBefore.add(new BN(token?.token_data?.balance ?? '0'))), true);
 }
 
+
+const postOffer = async (t: TestExecutionContext, tokenId: number) => {
+  const { offerer, platform, nft } = t.context.accounts;
+
+  await offerer.call(platform.accountId, 'create_offer', {
+    nft_contract_id: nft.accountId,
+    nft_id: tokenId.toString(),
+    near_fee_amount: parseUnits('1', 24),
+    near_guarantee_amount: parseUnits('10', 24),
+    duration: 1
+  }, {
+    attachedDeposit: parseUnits('10', 24),
+  })
+}
+
+const cancelOffer = async (t: TestExecutionContext, orderId: number) => {
+  const { offerer, platform, nft } = t.context.accounts;
+
+  await offerer.call(platform.accountId, 'cancel_order', {
+    order_id: orderId.toString()
+  }, {
+    attachedDeposit: parseUnits('1', 20),
+  })
+}
+
 // test('purchase tokens', async (t) => {
 //   await testPurchaseToken(t);
 // });
@@ -235,7 +268,20 @@ const testClaim = async (t: TestExecutionContext, claimTokenId: number) => {
 //   await testClaim(t, 1);
 // });
 
-test('purchase tokens and make another purchase on the same id', async (t) => {
-  await testPurchaseToken(t);
-  await testPurchaseToken(t, 1);
-});
+// test('purchase tokens and make another purchase on the same id', async (t) => {
+//   await testPurchaseToken(t);
+//   await testPurchaseToken(t, 1);
+// });
+
+// test('purchase tokens and post offer to platform', async (t) => {
+//   await testPurchaseToken(t);
+// });
+
+test('post offer', async (t) => {
+  postOffer(t, 1)
+})
+
+test('post offer and cancel', async (t) => {
+  postOffer(t, 1)
+  cancelOffer(t, 0);
+})

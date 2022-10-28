@@ -18,6 +18,7 @@
     "build:contract:launchpadFactory": "near-sdk-js build ./contracts/src/launchpadFactory.ts build/launchpad_factory.wasm",
     "build:contract:nft": "near-sdk-js build ./contracts/src/nft.ts build/nft.wasm",
     "build:contract:ft": "near-sdk-js build ./contracts/src/ft.ts build/ft.wasm",
+    "build:contract:platform": "near-sdk-js build ./contracts/src/equitifyPlatform.ts build/equitify_platform.wasm",
     "test": "yarn test:integration",
     "test:integration": "yarn build:contracts && cd integration-tests && yarn test",
     "test:integration:noBuild": "cd integration-tests && yarn test"

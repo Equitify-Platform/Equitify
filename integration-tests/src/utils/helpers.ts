@@ -11,7 +11,7 @@ export type TestContext<TAccounts> = {
 
 export type TestFuncWithWorker<TAccounts = Record<string, NearAccount>> = TestFn<TestContext<TAccounts>>
 
-type Contract = 'launchpad' | 'launchpad_factory' | 'ft' | 'nft'
+type Contract = 'launchpad' | 'launchpad_factory' | 'ft' | 'nft' | 'equitify_platform'
 
 export const getContractWasmPath = (contract: Contract) => {
     return path.join('build', `${contract}.wasm`);
