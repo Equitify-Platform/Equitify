@@ -43,7 +43,7 @@ function IDO() {
   useEffect(() => {
     setIsLoading(true);
     Promise.allSettled([
-      dispatch(getLaunchpads()),
+      dispatch(getLaunchpads(wallet)),
       dispatch(getBalance(wallet)),
     ])
       .then(() => setIsLoading(false))
@@ -84,6 +84,8 @@ function IDO() {
             symbol={launchpad?.token.symbol ?? ""}
             balance={parseFloat(balance).toFixed(2)}
             price={launchpad ? launchpad.projectStruct.price : "0"}
+            wallet={wallet}
+            nftAddress={launchpad ? launchpad.nft.address : ""}
           />
           <ClaimSide
             idoStage={idoStage}

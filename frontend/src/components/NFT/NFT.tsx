@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 
 import styles from "./style.module.scss";
 
+import { Wallet } from "../../near-wallet";
 import {
   claimTokens,
   transferNft,
@@ -15,6 +16,7 @@ interface NFTProps {
   nftID: string;
   setIsLoading: Dispatch<SetStateAction<boolean>>;
   nftAddress: string;
+  wallet: Wallet;
 }
 
 const NFT: FC<NFTProps> = ({
@@ -23,6 +25,7 @@ const NFT: FC<NFTProps> = ({
   nftID,
   setIsLoading,
   nftAddress,
+  wallet,
 }) => {
   const dispatch = useAppDispatch();
   const [isOpened, setIsOpened] = useState<boolean>(false);
@@ -31,9 +34,7 @@ const NFT: FC<NFTProps> = ({
   const onClaim = async () => {
     setIsLoading(true);
     try {
-      await dispatch(
-        claimTokens({ tokenId: nftID, launchpadAddress: idoAddress })
-      );
+      await dispatch(claimTokens({ tokenId: nftID, nftAddress, wallet }));
     } catch (e) {
       console.error("Error while claiming:", e);
     } finally {
@@ -46,7 +47,9 @@ const NFT: FC<NFTProps> = ({
   const handleTransfer = async () => {
     setIsLoading(true);
     try {
-      await dispatch(transferNft({ tokenId: nftID, nftAddress, receiverId }));
+      await dispatch(
+        transferNft({ tokenId: nftID, nftAddress, receiverId, wallet })
+      );
     } catch (e) {
       console.error("Error while transfering NFT:", e);
     } finally {

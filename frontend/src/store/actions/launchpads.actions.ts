@@ -1,12 +1,12 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
+import { Wallet } from "../../near-wallet";
 import {
   claimTokensNear,
   getLaunchpadsNear,
   purchaseTokensNear,
   transferNftNear,
 } from "../near/launchpads.near";
-import { store } from "../store";
 
 export type ProjectStruct = {
   projectName: string;
@@ -22,7 +22,7 @@ export type ProjectStruct = {
 export type NftType = {
   balance: string;
   claimed: boolean;
-  initialized: boolean;
+  claimable: string;
   released: string;
   revoked: boolean;
   tokenId: string;
@@ -50,10 +50,10 @@ export type ProjectType = {
   totalRaised: string;
 };
 
-export const getLaunchpads = createAsyncThunk<ProjectType[]>(
+export const getLaunchpads = createAsyncThunk<ProjectType[], Wallet>(
   "getLaunchpads",
-  async () => {
-    return await getLaunchpadsNear(store.getState().wallet.wallet);
+  async (wallet) => {
+    return await getLaunchpadsNear(wallet);
   }
 );
 
@@ -61,33 +61,26 @@ export type PurchaseTokensParams = {
   launchpadAddress: string;
   tokenId: string;
   amount: string;
+  wallet: Wallet;
 };
 
 export const purchaseTokens = createAsyncThunk<void, PurchaseTokensParams>(
   "purchaseTokens",
-  async ({ launchpadAddress, tokenId, amount }) => {
-    return await purchaseTokensNear(
-      store.getState().wallet.wallet,
-      launchpadAddress,
-      tokenId,
-      amount
-    );
+  async ({ launchpadAddress, tokenId, amount, wallet }) => {
+    return await purchaseTokensNear(wallet, launchpadAddress, tokenId, amount);
   }
 );
 
 export type ClaimTokensParams = {
-  launchpadAddress: string;
+  wallet: Wallet;
+  nftAddress: string;
   tokenId: string;
 };
 
 export const claimTokens = createAsyncThunk<void, ClaimTokensParams>(
   "claimTokens",
-  async ({ launchpadAddress, tokenId }) => {
-    return await claimTokensNear(
-      store.getState().wallet.wallet,
-      launchpadAddress,
-      tokenId
-    );
+  async ({ nftAddress, tokenId, wallet }) => {
+    return await claimTokensNear(wallet, nftAddress, tokenId);
   }
 );
 
@@ -95,16 +88,12 @@ export type TransferNftParams = {
   nftAddress: string;
   receiverId: string;
   tokenId: string;
+  wallet: Wallet;
 };
 
 export const transferNft = createAsyncThunk<void, TransferNftParams>(
   "transferNft",
-  async ({ nftAddress, tokenId, receiverId }) => {
-    return await transferNftNear(
-      store.getState().wallet.wallet,
-      nftAddress,
-      receiverId,
-      tokenId
-    );
+  async ({ nftAddress, tokenId, receiverId, wallet }) => {
+    return await transferNftNear(wallet, nftAddress, receiverId, tokenId);
   }
 );
