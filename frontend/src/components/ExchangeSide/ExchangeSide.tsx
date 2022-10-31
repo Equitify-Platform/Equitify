@@ -2,6 +2,7 @@ import React, { Dispatch, FC, SetStateAction, useMemo, useState } from "react";
 
 import styles from "./style.module.scss";
 
+import { Wallet } from "../../near-wallet";
 import {
   claimTokens,
   purchaseTokens,
@@ -21,6 +22,7 @@ interface ExchangeSideProps {
   price: string;
   launchpadAddress: string;
   setIsLoading: Dispatch<SetStateAction<boolean>>;
+  wallet: Wallet;
 }
 
 export const ExchangeSide: FC<ExchangeSideProps> = ({
@@ -33,6 +35,7 @@ export const ExchangeSide: FC<ExchangeSideProps> = ({
   price,
   setIsLoading,
   launchpadAddress,
+  wallet,
 }) => {
   const dispatch = useAppDispatch();
   const [nativeAmount, setNativeAmount] = useState<number>(0);
@@ -55,6 +58,7 @@ export const ExchangeSide: FC<ExchangeSideProps> = ({
           amount: nativeAmount.toString(),
           tokenId: option?.id || "0",
           launchpadAddress,
+          wallet,
         })
       );
     } catch (e) {
@@ -68,7 +72,7 @@ export const ExchangeSide: FC<ExchangeSideProps> = ({
     try {
       setIsLoading(true);
       await dispatch(
-        claimTokens({ tokenId: option?.id || "0", launchpadAddress })
+        claimTokens({ tokenId: option?.id || "0", launchpadAddress, wallet })
       );
     } catch (e) {
       console.error("Error while claiming tokens:", e);

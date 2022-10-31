@@ -14,7 +14,7 @@ function Claim() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    dispatch(getLaunchpads());
+    dispatch(getLaunchpads(wallet));
   }, [dispatch, wallet]);
 
   return (
@@ -26,11 +26,12 @@ function Claim() {
               !nft.claimed && (
                 <NFT
                   nftAddress={project.nft.address}
-                  key={nft.tokenId}
+                  key={`${project.nft.address}${nft.tokenId}`}
                   nftID={nft.tokenId}
                   idoAddress={project.address}
                   claimableAmount={nft.balance}
                   setIsLoading={setIsLoading}
+                  wallet={wallet}
                 />
               )
             );
