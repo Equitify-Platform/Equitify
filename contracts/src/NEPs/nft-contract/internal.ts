@@ -124,6 +124,7 @@ export function internalTransfer(contract: LaunchpadNft, senderId: string, recei
 
     //if the sender doesn't equal the owner, we check if the sender is in the approval list
     if (senderId != token.owner_id) {
+        log('internalTransfer', senderId, token.owner_id, token.approved_account_ids)
         //if the token's approved account IDs doesn't contain the sender, we panic
         if (!token.approved_account_ids.hasOwnProperty(senderId)) {
             near.panicUtf8("Unauthorized");

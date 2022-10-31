@@ -98,7 +98,7 @@ export class LaunchpadNft extends WithCallback {
         assert(nft.token?.owner_id === near.predecessorAccountId(), "Caller not a nft owner");
         assert(BigInt(data.totalVested) > BigInt(data.totalReleased), "Already claimed");
 
-        const availableToClaim = this._calculateClaimableAmount({ token: nft });
+        const availableToClaim = this._calculateClaimableAmount({ token: nft.token_data });
 
         assert(availableToClaim > BigInt(0), 'Nothing to claim');
 
@@ -239,19 +239,19 @@ export class LaunchpadNft extends WithCallback {
         return internalNftToken({ contract: this, tokenId: token_id });
     }
 
-    @call({payableFunction:true})
+    @call({ payableFunction: true })
     //implementation of the nft_transfer method. This transfers the NFT from the current owner to the receiver. 
     nft_transfer({ receiver_id, token_id, approval_id, memo }) {
         return internalNftTransfer({ contract: this, receiverId: receiver_id, tokenId: token_id, approvalId: approval_id, memo: memo });
     }
 
-    @call({payableFunction:true})
+    @call({ payableFunction: true })
     //implementation of the transfer call method. This will transfer the NFT and call a method on the receiver_id contract
     nft_transfer_call({ receiver_id, token_id, approval_id, memo, msg }) {
         return internalNftTransferCall({ contract: this, receiverId: receiver_id, tokenId: token_id, approvalId: approval_id, memo: memo, msg: msg });
     }
 
-    @call({payableFunction:true})
+    @call({ payableFunction: true })
     //resolves the cross contract call when calling nft_on_transfer in the nft_transfer_call method
     //returns true if the token was successfully transferred to the receiver_id
     nft_resolve_transfer({ authorized_id, owner_id, receiver_id, token_id, approved_account_ids, memo }) {
@@ -267,34 +267,35 @@ export class LaunchpadNft extends WithCallback {
         return internalNftIsApproved({ contract: this, tokenId: token_id, approvedAccountId: approved_account_id, approvalId: approval_id });
     }
 
-    @call({payableFunction:true})
     //approve an account ID to transfer a token on your behalf
+    @call({ payableFunction: true, privateFunction: false })
     nft_approve({ token_id, account_id, msg }) {
+        log('APPROVED');
         return internalNftApprove({ contract: this, tokenId: token_id, accountId: account_id, msg: msg });
     }
 
     /*
         ROYALTY
     */
-        @call({payableFunction:true})
+    @call({ payableFunction: true })
     //calculates the payout for a token given the passed in balance. This is a view method
     nft_payout({ token_id, balance, max_len_payout }) {
         return internalNftPayout({ contract: this, tokenId: token_id, balance: balance, maxLenPayout: max_len_payout });
     }
 
-    @call({payableFunction:true})
+    @call({ payableFunction: true })
     //transfers the token to the receiver ID and returns the payout object that should be payed given the passed in balance. 
     nft_transfer_payout({ receiver_id, token_id, approval_id, memo, balance, max_len_payout }) {
         return internalNftTransferPayout({ contract: this, receiverId: receiver_id, tokenId: token_id, approvalId: approval_id, memo: memo, balance: balance, maxLenPayout: max_len_payout });
     }
 
-    @call({payableFunction:true})
+    @call({ payableFunction: true })
     //approve an account ID to transfer a token on your behalf
     nft_revoke({ token_id, account_id }) {
         return internalNftRevoke({ contract: this, tokenId: token_id, accountId: account_id });
     }
 
-    @call({payableFunction:true})
+    @call({ payableFunction: true })
     //approve an account ID to transfer a token on your behalf
     nft_revoke_all({ token_id }) {
         return internalNftRevokeAll({ contract: this, tokenId: token_id });
@@ -336,6 +337,12 @@ export class LaunchpadNft extends WithCallback {
         return internalNftMetadata({ contract: this });
     }
 
+    @view({})
+    calculate_claimable_amount({ token_id }: { token_id: string }) {
+        return this._calculateClaimableAmount({ token: this._getTokenDataInternal({ token_id }) });
+    }
+
+
     private _onlyFromIdo() {
         assert(near.predecessorAccountId() == this.ido_id, "caller not a contract owner");
     }
@@ -353,8 +360,8 @@ export class LaunchpadNft extends WithCallback {
         return tokens.map(v => new LaunchpadJsonToken(v, this._getTokenDataInternal({ token_id: v.token_id })))
     }
 
-    private _calculateClaimableAmount({ token }: { token: LaunchpadJsonToken }) {
-        const data = token.token_data;
+    private _calculateClaimableAmount({ token }: { token: TokenData }) {
+        const data = token;
         assert(data, 'Invalid token data');
 
         const currTime = near.blockTimestamp();
@@ -363,7 +370,6 @@ export class LaunchpadNft extends WithCallback {
 
         const BN_ZERO = BigInt(0);
 
-        if (currTime < cliffStartAt) return BN_ZERO;
         if (currTime < vestingCliffEnd) return BN_ZERO;
 
         const totalClaimed = BigInt(data.totalReleased);
@@ -373,7 +379,7 @@ export class LaunchpadNft extends WithCallback {
         const vestingEnd = vestingCliffEnd + BigInt(data.vestingDuration);
 
         if (currTime >= vestingEnd) return totalVested - totalClaimed;
-        const toClaim = totalVested / vestingDuration - totalClaimed;
+        const toClaim = totalVested * (currTime - vestingCliffEnd) / vestingDuration - totalClaimed;
 
         if (totalClaimed + toClaim > totalVested)
             return totalVested - totalClaimed;

@@ -1,5 +1,5 @@
 import testAny, { ExecutionContext } from 'ava';
-import { NearAccount, Worker } from 'near-workspaces';
+import { NearAccount, parseGas, Worker } from 'near-workspaces';
 import { getContractWasmPath, parseUnits, TestContext, TestFuncWithWorker } from './utils/helpers';
 import { GetIdoDataResult, IDOData, IDOParams } from "../../contracts/src/launchpad";
 import { BN } from 'bn.js';
@@ -246,7 +246,8 @@ const postOffer = async (t: TestExecutionContext, tokenId: number) => {
     near_guarantee_amount: parseUnits('10', 24).toString(),
     duration: '1'
   }, {
-    attachedDeposit: parseUnits('10', 24),
+    attachedDeposit: parseUnits('11', 24),
+    gas: parseUnits(300, 12),
   })
 }
 
@@ -254,9 +255,10 @@ const cancelOffer = async (t: TestExecutionContext, orderId: number) => {
   const { offerer, platform, nft } = t.context.accounts;
 
   await offerer.call(platform.accountId, 'cancel_order', {
-    order_id: orderId.toString()
-  }, {
+    offer_id: orderId.toString()
+  }, {  
     attachedDeposit: parseUnits('1', 20),
+    gas: parseUnits(300, 12),
   })
 }
 
@@ -264,10 +266,11 @@ const acceptOffer = async (t: TestExecutionContext, approvalId: number, orderId:
   const { offerer, platform, beneficiary } = t.context.accounts;
 
   await beneficiary.call(platform.accountId, 'accept_offer', {
-    order_id: orderId.toString(),
+    offer_id: orderId.toString(),
     approval_id: approvalId.toString()
   }, {
-    attachedDeposit: parseUnits('1', 20),
+    attachedDeposit: parseUnits('1', 24),
+    gas: parseUnits(300, 12),
   })
 }
 
@@ -276,10 +279,32 @@ const approveNft = async (t: TestExecutionContext, nftId: number, approveTo: str
 
   await beneficiary.call(nft.accountId, 'nft_approve', {
     token_id: nftId.toString(),
-    account_id: approveTo,
-    msg: ''
+    account_id: approveTo 
   }, {
-    attachedDeposit: parseUnits('1', 20),
+    attachedDeposit: parseUnits('1', 24),
+    gas: parseUnits(300, 12),
+  })
+}
+
+const claimNft = async (t: TestExecutionContext, offerId: number) => {
+  const { offerer, nft, beneficiary, platform } = t.context.accounts;
+
+  await beneficiary.call(platform.accountId, 'taker_claim_nft', {
+    offer_id: offerId.toString(),
+  }, {
+    attachedDeposit: parseUnits('1', 15),
+    gas: parseUnits(300, 12),
+  })
+}
+
+const claimGuarantee = async (t: TestExecutionContext, offerId: number) => {
+  const { offerer, nft, beneficiary, platform } = t.context.accounts;
+
+  await beneficiary.call(platform.accountId, 'taker_claim_guarantee', {
+    offer_id: offerId.toString(),
+  }, {
+    attachedDeposit: parseUnits('1', 15),
+    gas: parseUnits(300, 12),
   })
 }
 
@@ -302,18 +327,37 @@ const approveNft = async (t: TestExecutionContext, nftId: number, approveTo: str
 //   await testPurchaseToken(t);
 // });
 
-test('post offer', async (t) => {
-  postOffer(t, 1)
-})
+// test('post offer', async (t) => {
+//   postOffer(t, 1)
+// })
 
-test('post offer and cancel', async (t) => {
-  postOffer(t, 1)
-  cancelOffer(t, 0);
-})
+// test('post offer and cancel', async (t) => {
+//   postOffer(t, 1)
+//   cancelOffer(t, 0);
+// })
 
-test('post offer and accept offer', async (t) => {
+test('post offer and accept it from beneficiary', async (t) => {
   await testPurchaseToken(t);
-  approveNft(t, 1, t.context.accounts.nft.accountId);
-  postOffer(t, 1)
-  acceptOffer(t, 0, 0)
+  await approveNft(t, 1, t.context.accounts.platform.accountId);
+  await postOffer(t, 1)
+  await acceptOffer(t, 0, 0)
+})
+
+
+test('post offer and accept it from beneficiary, wait till it ended and claim nft', async (t) => {
+  await testPurchaseToken(t);
+  await approveNft(t, 1, t.context.accounts.platform.accountId);
+  await postOffer(t, 1)
+  await acceptOffer(t, 0, 0)
+  await delay(100);
+  await claimNft(t, 0);
+})
+
+test('post offer and accept it from beneficiary, wait till it ended and claim near guarantee', async (t) => {
+  await testPurchaseToken(t);
+  await approveNft(t, 1, t.context.accounts.platform.accountId);
+  await postOffer(t, 1)
+  await acceptOffer(t, 0, 0)
+  await delay(100);
+  await claimGuarantee(t, 0);
 })

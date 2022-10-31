@@ -117,6 +117,19 @@ const main = async () => {
   else console.log('Config found')
   const deployer = await nearConnection.account(DEPLOYER_NAME);
 
+  const platform = await createAccountAndDeploy(
+    deployer.accountId,
+    `platform`,
+    getContract("equitify_platform"),
+    "5.5"
+  );
+
+  await platform.functionCall({
+    contractId: platform.accountId,
+    methodName: "init",
+    args: {},
+  })
+
   const idoToken = await createAccountAndDeploy(
     deployer.accountId,
     `ido-token`,
@@ -145,7 +158,7 @@ const main = async () => {
     "10"
   );
 
-  const launchAmount = parseUnits(2500).toString();
+  const launchAmount = parseUnits(1000000).toString();
 
   await ftDeposit(idoToken.accountId, launchpad.accountId);
   await ftDeposit(idoToken.accountId, deployer.accountId);
@@ -191,8 +204,8 @@ const main = async () => {
       _nft: nft.accountId,
       _tokenFounder: deployer.accountId,
       _project: {
-        hardCap: utils.format.parseNearAmount("10"),
-        softCap: utils.format.parseNearAmount("1"),
+        hardCap: utils.format.parseNearAmount("50"),
+        softCap: utils.format.parseNearAmount("0.1"),
         saleStartTime: saleStart.toString(),
         saleEndTime: saleEnd,
         price: "1",

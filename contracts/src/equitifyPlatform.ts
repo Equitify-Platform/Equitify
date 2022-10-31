@@ -60,6 +60,7 @@ export class EquitifyPlatform extends WithCallback {
 
         const newId = this.offers.length;
 
+        log('Offer id:',newId.toString());
         const offer = {
             nftContractId: nft_contract_id,
             nftId: nft_id,
@@ -76,21 +77,24 @@ export class EquitifyPlatform extends WithCallback {
         log('created offer', this.offers.get(newId.toString()));
     }
 
-    @call({})
+    @call({payableFunction: true})
     cancel_order({
-        order_id
+        offer_id
     }: {
-        order_id: string
+        offer_id: string
     }) {
-        log('cancel_order', { order_id })
-        const offer = this.offers.get(order_id);
+        log('cancel_order', { offer_id })
+        const offer = this.offers.get(offer_id);
+        assert(offer, 'Offer is not exists');
+        assert(!offer.isCancelled, 'Offer is already cancelled');
+        assert(offer.isActive, 'Offer is not active');
 
         assert(offer.makerId === near.predecessorAccountId(), 'Invalid predecessor');
 
         offer.isCancelled = true;
         offer.isActive = false;
 
-        this.offers.set(order_id, offer);
+        this.offers.set(offer_id, offer);
 
         log('cancel_order end');
 
@@ -103,12 +107,13 @@ export class EquitifyPlatform extends WithCallback {
         approval_id
     }: {
         offer_id: string,
-        approval_id: string
+        approval_id?: string
     }) {
-        log('accept_order end');
+        log('accept_order end', offer_id, approval_id);
 
         const offer = this.offers.get(offer_id)
 
+        assert(offer, 'Offer is not exists');
         assert(near.predecessorAccountId() !== offer.makerId, "Maker cannot accept offer");
         assert(!offer.isCancelled, "Offer is cancelled");
         assert(offer.isActive, "Offer is not active");
@@ -133,13 +138,17 @@ export class EquitifyPlatform extends WithCallback {
         }).asReturn();
     }
 
-    @call({})
+    @call({ payableFunction: true })
     taker_claim_guarantee({
         offer_id
     }: {
         offer_id: string
     }) {
         const { offer, protection } = this._takerClaimVerify({ offer_id });
+
+        protection.isGuaranteeClaimed = true;
+
+        this.protections.set(offer_id, protection);
 
         return NearPromise.new(offer.makerId)
             .transfer(BigInt(offer.nearGuaranteeAmount))
@@ -150,13 +159,17 @@ export class EquitifyPlatform extends WithCallback {
             })).asReturn();
     }
 
-    @call({})
+    @call({payableFunction: true})
     taker_claim_nft({
         offer_id
     }: {
         offer_id: string
     }) {
         const { offer, protection } = this._takerClaimVerify({ offer_id });
+
+        protection.isNftClaimed = true;
+
+        this.protections.set(offer_id, protection);
 
         return NearPromise.new(protection.takerId)
             .transfer(BigInt(offer.nearGuaranteeAmount))
@@ -179,8 +192,8 @@ export class EquitifyPlatform extends WithCallback {
 
         const protection = this.protections.get(offer_id)
 
-        assert(!protection.isNftClaimed && protection.isNftClaimed, "Protection is already claimed");
         assert(protection.takerId === near.predecessorAccountId(), "Predecessor is not a protection taker");
+        assert(!protection.isNftClaimed && !protection.isGuaranteeClaimed, "Guarantee/Nft is already claimed");
 
         return { offer, protection }
     }
@@ -199,7 +212,8 @@ export class EquitifyPlatform extends WithCallback {
                     approval_id,
                     memo: '',
                     msg: ''
-                })
+                }),
+                deposit: BigInt('1')
             }
         });
     }
