@@ -22,7 +22,7 @@ export type ProjectStruct = {
 export type NftType = {
   balance: string;
   claimed: boolean;
-  initialized: boolean;
+  claimable: string;
   released: string;
   revoked: boolean;
   tokenId: string;
@@ -73,14 +73,14 @@ export const purchaseTokens = createAsyncThunk<void, PurchaseTokensParams>(
 
 export type ClaimTokensParams = {
   wallet: Wallet;
-  launchpadAddress: string;
+  nftAddress: string;
   tokenId: string;
 };
 
 export const claimTokens = createAsyncThunk<void, ClaimTokensParams>(
   "claimTokens",
-  async ({ launchpadAddress, tokenId, wallet }) => {
-    return await claimTokensNear(wallet, launchpadAddress, tokenId);
+  async ({ nftAddress, tokenId, wallet }) => {
+    return await claimTokensNear(wallet, nftAddress, tokenId);
   }
 );
 

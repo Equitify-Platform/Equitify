@@ -44,7 +44,6 @@ export class Launchpad {
   ) {}
 
   public async getIdoInfo(): Promise<GetIdoDataResult> {
-    console.log(this.contractId)
     return this.wallet.view<GetIdoDataResult>(this.contractId, "get_ido_info");
   }
 
@@ -60,12 +59,5 @@ export class Launchpad {
       new BN(THIRTY_TGAS).muln(10).toString(),
       amount
     );
-  }
-
-  public async claimVestedTokens(
-    beneficiary: string,
-    token_id: string
-  ): Promise<void | FinalExecutionOutcome> {
-    return await this.wallet.call(this.contractId, "claimVestedTokens");
   }
 }
