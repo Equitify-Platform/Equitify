@@ -15,7 +15,7 @@ export const getLaunchpadsNear = async (
     LAUNCHPADS_ADDRESSES.map<Promise<ProjectType>>(async (address) => {
       const launchpad = new Launchpad(address, wallet);
       const data = await launchpad.getIdoInfo();
-      console.log('data',data);
+      console.log("data", data);
 
       const ft = new FungibleToken(data.idoToken, wallet);
       const nft = new NonFungibleToken(data.nftContract, wallet);
@@ -96,11 +96,11 @@ export const purchaseTokensNear = async (
 
 export const claimTokensNear = async (
   wallet: Wallet,
-  launchpadAddress: string,
+  nftAddress: string,
   tokenId: string
 ): Promise<void> => {
-  const launchpad = new Launchpad(launchpadAddress, wallet);
-  await launchpad.claimVestedTokens(wallet.accountId ?? "", tokenId);
+  const nft = new NonFungibleToken(nftAddress, wallet);
+  await nft.claimVestedTokens(tokenId);
 };
 
 export const transferNftNear = async (

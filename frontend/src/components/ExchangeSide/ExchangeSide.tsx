@@ -21,6 +21,7 @@ interface ExchangeSideProps {
   balance: string;
   price: string;
   launchpadAddress: string;
+  nftAddress: string;
   setIsLoading: Dispatch<SetStateAction<boolean>>;
   wallet: Wallet;
 }
@@ -36,6 +37,7 @@ export const ExchangeSide: FC<ExchangeSideProps> = ({
   setIsLoading,
   launchpadAddress,
   wallet,
+  nftAddress,
 }) => {
   const dispatch = useAppDispatch();
   const [nativeAmount, setNativeAmount] = useState<number>(0);
@@ -72,7 +74,7 @@ export const ExchangeSide: FC<ExchangeSideProps> = ({
     try {
       setIsLoading(true);
       await dispatch(
-        claimTokens({ tokenId: option?.id || "0", launchpadAddress, wallet })
+        claimTokens({ tokenId: option?.id || "0", nftAddress, wallet })
       );
     } catch (e) {
       console.error("Error while claiming tokens:", e);

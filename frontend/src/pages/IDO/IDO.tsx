@@ -85,6 +85,7 @@ function IDO() {
             balance={parseFloat(balance).toFixed(2)}
             price={launchpad ? launchpad.projectStruct.price : "0"}
             wallet={wallet}
+            nftAddress={launchpad ? launchpad.nft.address : ""}
           />
           <ClaimSide
             idoStage={idoStage}

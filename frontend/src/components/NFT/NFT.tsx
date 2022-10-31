@@ -34,9 +34,7 @@ const NFT: FC<NFTProps> = ({
   const onClaim = async () => {
     setIsLoading(true);
     try {
-      await dispatch(
-        claimTokens({ tokenId: nftID, launchpadAddress: idoAddress, wallet })
-      );
+      await dispatch(claimTokens({ tokenId: nftID, nftAddress, wallet }));
     } catch (e) {
       console.error("Error while claiming:", e);
     } finally {

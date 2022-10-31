@@ -44,6 +44,16 @@ export class NonFungibleToken {
     private readonly wallet: Wallet
   ) {}
 
+  public async claimVestedTokens(token_id: string) {
+    return this.wallet.call(
+      this.contractId,
+      "make_claim",
+      { token_id },
+      THIRTY_TGAS,
+      "1"
+    );
+  }
+
   public async transferNft(receiver_id: string, token_id: string) {
     return this.wallet.call(
       this.contractId,
