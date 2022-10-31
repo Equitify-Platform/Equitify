@@ -3,11 +3,12 @@ import { THIRTY_TGAS, Wallet } from "../near-wallet";
 export interface TokenData {
   tokenId: string;
   tokenURI: string;
-  balance: string;
-  released: string;
+  totalVested: string;
+  totalReleased: string;
   revoked: boolean;
-  initialized: boolean;
-  claimed: boolean;
+  cliffStartAt: string;
+  cliffDuration: string;
+  vestingDuration: string;
 }
 
 export interface TokenMetadata {
@@ -43,6 +44,16 @@ export class NonFungibleToken {
     private readonly contractId: string,
     private readonly wallet: Wallet
   ) {}
+
+  public async calcClaimableAmount(token_id: string): Promise<string> {
+    return await this.wallet.view<string>(
+      this.contractId,
+      "calculate_claimable_amount",
+      {
+        token_id,
+      }
+    );
+  }
 
   public async claimVestedTokens(token_id: string) {
     return this.wallet.call(

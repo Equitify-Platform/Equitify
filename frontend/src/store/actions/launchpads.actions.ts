@@ -22,7 +22,7 @@ export type ProjectStruct = {
 export type NftType = {
   balance: string;
   claimed: boolean;
-  initialized: boolean;
+  claimable: string;
   released: string;
   revoked: boolean;
   tokenId: string;

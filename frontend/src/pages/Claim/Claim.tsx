@@ -22,6 +22,7 @@ function Claim() {
       <div>
         {launchpads.projects.map((project) => {
           return project.nft.nfts.map((nft) => {
+            console.log(nft);
             return (
               !nft.claimed && (
                 <NFT
@@ -29,7 +30,7 @@ function Claim() {
                   key={`${project.nft.address}${nft.tokenId}`}
                   nftID={nft.tokenId}
                   idoAddress={project.address}
-                  claimableAmount={nft.balance}
+                  claimableAmount={nft.claimable}
                   setIsLoading={setIsLoading}
                   wallet={wallet}
                 />

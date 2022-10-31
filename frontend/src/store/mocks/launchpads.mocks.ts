@@ -11,6 +11,7 @@ export const getLaunchpadsMock = (): Promise<ProjectType[]> =>
           {
             balance: "100",
             claimed: false,
+            claimable: "0",
             initialized: true,
             released: "0",
             revoked: false,

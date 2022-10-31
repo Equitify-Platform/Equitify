@@ -28,28 +28,33 @@ export const getLaunchpadsNear = async (
           ? nft.nftTokensDetailedForOwner(wallet.accountId)
           : Promise.resolve([]),
       ]);
-      console.log(idoData);
+
       return {
         address,
         nft: {
           address: data.nftContract,
-          nfts: nfts
-            .filter((t) => !!t.token_data)
-            .map<NftType>((t) => ({
-              balance: formatUnits(
-                t.token_data?.balance ?? "0",
-                metadata.decimals
-              ),
-              claimed: t.token_data?.claimed ?? false,
-              initialized: t.token_data?.initialized ?? false,
-              released: formatUnits(
-                t.token_data?.released ?? "0",
-                metadata.decimals
-              ),
-              revoked: t.token_data?.revoked ?? false,
-              tokenId: t.token_data?.tokenId ?? "1",
-              tokenUri: t.token_data?.tokenURI ?? "",
-            })),
+          nfts: await Promise.all(
+            nfts
+              .filter((t) => !!t.token_data)
+              .map<Promise<NftType>>(async (t) => ({
+                balance: formatUnits(
+                  t.token_data?.totalVested ?? "0",
+                  metadata.decimals
+                ),
+                claimable: await nft.calcClaimableAmount(
+                  t.token_data?.tokenId ?? "0"
+                ),
+                claimed:
+                  t.token_data?.totalVested === t.token_data?.totalReleased,
+                released: formatUnits(
+                  t.token_data?.totalReleased ?? "0",
+                  metadata.decimals
+                ),
+                revoked: t.token_data?.revoked ?? false,
+                tokenId: t.token_data?.tokenId ?? "1",
+                tokenUri: t.token_data?.tokenURI ?? "",
+              }))
+          ),
         },
         projectStruct: {
           hardCap: formatUnits(project.hardCap, NATIVE_DECIMALS),
