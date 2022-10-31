@@ -15,6 +15,8 @@ export const getLaunchpadsNear = async (
     LAUNCHPADS_ADDRESSES.map<Promise<ProjectType>>(async (address) => {
       const launchpad = new Launchpad(address, wallet);
       const data = await launchpad.getIdoInfo();
+      console.log('data',data);
+
       const ft = new FungibleToken(data.idoToken, wallet);
       const nft = new NonFungibleToken(data.nftContract, wallet);
       const { idoData, project } = data;

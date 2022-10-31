@@ -2,9 +2,9 @@ import * as nearAPI from "near-api-js";
 import { Account, Near, utils, WalletConnection } from "near-api-js";
 import * as fs from "fs";
 import { FTContractMetadata } from "../../ft";
-import { parseUnits } from "../utils";
+import { parseUnits, secondsToNearTimestamp } from "../utils";
 import { testnetConfig } from "./config";
-import { Project } from "../../launchpad";
+import { IDOParams, Project } from "../../launchpad";
 const { keyStores, KeyPair, connect } = nearAPI;
 
 const KEY_STORE_PATH = '/home/kostya/near/keystore' // process.env.KEY_STORE ?? "~/near/keystore";
@@ -23,7 +23,7 @@ const connectionConfig = {
 
 let nearConnection: Near;
 
-const DEPLOYER_PK = '<pk>' //process.env.SIGNER_PK;
+const DEPLOYER_PK = '' //process.env.SIGNER_PK;
 const DEPLOYER_NAME = 'launchpad-deployer.testnet' //process.env.SIGNER_PK;
 
 const globalDeployPrefix = process.argv[2] ?? "default";
@@ -168,15 +168,19 @@ const main = async () => {
     "5.7"
   );
 
+  await ftDeposit(idoToken.accountId, nft.accountId);
+
   await nft.functionCall({
     contractId: nft.accountId,
     methodName: "init",
     args: {
-      owner_id: launchpad.accountId,
+      ido_id: launchpad.accountId,
+      ido_token_id: idoToken.accountId,
     },
   });
 
-  const saleStart = (Math.floor((new Date().getTime() + 60 * 60 * 0.5 * 1000) * 1_000_000));
+  const saleStart = (Math.floor((new Date().getTime()) * 1_000_000) + secondsToNearTimestamp(3 * 60));
+  const saleEnd = (saleStart + 60 * 60 * 1 * 1000 * 1_000_000).toString();
 
   await launchpad.functionCall({
     contractId: launchpad.accountId,
@@ -190,13 +194,16 @@ const main = async () => {
         hardCap: utils.format.parseNearAmount("10"),
         softCap: utils.format.parseNearAmount("1"),
         saleStartTime: saleStart.toString(),
-        saleEndTime: (saleStart + 60 * 60 * 2 * 1000 * 1_000_000).toString(),
-        price: "1" ,
+        saleEndTime: saleEnd,
+        price: "1",
         projectDescription: 'Its aboba project for aboba people',
         projectName: 'ABOBA project',
         projectSignature: 'ABOBA'
       } as Project,
-    },
+      cliffDuration: secondsToNearTimestamp(2 * 60).toString(),
+      cliffStart: saleEnd,
+      vestingDuration: secondsToNearTimestamp(1 * 60 * 60).toString(),
+    } as IDOParams,
 
     gas: parseUnits(300, 12),
   });
