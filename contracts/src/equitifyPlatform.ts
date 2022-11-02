@@ -60,7 +60,7 @@ export class EquitifyPlatform extends WithCallback {
 
         const newId = this.offers.length;
 
-        log('Offer id:',newId.toString());
+        log('Offer id:', newId.toString());
         const offer = {
             nftContractId: nft_contract_id,
             nftId: nft_id,
@@ -77,7 +77,7 @@ export class EquitifyPlatform extends WithCallback {
         log('created offer', this.offers.get(newId.toString()));
     }
 
-    @call({payableFunction: true})
+    @call({ payableFunction: true })
     cancel_order({
         offer_id
     }: {
@@ -129,7 +129,7 @@ export class EquitifyPlatform extends WithCallback {
         this.protections.set(offer_id, protection);
 
         log('accept_order end');
-        
+
         return this._transferNftInternal({
             receiver_id: near.currentAccountId(),
             nft_contract_id: offer.nftContractId,
@@ -159,7 +159,7 @@ export class EquitifyPlatform extends WithCallback {
             })).asReturn();
     }
 
-    @call({payableFunction: true})
+    @call({ payableFunction: true })
     taker_claim_nft({
         offer_id
     }: {
@@ -178,6 +178,79 @@ export class EquitifyPlatform extends WithCallback {
                 nft_contract_id: offer.nftContractId,
                 nft_id: offer.nftId.toString()
             })).asReturn();
+    }
+
+    @view({})
+    get_offers({
+        maker_id,
+        nft_contract_id,
+        is_active,
+        is_cancelled,
+        from_id = '0',
+        to_id = '50'
+    }: {
+        maker_id?: string,
+        nft_contract_id?: string,
+        is_active?: boolean,
+        is_cancelled?: boolean,
+        from_id?: string,
+        to_id?: string
+    }) {
+        let result = this.offersToArrayResult();
+
+        if (!result.length) return result;
+
+        if (maker_id)
+            result = result.filter(v => v.makerId === maker_id);
+
+        if (nft_contract_id)
+            result = result.filter(v => v.nftContractId === nft_contract_id);
+
+        if (is_active)
+            result = result.filter(v => v.isActive === is_active);
+
+        if (is_cancelled)
+            result = result.filter(v => v.isCancelled === is_cancelled);
+
+        return result.filter((_, i) => BigInt(i) >= BigInt(from_id) && BigInt(i) < BigInt(to_id));
+    }
+
+    @view({})
+    get_protections({
+        taker_id,
+        offer_id,
+        is_active,
+        from_id = '0',
+        to_id = '50'
+    }: {
+        taker_id?: string,
+        offer_id?: string,
+        is_active?: boolean,
+        from_id?: string,
+        to_id?: string
+    }) {
+        let result = this.protectionsToArrayResult();
+
+        if (!result.length) return result;
+
+        if (taker_id)
+            result = result.filter(v => v.takerId === taker_id);
+
+        if (offer_id)
+            result = result.filter(v => v.offerId === offer_id);
+
+        if (is_active)
+            result = result.filter(v => !v.isGuaranteeClaimed && !v.isNftClaimed);
+
+        return result.filter((_, i) => BigInt(i) >= BigInt(from_id) && BigInt(i) < BigInt(to_id));
+    }
+
+    private offersToArrayResult() {
+        return this.offers.toArray().map(v => ({ id: v[0], ...v[1] }));
+    }
+
+    private protectionsToArrayResult() {
+        return this.protections.toArray().map(v => ({ id: v[0], ...v[1] }));
     }
 
     private _takerClaimVerify({

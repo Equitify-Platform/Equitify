@@ -7,3 +7,7 @@ export const parseUnits = (amount: number | string, decimals: number = 18) => {
 export const secondsToNearTimestamp = (seconds: number) => {
     return seconds * 1_000_000_000
 }
+
+export const currentTimeToNearTimestamp = () => {
+    return Math.floor(new Date().getTime() * 1_000_000); 
+}

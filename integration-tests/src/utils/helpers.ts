@@ -5,7 +5,7 @@ import path from 'path';
 
 export type TestContext<TAccounts> = {
   worker: Worker;
-  accounts: TAccounts;
+  context: TAccounts;
 }
 
 
