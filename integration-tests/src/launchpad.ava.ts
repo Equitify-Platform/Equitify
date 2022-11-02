@@ -267,10 +267,10 @@ const testClaim = async (t: TestExecutionContext, claimTokenId: number) => {
 }
 
 
-const postOffer = async (t: TestExecutionContext, tokenId: number) => {
+const postOfferAsGuarantee = async (t: TestExecutionContext, tokenId: number) => {
   const { offerer, platform, nft } = t.context.context;
 
-  await offerer.call(platform.accountId, 'create_offer', {
+  await offerer.call(platform.accountId, 'create_offer_from_guarantee_provider', {
     nft_contract_id: nft.accountId,
     nft_id: tokenId.toString(),
     near_fee_amount: parseUnits('1', 24).toString(),
@@ -282,10 +282,25 @@ const postOffer = async (t: TestExecutionContext, tokenId: number) => {
   })
 }
 
-const cancelOffer = async (t: TestExecutionContext, orderId: number) => {
+const postOfferAsNftProvider = async (t: TestExecutionContext, tokenId: number) => {
+  const { offerer, platform, nft, beneficiary } = t.context.context;
+
+  await beneficiary.call(platform.accountId, 'create_offer_from_nft_provider', {
+    nft_contract_id: nft.accountId,
+    nft_id: tokenId.toString(),
+    near_fee_amount: parseUnits('1', 24).toString(),
+    near_guarantee_amount: parseUnits('10', 24).toString(),
+    duration: '1'
+  }, {
+    attachedDeposit: parseUnits('2', 24),
+    gas: parseUnits(300, 12),
+  })
+}
+
+const cancelOffer = async (t: TestExecutionContext, account: NearAccount, orderId: number) => {
   const { offerer, platform, nft } = t.context.context;
 
-  await offerer.call(platform.accountId, 'cancel_order', {
+  await account.call(platform.accountId, 'cancel_order', {
     offer_id: orderId.toString()
   }, {
     attachedDeposit: parseUnits('1', 20),
@@ -293,14 +308,28 @@ const cancelOffer = async (t: TestExecutionContext, orderId: number) => {
   })
 }
 
-const acceptOffer = async (t: TestExecutionContext, approvalId: number, orderId: number) => {
+const acceptOfferFromNftProvider = async (t: TestExecutionContext, approvalId: number, orderId?: number) => {
   const { offerer, platform, beneficiary } = t.context.context;
 
-  await beneficiary.call(platform.accountId, 'accept_offer', {
-    offer_id: orderId.toString(),
-    approval_id: approvalId.toString()
+  await beneficiary.call(platform.accountId, 'accept_offer_from_nft_provider', {
+    offer_id: orderId?.toString(),
+    approval_id: approvalId?.toString()
   }, {
     attachedDeposit: parseUnits('1', 24),
+    gas: parseUnits(300, 12),
+  })
+
+  console.log('Offers', await platform.view('get_offers', {}))
+  console.log('Protections', await platform.view('get_protections', {}))
+}
+
+const acceptOfferFromGuaranteeProvider = async (t: TestExecutionContext, approvalId: number, orderId?: number) => {
+  const { offerer, platform, beneficiary } = t.context.context;
+
+  await offerer.call(platform.accountId, 'accept_offer_from_guarantee_provider', {
+    offer_id: orderId?.toString()
+  }, {
+    attachedDeposit: parseUnits('10', 24),
     gas: parseUnits(300, 12),
   })
 
@@ -323,7 +352,7 @@ const approveNft = async (t: TestExecutionContext, nftId: number, approveTo: str
 const claimNft = async (t: TestExecutionContext, offerId: number) => {
   const { offerer, nft, beneficiary, platform } = t.context.context;
 
-  await beneficiary.call(platform.accountId, 'taker_claim_nft', {
+  await beneficiary.call(platform.accountId, 'protection_claim_nft', {
     offer_id: offerId.toString(),
   }, {
     attachedDeposit: parseUnits('1', 15),
@@ -335,7 +364,7 @@ const claimNft = async (t: TestExecutionContext, offerId: number) => {
 const claimGuarantee = async (t: TestExecutionContext, offerId: number) => {
   const { offerer, nft, beneficiary, platform } = t.context.context;
 
-  await beneficiary.call(platform.accountId, 'taker_claim_guarantee', {
+  await beneficiary.call(platform.accountId, 'protection_claim_guarantee', {
     offer_id: offerId.toString(),
   }, {
     attachedDeposit: parseUnits('1', 15),
@@ -358,32 +387,28 @@ const claimGuarantee = async (t: TestExecutionContext, offerId: number) => {
 //   await testPurchaseToken(t, 1);
 // });
 
-// test('purchase tokens and post offer to platform', async (t) => {
-//   await testPurchaseToken(t);
-// });
-
 // test('post offer', async (t) => {
-//   postOffer(t, 1)
+//   postOfferAsGuarantee(t, 1)
 // })
 
-// test('post offer and cancel', async (t) => {
-//   postOffer(t, 1)
-//   cancelOffer(t, 0);
-// })
+test('post offer and cancel', async (t) => {
+  postOfferAsGuarantee(t, 1)
+  cancelOffer(t, t.context.context.offerer, 0);
+})
 
 test('post offer and accept it from beneficiary', async (t) => {
   await testPurchaseToken(t);
   await approveNft(t, 1, t.context.context.platform.accountId);
-  await postOffer(t, 1)
-  await acceptOffer(t, 0, 0)
+  await postOfferAsGuarantee(t, 1)
+  await acceptOfferFromNftProvider(t, 0, 0)
 })
 
 
 test('post offer and accept it from beneficiary, wait till it ended and claim nft', async (t) => {
   await testPurchaseToken(t);
   await approveNft(t, 1, t.context.context.platform.accountId);
-  await postOffer(t, 1)
-  await acceptOffer(t, 0, 0)
+  await postOfferAsGuarantee(t, 1)
+  await acceptOfferFromNftProvider(t, 0, 0)
   await delay(100);
   await claimNft(t, 0);
 
@@ -392,8 +417,24 @@ test('post offer and accept it from beneficiary, wait till it ended and claim nf
 test('post offer and accept it from beneficiary, wait till it ended and claim near guarantee', async (t) => {
   await testPurchaseToken(t);
   await approveNft(t, 1, t.context.context.platform.accountId);
-  await postOffer(t, 1)
-  await acceptOffer(t, 0, 0)
+  await postOfferAsGuarantee(t, 1)
+  await acceptOfferFromNftProvider(t, 0, 0)
   await delay(100);
   await claimGuarantee(t, 0);
+})
+
+test('post offer from beneficiary and accept it from guarantee provider, wait till it ended and claim near guarantee', async (t) => {
+  await testPurchaseToken(t);
+  await approveNft(t, 1, t.context.context.platform.accountId);
+  await postOfferAsNftProvider(t, 1)
+  await acceptOfferFromGuaranteeProvider(t, 0, 0)
+  await delay(100);
+  await claimGuarantee(t, 0);
+})
+
+test('post offer from beneficiary and cancel it', async (t) => {
+  await testPurchaseToken(t);
+  await approveNft(t, 1, t.context.context.platform.accountId);
+  await postOfferAsNftProvider(t, 1)
+  await cancelOffer(t, t.context.context.beneficiary, 0);
 })

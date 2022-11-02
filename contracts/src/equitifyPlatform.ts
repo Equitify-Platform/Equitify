@@ -2,10 +2,16 @@ import { NearBindgen, near, call, view, initialize, UnorderedMap, LookupMap, val
 import { log } from './utils';
 import { WithCallback } from './utils/contracts/withCallback';
 
+export enum OfferCreatorType {
+    GUARANTEE_PROVIDER,
+    NFT_PROVIDER
+}
+
 export type Offer = {
-    nftContractId: string,
-    makerId: string,
+    offerCreatorId: string,
+    offerCreatorType: OfferCreatorType,
     nftId: string,
+    nftContractId: string,
     nearFeeAmount: string,
     nearGuaranteeAmount: string,
     protectionDuration: string,
@@ -15,9 +21,12 @@ export type Offer = {
 
 export type Protection = {
     offerId: string,
+
+    nftProviderId: string,
+    guaranteeProviderId: string,
+
     isGuaranteeClaimed: boolean;
     isNftClaimed: boolean;
-    takerId: string
 }
 
 @NearBindgen({ requireInit: true })
@@ -36,7 +45,7 @@ export class EquitifyPlatform extends WithCallback {
     }
 
     @call({ payableFunction: true })
-    create_offer({
+    create_offer_from_guarantee_provider({
         nft_contract_id,
         nft_id,
         near_fee_amount,
@@ -49,32 +58,51 @@ export class EquitifyPlatform extends WithCallback {
         near_guarantee_amount: string,
         duration: string
     }) {
-        log('create_offer', { nft_contract_id, nft_id, near_fee_amount, near_guarantee_amount, duration });
-
-        validateAccountId(nft_contract_id);
-        assert(BigInt(near_fee_amount) >= 0, "Invalid near_fee_amount");
-        assert(BigInt(near_guarantee_amount) >= 0, "Invalid near_fee_amount");
         assert(near.attachedDeposit() >= BigInt(near_guarantee_amount), "Insufficient guarantee provided ");
 
-        assert(BigInt(duration) > 0, "Invalid duration");
-
-        const newId = this.offers.length;
-
-        log('Offer id:', newId.toString());
-        const offer = {
+        return this.createOffer({
             nftContractId: nft_contract_id,
+            offerCreatorType: OfferCreatorType.GUARANTEE_PROVIDER,
             nftId: nft_id,
-            makerId: near.predecessorAccountId(),
             nearFeeAmount: near_fee_amount,
-            nearGuaranteeAmount: near_fee_amount,
-            protectionDuration: duration,
-            isActive: true,
-            isCancelled: false
-        } as Offer
+            nearGuaranteeAmount: near_guarantee_amount,
+            protectionDuration: duration
+        })
+    }
 
-        this.offers.set(newId.toString(), offer);
+    @call({ payableFunction: true })
+    create_offer_from_nft_provider({
+        nft_contract_id,
+        nft_id,
+        near_fee_amount,
+        near_guarantee_amount,
+        duration,
+        approval_id
+    }: {
+        nft_contract_id: string,
+        nft_id: string,
+        near_fee_amount: string,
+        near_guarantee_amount: string,
+        duration: string,
+        approval_id?: string
+    }) {
+        this.createOffer({
+            nftContractId: nft_contract_id,
+            offerCreatorType: OfferCreatorType.NFT_PROVIDER,
+            nftId: nft_id,
+            nearFeeAmount: near_fee_amount,
+            nearGuaranteeAmount: near_guarantee_amount,
+            protectionDuration: duration
+        })
 
-        log('created offer', this.offers.get(newId.toString()));
+        assert(near.attachedDeposit() >= BigInt(near_fee_amount), "Insufficient fee provided ");
+
+        return this._transferNftInternal({
+            receiver_id: near.currentAccountId(),
+            approval_id,
+            nft_contract_id: nft_contract_id,
+            nft_id: nft_id,
+        }).asReturn();
     }
 
     @call({ payableFunction: true })
@@ -89,7 +117,7 @@ export class EquitifyPlatform extends WithCallback {
         assert(!offer.isCancelled, 'Offer is already cancelled');
         assert(offer.isActive, 'Offer is not active');
 
-        assert(offer.makerId === near.predecessorAccountId(), 'Invalid predecessor');
+        assert(offer.offerCreatorId === near.predecessorAccountId(), 'Invalid predecessor');
 
         offer.isCancelled = true;
         offer.isActive = false;
@@ -98,37 +126,30 @@ export class EquitifyPlatform extends WithCallback {
 
         log('cancel_order end');
 
-        return NearPromise.new(offer.makerId).transfer(BigInt(offer.nearGuaranteeAmount));
+        if (offer.offerCreatorType === OfferCreatorType.GUARANTEE_PROVIDER)
+            return NearPromise.new(offer.offerCreatorId).transfer(BigInt(offer.nearGuaranteeAmount));
+        else if (offer.offerCreatorType === OfferCreatorType.NFT_PROVIDER)
+            return this._transferNftInternal({
+                receiver_id: offer.offerCreatorId,
+                nft_contract_id: offer.nftContractId,
+                nft_id: offer.nftId.toString(),
+            }).then(NearPromise.new(offer.offerCreatorId)
+                .transfer(BigInt(offer.nearGuaranteeAmount))).asReturn();
     }
 
     @call({ payableFunction: true })
-    accept_offer({
+    accept_offer_from_nft_provider({
         offer_id,
         approval_id
     }: {
         offer_id: string,
         approval_id?: string
     }) {
-        log('accept_order end', offer_id, approval_id);
+        const { offer } = this.acceptOffer({
+            offerId: offer_id
+        })
 
-        const offer = this.offers.get(offer_id)
-
-        assert(offer, 'Offer is not exists');
-        assert(near.predecessorAccountId() !== offer.makerId, "Maker cannot accept offer");
-        assert(!offer.isCancelled, "Offer is cancelled");
-        assert(offer.isActive, "Offer is not active");
         assert(near.attachedDeposit() >= BigInt(offer.nearFeeAmount), "Insufficient fee provided");
-
-        const protection = {
-            offerId: offer_id,
-            isGuaranteeClaimed: false,
-            isNftClaimed: false,
-            takerId: near.predecessorAccountId()
-        } as Protection
-
-        this.protections.set(offer_id, protection);
-
-        log('accept_order end');
 
         return this._transferNftInternal({
             receiver_id: near.currentAccountId(),
@@ -139,7 +160,19 @@ export class EquitifyPlatform extends WithCallback {
     }
 
     @call({ payableFunction: true })
-    taker_claim_guarantee({
+    accept_offer_from_guarantee_provider({ offer_id }: { offer_id: string }) {
+        const { offer } = this.acceptOffer({
+            offerId: offer_id
+        })
+
+        assert(near.attachedDeposit() >= BigInt(offer.nearGuaranteeAmount), "Insufficient guarantee provided");
+
+        return NearPromise.new(near.predecessorAccountId())
+            .transfer(BigInt(offer.nearFeeAmount)).asReturn();
+    }
+
+    @call({ payableFunction: true })
+    protection_claim_guarantee({
         offer_id
     }: {
         offer_id: string
@@ -150,17 +183,17 @@ export class EquitifyPlatform extends WithCallback {
 
         this.protections.set(offer_id, protection);
 
-        return NearPromise.new(offer.makerId)
+        return NearPromise.new(protection.nftProviderId)
             .transfer(BigInt(offer.nearGuaranteeAmount))
             .then(this._transferNftInternal({
-                receiver_id: protection.takerId,
+                receiver_id: protection.guaranteeProviderId,
                 nft_contract_id: offer.nftContractId,
                 nft_id: offer.nftId.toString()
             })).asReturn();
     }
 
     @call({ payableFunction: true })
-    taker_claim_nft({
+    protection_claim_nft({
         offer_id
     }: {
         offer_id: string
@@ -171,10 +204,10 @@ export class EquitifyPlatform extends WithCallback {
 
         this.protections.set(offer_id, protection);
 
-        return NearPromise.new(protection.takerId)
+        return NearPromise.new(protection.guaranteeProviderId)
             .transfer(BigInt(offer.nearGuaranteeAmount))
             .then(this._transferNftInternal({
-                receiver_id: offer.makerId,
+                receiver_id: protection.nftProviderId,
                 nft_contract_id: offer.nftContractId,
                 nft_id: offer.nftId.toString()
             })).asReturn();
@@ -182,14 +215,16 @@ export class EquitifyPlatform extends WithCallback {
 
     @view({})
     get_offers({
-        maker_id,
+        creator_id,
+        offer_id,
         nft_contract_id,
         is_active,
         is_cancelled,
         from_id = '0',
         to_id = '50'
     }: {
-        maker_id?: string,
+        creator_id?: string,
+        offer_id?: string,
         nft_contract_id?: string,
         is_active?: boolean,
         is_cancelled?: boolean,
@@ -200,8 +235,11 @@ export class EquitifyPlatform extends WithCallback {
 
         if (!result.length) return result;
 
-        if (maker_id)
-            result = result.filter(v => v.makerId === maker_id);
+        if (offer_id)
+            result = result.filter(v => v.id === offer_id);
+
+        if (creator_id)
+            result = result.filter(v => v.offerCreatorId === creator_id);
 
         if (nft_contract_id)
             result = result.filter(v => v.nftContractId === nft_contract_id);
@@ -217,14 +255,16 @@ export class EquitifyPlatform extends WithCallback {
 
     @view({})
     get_protections({
-        taker_id,
+        guarantee_provider_id,
+        nft_provider_id,
         offer_id,
         is_active,
         from_id = '0',
         to_id = '50'
     }: {
-        taker_id?: string,
         offer_id?: string,
+        guarantee_provider_id?: string,
+        nft_provider_id?: string,
         is_active?: boolean,
         from_id?: string,
         to_id?: string
@@ -233,16 +273,70 @@ export class EquitifyPlatform extends WithCallback {
 
         if (!result.length) return result;
 
-        if (taker_id)
-            result = result.filter(v => v.takerId === taker_id);
-
         if (offer_id)
             result = result.filter(v => v.offerId === offer_id);
+
+        if (guarantee_provider_id)
+            result = result.filter(v => v.guaranteeProviderId === guarantee_provider_id);
+
+        if (nft_provider_id)
+            result = result.filter(v => v.nftProviderId === guarantee_provider_id);
+
 
         if (is_active)
             result = result.filter(v => !v.isGuaranteeClaimed && !v.isNftClaimed);
 
         return result.filter((_, i) => BigInt(i) >= BigInt(from_id) && BigInt(i) < BigInt(to_id));
+    }
+
+    private createOffer(offer: Omit<Offer, 'isActive' | 'isCancelled' | 'offerCreatorId'>) {
+        validateAccountId(offer.nftContractId);
+        assert(BigInt(offer.nearFeeAmount) >= 0, "Invalid near_fee_amount");
+        assert(BigInt(offer.nearGuaranteeAmount) >= 0, "Invalid near_fee_amount");
+
+        assert(BigInt(offer.protectionDuration) > 0, "Invalid duration");
+
+        const newId = this.offers.length;
+
+        log('Offer id:', newId.toString());
+
+        const _offer = {
+            ...offer,
+            offerCreatorId: near.predecessorAccountId(),
+            isActive: true,
+            isCancelled: false
+        } as Offer
+
+        log('create_offer', _offer);
+
+        this.offers.set(newId.toString(), _offer);
+    }
+
+  
+    private acceptOffer(protection: Omit<Protection, 'nftProviderId' | 'isGuaranteeClaimed' | 'isNftClaimed' | 'guaranteeProviderId'>) {
+        const offer = this.offers.get(protection.offerId)
+
+        assert(offer, 'Offer is not exists');
+        assert(near.predecessorAccountId() !== offer.offerCreatorId, "Maker cannot accept offer");
+        assert(!offer.isCancelled, "Offer is cancelled");
+        assert(offer.isActive, "Offer is not active");
+
+        const _protection = {
+            ...protection,
+            isGuaranteeClaimed: false,
+            isNftClaimed: false,
+            guaranteeProviderId:
+                offer.offerCreatorType === OfferCreatorType.GUARANTEE_PROVIDER ?
+                    offer.offerCreatorId :
+                    near.predecessorAccountId(),
+            nftProviderId: offer.offerCreatorType === OfferCreatorType.NFT_PROVIDER ?
+                offer.offerCreatorId :
+                near.predecessorAccountId(),
+        } as Protection
+
+        this.protections.set(protection.offerId, _protection);
+
+        return { protection: _protection, offer };
     }
 
     private offersToArrayResult() {
@@ -265,7 +359,7 @@ export class EquitifyPlatform extends WithCallback {
 
         const protection = this.protections.get(offer_id)
 
-        assert(protection.takerId === near.predecessorAccountId(), "Predecessor is not a protection taker");
+        assert(protection.nftProviderId === near.predecessorAccountId(), "Predecessor is not a protection taker");
         assert(!protection.isNftClaimed && !protection.isGuaranteeClaimed, "Guarantee/Nft is already claimed");
 
         return { offer, protection }
