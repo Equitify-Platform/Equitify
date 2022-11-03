@@ -117,6 +117,13 @@ const main = async () => {
   else console.log('Config found')
   const deployer = await nearConnection.account(DEPLOYER_NAME);
 
+  const factory = await createAccountAndDeploy(
+    deployer.accountId,
+    `factory`,
+    getContract("launchpad_factory"),
+    "1"
+  );
+
   const platform = await createAccountAndDeploy(
     deployer.accountId,
     `platform`,
@@ -220,6 +227,15 @@ const main = async () => {
 
     gas: parseUnits(300, 12),
   });
+
+  await factory.functionCall({
+    contractId: factory.accountId, 
+    methodName: 'add_ido', 
+    args: {
+      account_id: launchpad.accountId
+    },
+    attachedDeposit: utils.format.parseNearAmount("0.1")
+  })
 
 };
 

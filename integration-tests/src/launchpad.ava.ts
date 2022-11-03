@@ -23,6 +23,7 @@ type Context = {
   idoToken: NearAccount,
   nft: NearAccount,
   platform: NearAccount,
+  factory: NearAccount
   // idoSaleTimeInfo?: {
   //   saleEnd: string,
   //   cliffStart: string,
@@ -72,15 +73,16 @@ test.beforeEach(async (t) => {
   const idoToken = await root.createSubAccount('idotoken');
   const nft = await root.createSubAccount('nft');
   const platform = await root.createSubAccount('platform');
-
-
+  const factory = await root.createSubAccount('factory');
 
   // const launchpadFactory = await root.createSubAccount('factory');
   const launchpad = await root.createSubAccount('testido');
 
-  t.context.context = { root, launchpad, beneficiary, idoToken, nft, platform, offerer };
+  t.context.context = { root, launchpad, beneficiary, idoToken, nft, platform, offerer, factory };
 
   // await launchpadFactory.deploy(launchpadFactoryContractPath);
+
+  await factory.deploy(launchpadFactoryContractPath)
 
   await platform.deploy(platformContractPath)
   await platform.call(platform, 'init', {})
@@ -161,6 +163,11 @@ test.beforeEach(async (t) => {
       gas: parseUnits(300, 12),
     });
 
+  await factory.call(factory, 'add_ido', {
+    account_id: launchpad.accountId
+  })
+
+  console.log("All idos", await factory.view('get_all_idos',{}))
   // await launchpadFactory.call(launchpadFactory.accountId, 'add_ido', {
   //   account_id: launchpad.accountId
   // })platformContractPath
