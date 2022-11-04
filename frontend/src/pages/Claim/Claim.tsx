@@ -22,7 +22,6 @@ function Claim() {
       <div>
         {launchpads.projects.map((project) => {
           return project.nft.nfts.map((nft) => {
-            console.log(nft);
             return (
               !nft.claimed && (
                 <NFT
