@@ -20,7 +20,6 @@ export const getLaunchpadsNear = async (
       const ft = new FungibleToken(data.idoToken, wallet);
       const nft = new NonFungibleToken(data.nftContract, wallet);
       const { idoData, project } = data;
-      console.log(idoData);
 
       const [metadata, nfts] = await Promise.all([
         ft.metadata(),
@@ -28,6 +27,8 @@ export const getLaunchpadsNear = async (
           ? nft.nftTokensDetailedForOwner(wallet.accountId)
           : Promise.resolve([]),
       ]);
+
+      console.log(nfts);
 
       return {
         address,
@@ -41,8 +42,9 @@ export const getLaunchpadsNear = async (
                   t.token_data?.totalVested ?? "0",
                   metadata.decimals
                 ),
-                claimable: await nft.calcClaimableAmount(
-                  t.token_data?.tokenId ?? "0"
+                claimable: formatUnits(
+                  await nft.calcClaimableAmount(t.token_data?.tokenId ?? "0"),
+                  metadata.decimals
                 ),
                 claimed:
                   t.token_data?.totalVested === t.token_data?.totalReleased,

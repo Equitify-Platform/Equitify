@@ -60,7 +60,7 @@ const NFT: FC<NFTProps> = ({
   return (
     <div className={styles.nftContainer}>
       <div className={styles.firstLine}>
-        <p>Amount to claim - {claimableAmount}</p>
+        <p>Amount to claim - {parseFloat(claimableAmount).toFixed(4)}</p>
         <p>NFT ID: {nftID}</p>
         <div className={styles.buttonsWrapper}>
           <NavLink to={`/ido/${idoAddress}`}>
