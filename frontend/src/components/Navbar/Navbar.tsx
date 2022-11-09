@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 
 import styles from "./style.module.scss";
 
+import NavLogo from "../../assets/icons/NavLogo.svg";
 import { startUpWallet } from "../../store/actions/wallet.actions";
 import { useAppDispatch, useWallet } from "../../store/hooks";
 
@@ -24,15 +25,33 @@ function Navbar() {
 
   return (
     <div className={styles.nav}>
-      <NavLink to="/">Home</NavLink>
-      <NavLink to="/staking">Staking</NavLink>
-      <NavLink to="/claim">Claim</NavLink>
-      <button onClick={handleClick}>
+      <img src={NavLogo} alt="" />
+      <div className={styles.navLinks}>
+        <NavLink
+          className={({ isActive }) => (isActive ? styles.activePage : "")}
+          to="/"
+          end
+        >
+          Home
+        </NavLink>
+        <NavLink
+          className={({ isActive }) => (isActive ? styles.activePage : "")}
+          to="/claim"
+        >
+          Claim
+        </NavLink>
+        <NavLink
+          className={({ isActive }) => (isActive ? styles.activePage : "")}
+          to="/staking"
+        >
+          3rd page
+        </NavLink>
+      </div>
+      <button className={styles.walletButton} onClick={handleClick}>
         {wallet.isSignedIn
           ? `Sign out ${wallet.wallet.accountId}`
           : "Connect wallet"}
-      </button>{" "}
-      {/* @note no functionality for now */}
+      </button>
     </div>
   );
 }

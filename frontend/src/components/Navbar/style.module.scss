@@ -1,18 +1,63 @@
 .nav {
   width: 100%;
-  height: 50px;
-  padding: 1.25rem 5rem;
+  height: 98px;
+
+  padding: 0 154px;
   margin-bottom: 1rem;
-  background-color: #383838;
+
+  background-color: var(--fg);
+
   display: flex;
   justify-content: space-between;
   align-items: center;
 
-  * {
-    color: var(--primary);
+  border-bottom: 1px solid #e3e7ee;
+  box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.05);
+
+  .navLinks {
+    width: 239px;
+
+    display: flex;
+    justify-content: space-between;
+
+    * {
+      color: var(--primary);
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 21px;
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
   }
 
-  button {
+  .walletButton {
+    width: 149px;
+    height: 50px;
+
+    background: #2f5fbb;
+    border-radius: 4px;
+
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 18px;
+    letter-spacing: 0.02em;
     color: white;
+
+    &:hover {
+      background: var(--hover);
+    }
+
+    &:active {
+      background: var(--active);
+    }
+
+    &:disabled {
+      opacity: var(--disabled);
+    }
+  }
+
+  .activePage {
+    font-weight: 700;
+    border-bottom: 1px solid #0f1138;
   }
 }
