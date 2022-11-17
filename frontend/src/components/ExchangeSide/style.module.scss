@@ -1,8 +1,21 @@
 .exchangeSide {
-  width: 550px;
-  height: 650px;
-  border: 2px solid black;
-  text-align: center;
+  width: 744px;
+  height: 498px;
+  margin-right: 129px;
+  display: flex;
+  justify-content: space-between;
+
+  .projectInfo {
+    margin-top: 40px;
+
+    .projectImg {
+      width: 259px;
+      height: 151px;
+      border-radius: 4px;
+      margin-top: 16px;
+      margin-bottom: 8px;
+    }
+  }
 }
 
 .balances {

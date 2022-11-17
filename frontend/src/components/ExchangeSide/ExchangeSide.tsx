@@ -2,6 +2,7 @@ import React, { Dispatch, FC, SetStateAction, useMemo, useState } from "react";
 
 import styles from "./style.module.scss";
 
+import IdoLogoExample from "../../assets/images/idoImgExample.png";
 import { Wallet } from "../../near-wallet";
 import {
   claimTokens,
@@ -10,81 +11,47 @@ import {
 import { useAppDispatch } from "../../store/hooks";
 import { IdoStage } from "../../types/IdoStage";
 import { BuyInput } from "../BuyInput";
+import ExchangeCard from "../ExchangeCard";
 import { NftSelect, Option } from "../NftSelect";
 
 interface ExchangeSideProps {
   idoStage: IdoStage;
-  options: Option[];
-  id: string;
-  onChange: (id: string) => void | Promise<void>;
   symbol: string;
   balance: string;
   price: string;
-  launchpadAddress: string;
-  nftAddress: string;
   setIsLoading: Dispatch<SetStateAction<boolean>>;
-  wallet: Wallet;
+  projectName: string;
+  projectDescription: string;
 }
 
 export const ExchangeSide: FC<ExchangeSideProps> = ({
   idoStage,
-  options,
-  onChange,
-  id,
   symbol,
   balance,
   price,
   setIsLoading,
-  launchpadAddress,
-  wallet,
-  nftAddress,
+  projectName,
+  projectDescription,
 }) => {
-  const dispatch = useAppDispatch();
-  const [nativeAmount, setNativeAmount] = useState<number>(0);
-  const [tokenAmount, setTokenAmount] = useState<number>(0);
-  const option = useMemo(() => options.find((o) => o.id === id), [options, id]);
-
-  const handleNativeChange = (native: number) => {
-    setTokenAmount(native * parseFloat(price));
-  };
-
-  const handleTokenChange = (token: number) => {
-    setNativeAmount(token / parseFloat(price));
-  };
-
-  const purchase = async (): Promise<void> => {
-    try {
-      setIsLoading(true);
-      await dispatch(
-        purchaseTokens({
-          amount: nativeAmount.toString(),
-          tokenId: option?.id || "0",
-          launchpadAddress,
-          wallet,
-        })
-      );
-    } catch (e) {
-      console.error("Error while purchasing tokens:", e);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const claim = async (): Promise<void> => {
-    try {
-      setIsLoading(true);
-      await dispatch(
-        claimTokens({ tokenId: option?.id || "0", nftAddress, wallet })
-      );
-    } catch (e) {
-      console.error("Error while claiming tokens:", e);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
     <div className={styles.exchangeSide}>
+      <div className={styles.projectInfo}>
+        <img className={styles.projectImg} src={IdoLogoExample} alt="" />
+        <h4>{projectName}</h4>
+        <p>{projectDescription}</p>
+      </div>
+      <ExchangeCard
+        idoStage={idoStage}
+        setIsLoading={setIsLoading}
+        balance={balance}
+        symbol={symbol}
+        projectName={projectName}
+      />
+    </div>
+  );
+};
+
+/* <div className={styles.exchangeSide}>
       <h2>Exchange side</h2>
       {idoStage !== IdoStage.PRESALE && (
         <NftSelect options={options} idoStage={idoStage} onChange={onChange} />
@@ -155,6 +122,4 @@ export const ExchangeSide: FC<ExchangeSideProps> = ({
           <button onClick={claim}>Claim</button>
         </>
       ) : null}
-    </div>
-  );
-};
+    </div> */
