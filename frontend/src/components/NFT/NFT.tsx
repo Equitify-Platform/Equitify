@@ -6,32 +6,36 @@ import styles from "./style.module.scss";
 import { Wallet } from "../../near-wallet";
 import {
   claimTokens,
+  NftContractType,
   transferNft,
 } from "../../store/actions/launchpads.actions";
 import { useAppDispatch } from "../../store/hooks";
+import ModalWindow from "../ModalWindow";
 
 interface NFTProps {
+  nftContract: NftContractType;
+  projectName: string;
+  tokenSymbol: string;
   idoAddress: string;
-  claimableAmount: string;
-  nftID: string;
   setIsLoading: Dispatch<SetStateAction<boolean>>;
-  nftAddress: string;
   wallet: Wallet;
 }
 
 const NFT: FC<NFTProps> = ({
+  projectName,
+  tokenSymbol,
+  nftContract,
   idoAddress,
-  claimableAmount,
-  nftID,
   setIsLoading,
-  nftAddress,
   wallet,
 }) => {
   const dispatch = useAppDispatch();
-  const [isOpened, setIsOpened] = useState<boolean>(false);
   const [receiverId, setReceiverId] = useState<string>("");
+  const [isModalShown, setIsModalShown] = useState<boolean>(false);
 
-  const onClaim = async () => {
+  const { address: nftAddress, nfts } = nftContract;
+
+  const onClaim = async (nftID: string) => {
     setIsLoading(true);
     try {
       await dispatch(claimTokens({ tokenId: nftID, nftAddress, wallet }));
@@ -42,9 +46,9 @@ const NFT: FC<NFTProps> = ({
     }
   };
 
-  const handleOpen = () => setIsOpened((prev) => !prev);
+  const handleOpen = () => setIsModalShown(true);
 
-  const handleTransfer = async () => {
+  const handleTransfer = async (nftID: string) => {
     setIsLoading(true);
     try {
       await dispatch(
@@ -59,28 +63,55 @@ const NFT: FC<NFTProps> = ({
 
   return (
     <div className={styles.nftContainer}>
-      <div className={styles.firstLine}>
-        <p>Amount to claim - {parseFloat(claimableAmount).toFixed(4)}</p>
-        <p>NFT ID: {nftID}</p>
-        <div className={styles.buttonsWrapper}>
-          <NavLink to={`/ido/${idoAddress}`}>
-            <button>Go to IDO</button>
-          </NavLink>
-          <button onClick={onClaim}>Claim</button>
-          <button onClick={handleOpen}>{isOpened ? "Hide" : "Transfer"}</button>
-        </div>
-      </div>
-      {isOpened && (
-        <div className={styles.secondLine}>
-          <input
-            type="text"
-            placeholder="address.testnet"
-            value={receiverId}
-            onChange={(e) => setReceiverId(e.target.value)}
-          />
-          <button onClick={handleTransfer}>Transfer</button>
-        </div>
-      )}
+      <h4>{projectName}</h4>
+      {nfts.map((nft) => {
+        return (
+          <div key={nft.tokenId} className={styles.wrapper}>
+            <div className={styles.nftDataContainer}>
+              <p>
+                <span>Amount to claim:</span>
+                {parseFloat(nft.claimable).toFixed(4) + tokenSymbol}
+              </p>
+              <p>
+                <span>NFT ID:</span>
+                {nft.tokenId}
+              </p>
+            </div>
+            <div className={styles.buttonsContainer}>
+              <button className={styles.transferBtn} onClick={handleOpen}>
+                Transfer
+              </button>
+              <NavLink to={`/ido/${idoAddress}`}>
+                <button className={styles.toIdoBtn}>Go to IDO</button>
+              </NavLink>
+              <button
+                className={styles.claimBtn}
+                onClick={() => onClaim(nft.tokenId)}
+              >
+                Claim
+              </button>
+            </div>
+            {isModalShown && (
+              <ModalWindow>
+                <h4>Transfer to</h4>
+                <input
+                  type={"text"}
+                  className={styles.transferInput}
+                  placeholder="Enter the address"
+                  value={receiverId}
+                  onChange={(e) => setReceiverId(e.target.value)}
+                />
+                <div className={styles.modalButtonsContainer}>
+                  <button onClick={() => setIsModalShown(false)}>Cancel</button>
+                  <button onClick={() => handleTransfer(nft.tokenId)}>
+                    Confirm
+                  </button>
+                </div>
+              </ModalWindow>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };

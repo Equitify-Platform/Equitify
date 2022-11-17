@@ -1,28 +1,131 @@
 .nftContainer {
-  height: auto;
   width: 100%;
-  padding: 1rem 5rem;
-  background-color: #383838;
-  display: flex;
-  flex-direction: column;
+  min-height: 129px;
+  padding: 24px;
+  background: #ffffff;
+  border-radius: 8px;
   color: var(--primary);
-}
 
-.firstLine {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+  .wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
 
-.secondLine {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
+    .nftDataContainer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
 
-.buttonsWrapper {
-  display: flex;
-  width: 30%;
-  justify-content: space-between;
-  align-items: center;
+      p {
+        &:first-child {
+          width: 330px;
+          margin-right: 24px;
+        }
+      }
+
+      span {
+        font-weight: 700;
+        margin-right: 8px;
+      }
+    }
+
+    .buttonsContainer {
+      width: 361px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      button {
+        width: 115px;
+        height: 34px;
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 18px;
+        letter-spacing: 0.02em;
+        color: #2f5fbb;
+        background-color: #fff;
+        padding: 8px 16px;
+        border: 1px solid #2f5fbb;
+        border-radius: 3px;
+      }
+
+      .transferBtn {
+        border: none;
+      }
+
+      .toIdoBtn,
+      .transferBtn {
+        &:hover {
+          background-color: #3b73e0;
+          color: #f7f7f7;
+        }
+        &:active {
+          background-color: #2f5fbb;
+          color: #f7f7f7;
+        }
+      }
+
+      .claimBtn {
+        color: #f7f7f7;
+        background-color: #2f5fbb;
+        border: none;
+      }
+    }
+  }
+  .transferInput {
+    padding: 12px 16px;
+    width: 405px;
+    height: 45px;
+    margin: 24px 0 24px 0;
+
+    background: #ffffff;
+    border: 1px solid #d0d7de;
+    border-radius: 4px;
+
+    font-size: 16px;
+    line-height: 21px;
+    letter-spacing: 0.02em;
+
+    &::placeholder {
+      color: #6c6e78;
+    }
+  }
+
+  .modalButtonsContainer {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    button {
+      padding: 16px 24px;
+
+      width: 190.5px;
+      height: 50px;
+
+      background: #2f5fbb;
+      border-radius: 4px;
+
+      font-size: 14px;
+      line-height: 18px;
+      letter-spacing: 0.02em;
+      color: #ffffff;
+
+      &:first-child {
+        background: #ffffff;
+        color: #2f5fbb;
+        border: 1px solid #2f5fbb;
+
+        &:hover {
+          background-color: #3b73e0;
+          color: #f7f7f7;
+        }
+        &:active {
+          background-color: #2f5fbb;
+          color: #f7f7f7;
+        }
+      }
+    }
+  }
 }
