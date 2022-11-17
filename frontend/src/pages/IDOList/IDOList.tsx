@@ -8,7 +8,6 @@ import IDOImg from "../../assets/images/idoImgExample.png";
 import { SWIPER_ITEMS_LIMIT } from "../../components/common/SwiperWithPaginator/constants";
 import { SwiperWithPaginator } from "../../components/common/SwiperWithPaginator/SwiperWithPaginator";
 import IDOCard from "../../components/IDOCard/IDOCard";
-import IDONavigation from "../../components/IDONavigation";
 import { useSeparatedDataArray } from "../../hooks/useSeparatedDataArray";
 import {
   getLaunchpads,
@@ -77,9 +76,7 @@ function IDOList() {
         {/*  />*/}
         {/*))}*/}
       </div>
-      <div className={styles.idoNavigation}>
-        <IDONavigation />
-      </div>
+      <div className={styles.idoNavigation}></div>
     </div>
   );
 }
