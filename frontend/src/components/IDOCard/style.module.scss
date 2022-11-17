@@ -1,6 +1,35 @@
 .idoCard {
-  width: 407px;
-  height: 376px;
-  padding: 30px;
-  background-color: #383838;
+  width: 356px;
+  height: 447px;
+  padding: 24px;
+  background: #ffffff;
+  border-radius: 8px;
+
+  .projectImg {
+    width: 312px;
+    height: 183px;
+    margin-bottom: 5px;
+  }
+
+  .fieldsWrapper {
+    width: 100%;
+    display: flex;
+    margin: 16px 0 24px 0;
+
+    .fieldTitlesWrapper,
+    .fieldDataWrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .fieldTitlesWrapper {
+      margin-right: 8px;
+
+      p {
+        font-weight: 700;
+        color: var(--primary);
+      }
+    }
+  }
 }
