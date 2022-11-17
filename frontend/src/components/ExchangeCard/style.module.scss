@@ -1,0 +1,63 @@
+.exchangeCard {
+  width: 356px;
+  height: 100%;
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 40px 24px;
+
+  span {
+    font-weight: 700;
+  }
+
+  .nftSelect {
+    margin-top: 24px;
+    margin-bottom: 8px;
+  }
+
+  .totalBalance {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 24px;
+  }
+
+  .purchasedInfo {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+
+    p {
+      width: 120px;
+      font-size: 12px;
+      line-height: 16px;
+    }
+  }
+
+  .dots {
+    display: flex;
+    gap: 16px;
+    margin: 24px;
+    justify-content: center;
+
+    .dot {
+      width: 4px;
+      height: 4px;
+      background: #0f1138;
+      border-radius: 28px;
+    }
+  }
+
+  .vestingData {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    p {
+      display: flex;
+      justify-content: space-between;
+    }
+  }
+
+  .buttonWrapper {
+    margin: 24px 0 40px 0;
+  }
+}
