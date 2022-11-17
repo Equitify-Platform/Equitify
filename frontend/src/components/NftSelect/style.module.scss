@@ -1,42 +1,17 @@
-.wrapper {
-  display: flex;
-  flex-direction: column;
-}
-
-.wrapper > img:first-of-type {
-  align-self: flex-end;
-  width: 127px;
-}
-
-.wrapper > img:last-of-type {
-  align-self: flex-start;
-  width: 232px;
-}
-
 .optionWrapper {
   color: white;
   display: flex;
-  gap: 10px;
-  padding-bottom: 2px;
-}
+  align-items: center;
+  gap: 12px;
+  background-color: transparent;
+  padding: 8px 16px;
+  height: 100%;
+  width: 100%;
+  cursor: pointer;
 
-.title {
-  font-family: "Jura", sans-serif;
-  font-style: normal;
-  font-weight: 700;
-  font-size: 16px;
-  line-height: 19px;
-  text-transform: uppercase;
-  color: #f3cfb3;
-}
-
-.secondary {
-  font-family: "Jura", sans-serif;
-  font-style: normal;
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 14px;
-  letter-spacing: 0.035em;
-  text-transform: capitalize;
-  color: #f3cfb3;
+  img {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+  }
 }
