@@ -1,8 +1,34 @@
 .claimSide {
-  width: 550px;
-  height: 650px;
-  border: 2px solid black;
+  width: 259px;
+  height: 329px;
   display: flex;
-  align-items: center;
   flex-direction: column;
+
+  .countdown {
+    margin-top: 40px;
+  }
+
+  .saleStats {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    .saleStatsField {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+
+      .fieldTitle {
+        font-weight: 700;
+      }
+    }
+  }
+  .price {
+    margin-top: 40px;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0.02em;
+    color: #2f5fbb;
+  }
 }
