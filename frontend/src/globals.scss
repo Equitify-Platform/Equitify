@@ -34,6 +34,12 @@ body {
 .page-wrapper {
   width: 100%;
   height: 100%;
+  background-color: #e1e5ec;
+}
+.content-wrapper {
+  width: 100%;
+  max-width: 1159px;
+  margin: 0 auto;
 }
 
 .with-padding {

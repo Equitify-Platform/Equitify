@@ -1,12 +1,19 @@
 import React, { useEffect } from "react";
+import { SwiperSlide } from "swiper/react";
 
 import styles from "./style.module.scss";
 
 import RobotHand from "../../assets/bg/robot-hand.png";
 import IDOImg from "../../assets/images/idoImgExample.png";
+import { SWIPER_ITEMS_LIMIT } from "../../components/common/SwiperWithPaginator/constants";
+import { SwiperWithPaginator } from "../../components/common/SwiperWithPaginator/SwiperWithPaginator";
 import IDOCard from "../../components/IDOCard/IDOCard";
 import IDONavigation from "../../components/IDONavigation";
-import { getLaunchpads } from "../../store/actions/launchpads.actions";
+import { useSeparatedDataArray } from "../../hooks/useSeparatedDataArray";
+import {
+  getLaunchpads,
+  ProjectType,
+} from "../../store/actions/launchpads.actions";
 import { useAppDispatch, useLaunchpads, useWallet } from "../../store/hooks";
 
 function IDOList() {
@@ -17,6 +24,11 @@ function IDOList() {
   useEffect(() => {
     dispatch(getLaunchpads(wallet));
   }, [dispatch, wallet]);
+
+  const separatedPositions = useSeparatedDataArray<ProjectType>(
+    launchpads.projects,
+    SWIPER_ITEMS_LIMIT
+  );
 
   return (
     <div className="page-wrapper">
@@ -32,17 +44,38 @@ function IDOList() {
         </div>
         <img src={RobotHand} alt="" />
       </div>
-      <h3 className={styles.idoSectionTitle}>Projects</h3>
+
       <div className={styles.idoSection}>
-        {launchpads.projects.map((p) => (
-          <IDOCard
-            imageURI={IDOImg}
-            address={p.address}
-            key={p.address}
-            tokenName={p.token.name}
-            {...p.projectStruct}
-          />
-        ))}
+        <h3>Projects</h3>
+        <SwiperWithPaginator
+          paginatorType="dot"
+          posLength={launchpads.projects.length || 1}
+        >
+          {separatedPositions.map((projectsArray, index) => (
+            <SwiperSlide key={index}>
+              <div className={styles.cardsContainer}>
+                {projectsArray.map((p) => (
+                  <IDOCard
+                    imageURI={IDOImg}
+                    address={p.address}
+                    key={p.address}
+                    tokenName={p.token.name}
+                    {...p.projectStruct}
+                  />
+                ))}
+              </div>
+            </SwiperSlide>
+          ))}
+        </SwiperWithPaginator>
+        {/*{launchpads.projects.map((p) => (*/}
+        {/*  <IDOCard*/}
+        {/*    imageURI={IDOImg}*/}
+        {/*    address={p.address}*/}
+        {/*    key={p.address}*/}
+        {/*    tokenName={p.token.name}*/}
+        {/*    {...p.projectStruct}*/}
+        {/*  />*/}
+        {/*))}*/}
       </div>
       <div className={styles.idoNavigation}>
         <IDONavigation />
