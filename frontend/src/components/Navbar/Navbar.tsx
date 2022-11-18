@@ -35,7 +35,7 @@ const Navbar: FC = () => {
   return (
     <>
       <div className={styles.nav}>
-        {width > 360 || isOpened ? (
+        {width > 576 || isOpened ? (
           <img className={styles.navLogo} src={NavLogo} alt="" />
         ) : (
           !isOpened && (
@@ -47,7 +47,7 @@ const Navbar: FC = () => {
             />
           )
         )}
-        {width > 360 && (
+        {width > 576 && (
           <div className={styles.navLinks}>
             <NavLink
               className={({ isActive }) => (isActive ? styles.activePage : "")}
@@ -109,17 +109,3 @@ const Navbar: FC = () => {
 };
 
 export default Navbar;
-
-/* 
-
-: (
-    <div className={styles.navSmall}>
-      <img className={styles.navLogoSmall} src={BurgerIcon} alt="" />
-      <button className={styles.walletButton} onClick={handleClick}>
-        {wallet.isSignedIn
-          ? `Sign out ${wallet.wallet.accountId}`
-          : "Connect wallet"}
-      </button>
-    </div>
-
-*/
