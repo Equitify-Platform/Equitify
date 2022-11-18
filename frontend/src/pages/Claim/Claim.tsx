@@ -27,48 +27,50 @@ function Claim() {
 
   return (
     <Loader isLoading={isLoading}>
-      <div className="page-wrapper with-padding">
-        <div className={styles.topSection}>
-          <h3>Claim</h3>
-          <p>Here you can find the list of all your purchases</p>
-        </div>
-        <div className={styles.nftWrapper}>
-          {launchpads.projects.map((project) => {
-            const unclaimedNfts = getUnclaimedNfts(project);
-            return (
-              unclaimedNfts.length > 0 && (
-                <NFT
-                  key={project.address}
-                  nftContract={project.nft}
-                  projectName={project.projectStruct.projectName}
-                  tokenSymbol={project.token.symbol}
-                  idoAddress={project.address}
-                  setIsLoading={setIsLoading}
-                  wallet={wallet}
-                />
-              )
-            );
-            // eslint-disable-next-line no-lone-blocks
-            {
-              /*
-           return project.nft.nfts.map((nft) => {
+      <div className="page-wrapper">
+        <div className="content-wrapper">
+          <div className={styles.topSection}>
+            <h3>Claim</h3>
+            <p>Here you can find the list of all your purchases</p>
+          </div>
+          <div className={styles.nftWrapper}>
+            {launchpads.projects.map((project) => {
+              const unclaimedNfts = getUnclaimedNfts(project);
               return (
-                !nft.claimed && (
+                unclaimedNfts.length > 0 && (
                   <NFT
-                    nftAddress={project.nft.address}
-                    key={`${project.nft.address}${nft.tokenId}`}
-                    nftID={nft.tokenId}
+                    key={project.address}
+                    nftContract={project.nft}
+                    projectName={project.projectStruct.projectName}
+                    tokenSymbol={project.token.symbol}
                     idoAddress={project.address}
-                    claimableAmount={nft.claimable}
                     setIsLoading={setIsLoading}
                     wallet={wallet}
                   />
                 )
               );
-            });
-          */
-            }
-          })}
+              // eslint-disable-next-line no-lone-blocks
+              {
+                /*
+             return project.nft.nfts.map((nft) => {
+                return (
+                  !nft.claimed && (
+                    <NFT
+                      nftAddress={project.nft.address}
+                      key={`${project.nft.address}${nft.tokenId}`}
+                      nftID={nft.tokenId}
+                      idoAddress={project.address}
+                      claimableAmount={nft.claimable}
+                      setIsLoading={setIsLoading}
+                      wallet={wallet}
+                    />
+                  )
+                );
+              });
+            */
+              }
+            })}
+          </div>
         </div>
       </div>
     </Loader>

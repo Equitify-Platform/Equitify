@@ -66,15 +66,6 @@ function IDOList() {
             </SwiperSlide>
           ))}
         </SwiperWithPaginator>
-        {/*{launchpads.projects.map((p) => (*/}
-        {/*  <IDOCard*/}
-        {/*    imageURI={IDOImg}*/}
-        {/*    address={p.address}*/}
-        {/*    key={p.address}*/}
-        {/*    tokenName={p.token.name}*/}
-        {/*    {...p.projectStruct}*/}
-        {/*  />*/}
-        {/*))}*/}
       </div>
       <div className={styles.idoNavigation}></div>
     </div>
