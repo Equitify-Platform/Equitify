@@ -1,20 +1,25 @@
 .topSection {
+  width: 100%;
   display: flex;
-  padding-left: 154px;
+  justify-content: start;
 
   .topSectionText {
     padding-top: 96px;
+    max-width: 550px;
   }
 }
 
 .idoSection {
   width: 100%;
-  max-width: 1132px;
   display: flex;
   flex-direction: column;
   align-items: start;
   gap: 24px;
   margin: 0 auto;
+  margin-top: 174px;
+  @media screen and (max-width: 576px) {
+    margin-top: 305px;
+  }
 }
 
 .cardsContainer {
@@ -27,11 +32,11 @@
   .topSection {
     padding-left: 0;
     flex-direction: column;
-    align-items: flex-end;
     margin-bottom: 56px;
 
     .topSectionText {
-      padding: 24px 16px 0 16px;
+      padding: unset;
+      max-width: unset;
 
       h1 {
         margin-bottom: 8px;
@@ -46,8 +51,19 @@
       width: 100%;
     }
   }
+}
 
-  .idoSection {
-    padding: 0 16px;
+.handImage {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  width: 802px;
+  height: 535px;
+
+  @media screen and (max-width: 576px) {
+    width: 344px;
+    height: 225px;
+    top: 298px;
+    right: 0;
   }
 }

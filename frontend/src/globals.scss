@@ -31,6 +31,7 @@ body {
 }
 
 .page-wrapper {
+  position: relative;
   width: 100%;
   height: 100%;
 }
@@ -276,10 +277,6 @@ main.please-wait .loader:after {
 }
 
 @media screen and (max-width: 576px) {
-  .page-wrapper {
-    padding: 0 16px;
-  }
-
   h1 {
     font-size: 40px;
     line-height: 48px;

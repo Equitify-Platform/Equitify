@@ -134,6 +134,9 @@
     &::placeholder {
       color: #6c6e78;
     }
+    @media screen and (max-width: 576px) {
+      width: 100%;
+    }
   }
 
   .modalButtonsContainer {

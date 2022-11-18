@@ -7,6 +7,7 @@ export interface PaginatorSwiperProps extends SwiperProps {
   paginatorType: IPaginatorType;
   children: React.ReactNode;
   posLength: number;
+  pageSize?: number;
 }
 
 export interface PaginatorContainerPropsType {
