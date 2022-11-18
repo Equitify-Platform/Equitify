@@ -2,6 +2,7 @@ import React, { FC } from "react";
 
 import { getStyles } from "./styles";
 
+import { useWindowSize } from "../../hooks/useWindowSize";
 import { IdoStage } from "../../types/IdoStage";
 
 interface CountdownItemProps {
@@ -11,7 +12,8 @@ interface CountdownItemProps {
 }
 
 const CountdownItem: FC<CountdownItemProps> = ({ value, label, idoStage }) => {
-  const styles = getStyles(idoStage);
+  const [width] = useWindowSize();
+  const styles = getStyles(idoStage, width);
   return (
     <div style={styles.item}>
       <div style={styles.value}>{value}</div>
@@ -35,7 +37,8 @@ const ClaimCountdown: FC<IDOCountdownProps> = ({
   seconds,
   idoStage,
 }) => {
-  const styles = getStyles(idoStage);
+  const [width] = useWindowSize();
+  const styles = getStyles(idoStage, width);
   return (
     <>
       <div style={styles.wrapper}>
