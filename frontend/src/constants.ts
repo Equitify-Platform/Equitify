@@ -10,4 +10,5 @@ export const LAUNCHPADS_ADDRESSES: string[] = [
   "ido-launchpad-test29.launchpad-deployer.testnet",
   "ido-launchpad-test30.launchpad-deployer.testnet",
   "ido-launchpad-test32.launchpad-deployer.testnet",
+  "ido-launchpad-test42.launchpad-deployer.testnet",
 ];

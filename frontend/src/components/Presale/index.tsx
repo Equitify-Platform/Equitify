@@ -1,4 +1,4 @@
-import React, { FC, useRef } from "react";
+import React, { FC, useEffect, useRef } from "react";
 import Countdown from "react-countdown";
 
 import styles from "./style.module.scss";
@@ -13,12 +13,16 @@ interface PresaleProps {
 
 const Presale: FC<PresaleProps> = ({ date, idoStage }) => {
   const clockRef = useRef<Countdown>(null);
+  useEffect(() => {
+    if (clockRef.current) clockRef.current.start();
+  }, [date, clockRef.current]);
   return (
     <div className={styles.presaleWrapper}>
       <h4>SALE STARTS IN</h4>
       <Countdown
         ref={clockRef}
         date={date}
+        now={() => Date.now()}
         renderer={({ formatted: f }) => (
           <ClaimCountdown
             days={f.days}
