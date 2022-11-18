@@ -5,6 +5,9 @@
   background: #ffffff;
   border: 1px solid #2f5fbb;
   border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
   .childrenWrapper {
     display: flex;
@@ -37,5 +40,18 @@
 
   &:disabled {
     opacity: var(--disabled);
+  }
+}
+
+@media screen and (max-width: 360px) {
+  .secondaryButton {
+    height: 32px;
+
+    .childrenWrapper {
+      p {
+        font-size: 12px;
+        line-height: 16px;
+      }
+    }
   }
 }
