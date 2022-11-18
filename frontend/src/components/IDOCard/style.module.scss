@@ -34,10 +34,11 @@
   }
 }
 
-@media screen and (max-width: 360px) {
+@media screen and (max-width: 576px) {
   .idoCard {
     width: 328px;
     height: 415px;
+    margin: 0 auto;
 
     .projectImg {
       width: 280px;
