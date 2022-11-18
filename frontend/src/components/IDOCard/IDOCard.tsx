@@ -5,6 +5,8 @@ import styles from "./style.module.scss";
 
 import ArrowIconBlue from "../../assets/icons/arrowRightBlue.svg";
 import ArrowIconWhite from "../../assets/icons/arrowRightWhite.svg";
+import ClaimCountdown from "../ClaimCountdown";
+import { CountdownHOC } from "../common/CountdownHOC/CountdownHOC";
 import SecondaryButton from "../SecondaryButton";
 
 interface IDOCardProps {
@@ -39,7 +41,22 @@ export const IDOCard: FC<IDOCardProps> = ({
         <div className={styles.fieldDataWrapper}>
           <p>{price} NEAR</p>
           <p>${tokenName}</p>
-          <p>{saleStartTime}</p>
+          <p>
+            <CountdownHOC
+              date={new Date(+saleStartTime * 1000)}
+              now={() => Date.now()}
+              renderer={({ formatted: f, completed }) => (
+                <>
+                  {completed && <>00 : 00 : 00 : 00</>}
+                  {!completed && (
+                    <>
+                      {f.days} : {f.hours} : {f.minutes} : {f.seconds}
+                    </>
+                  )}
+                </>
+              )}
+            />
+          </p>
         </div>
       </div>
       <NavLink to={`/ido/${address}`} style={{ textDecoration: "none" }}>

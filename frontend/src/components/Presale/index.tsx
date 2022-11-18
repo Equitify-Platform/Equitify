@@ -5,6 +5,7 @@ import styles from "./style.module.scss";
 
 import { IdoStage } from "../../types/IdoStage";
 import ClaimCountdown from "../ClaimCountdown";
+import { CountdownHOC } from "../common/CountdownHOC/CountdownHOC";
 
 interface PresaleProps {
   date: Date;
@@ -12,15 +13,10 @@ interface PresaleProps {
 }
 
 const Presale: FC<PresaleProps> = ({ date, idoStage }) => {
-  const clockRef = useRef<Countdown>(null);
-  useEffect(() => {
-    if (clockRef.current) clockRef.current.start();
-  }, [date, clockRef.current]);
   return (
     <div className={styles.presaleWrapper}>
       <h4>SALE STARTS IN</h4>
-      <Countdown
-        ref={clockRef}
+      <CountdownHOC
         date={date}
         now={() => Date.now()}
         renderer={({ formatted: f }) => (
