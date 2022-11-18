@@ -9,6 +9,7 @@ interface SecondaryButtonProps
   > {
   isBlue: boolean;
   text: string;
+  isScalable: boolean;
   children?: JSX.Element | JSX.Element[];
 }
 
@@ -16,6 +17,7 @@ const SecondaryButton: FC<SecondaryButtonProps> = ({
   isBlue,
   children,
   text,
+  isScalable,
   ...props
 }) => {
   const blueButtonStyle = {
@@ -27,7 +29,9 @@ const SecondaryButton: FC<SecondaryButtonProps> = ({
 
   return (
     <button
-      className={styles.secondaryButton}
+      className={
+        !isScalable ? styles.secondaryButton : styles.scalableSecondaryButton
+      }
       style={isBlue ? blueButtonStyle : {}}
       {...props}
     >

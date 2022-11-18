@@ -1,4 +1,5 @@
-.secondaryButton {
+.secondaryButton,
+.scalableSecondaryButton {
   width: 100%;
   height: 50px;
   padding: 16px 24px;
@@ -43,8 +44,8 @@
   }
 }
 
-@media screen and (max-width: 360px) {
-  .secondaryButton {
+@media screen and (max-width: 576px) {
+  .scalableSecondaryButton {
     height: 32px;
 
     .childrenWrapper {
