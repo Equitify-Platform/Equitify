@@ -55,7 +55,14 @@ export const NftSelect: FC<NftSelectProps> = (props) => {
       : [];
 
     if (props.idoStage !== IdoStage.CLAIM) {
-      res.push({ value: "0", label: <div>Mint new NFT</div> });
+      res.push({
+        value: "0",
+        label: (
+          <div className={styles.optionWrapper}>
+            <p className={styles.nftName}>Mint new NFT</p>
+          </div>
+        ),
+      });
     }
 
     return res.sort((a, b) => parseInt(a.value) - parseInt(b.value));
