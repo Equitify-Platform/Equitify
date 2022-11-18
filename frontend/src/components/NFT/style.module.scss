@@ -6,11 +6,30 @@
   border-radius: 8px;
   color: var(--primary);
 
+  @media screen and (max-width: 576px) {
+    h4 {
+      font-size: 20px;
+    }
+  }
+
   .wrapper {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-top: 16px;
+
+    @media screen and (max-width: 576px) {
+      flex-direction: column;
+      align-items: start;
+      justify-content: unset;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #d0d7de;
+
+      &:last-child {
+        padding-bottom: unset;
+        border-bottom: unset;
+      }
+    }
 
     .nftDataContainer {
       display: flex;
@@ -28,6 +47,18 @@
         font-weight: 700;
         margin-right: 8px;
       }
+
+      @media screen and (max-width: 576px) {
+        flex-direction: column;
+        align-items: start;
+        justify-content: unset;
+
+        p {
+          font-size: 14px;
+          margin-right: unset !important;
+          width: 310px !important;
+        }
+      }
     }
 
     .buttonsContainer {
@@ -35,6 +66,19 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+
+      @media screen and (max-width: 576px) {
+        width: 310px;
+        justify-content: end;
+        gap: 8px;
+        margin-top: 24px;
+
+        button {
+          width: 88px !important;
+          white-space: nowrap;
+          padding: unset !important;
+        }
+      }
 
       button {
         width: 115px;
@@ -89,6 +133,9 @@
 
     &::placeholder {
       color: #6c6e78;
+    }
+    @media screen and (max-width: 576px) {
+      width: 100%;
     }
   }
 

@@ -14,12 +14,14 @@ SwiperCore.use([EffectFlip, Navigation, Pagination]);
 export const SwiperWithPaginator: FC<PaginatorSwiperProps> = ({
   children,
   posLength,
+  pageSize,
   paginatorType,
   ...props
 }) => {
   const { isMobile } = useMatchBreakpoints();
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const withPaginator = Math.ceil(posLength / SWIPER_ITEMS_LIMIT) > 1;
+  const withPaginator =
+    Math.ceil(posLength / (pageSize || SWIPER_ITEMS_LIMIT)) > 1;
   return (
     <SwiperWrapper
       className="home-slider"
@@ -37,7 +39,7 @@ export const SwiperWithPaginator: FC<PaginatorSwiperProps> = ({
         <PaginatorContainer
           paginatorType={paginatorType}
           totalCount={posLength}
-          pageSize={SWIPER_ITEMS_LIMIT}
+          pageSize={pageSize || SWIPER_ITEMS_LIMIT}
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
         />

@@ -1,9 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { SwiperSlide } from "swiper/react";
 
 import styles from "./style.module.scss";
 
+import { SWIPER_ITEMS_LIMIT } from "../../components/common/SwiperWithPaginator/constants";
+import { SwiperWithPaginator } from "../../components/common/SwiperWithPaginator/SwiperWithPaginator";
 import { Loader } from "../../components/Loader";
 import NFT from "../../components/NFT/NFT";
+import { useSeparatedDataArray } from "../../hooks/useSeparatedDataArray";
 import {
   getLaunchpads,
   NftType,
@@ -21,54 +25,70 @@ function Claim() {
     return project.nft.nfts.filter((nft) => nft.claimed === false);
   };
 
+  const projectsWithUnmintedNFTs = useMemo(() => {
+    return launchpads.projects.filter((project) => {
+      const unclaimedNfts = getUnclaimedNfts(project);
+      return unclaimedNfts.length > 0;
+    });
+  }, [launchpads.projects]);
+
+  const separatedProjectsWithUnmintedNFTs = useSeparatedDataArray<ProjectType>(
+    projectsWithUnmintedNFTs,
+    SWIPER_ITEMS_LIMIT
+  );
+
   useEffect(() => {
     dispatch(getLaunchpads(wallet));
   }, [dispatch, wallet]);
 
   return (
     <Loader isLoading={isLoading}>
-      <div className="page-wrapper with-padding">
-        <div className={styles.topSection}>
-          <h3>Claim</h3>
-          <p>Here you can find the list of all your purchases</p>
-        </div>
-        <div className={styles.nftWrapper}>
-          {launchpads.projects.map((project) => {
-            const unclaimedNfts = getUnclaimedNfts(project);
-            return (
-              unclaimedNfts.length > 0 && (
-                <NFT
-                  key={project.address}
-                  nftContract={project.nft}
-                  projectName={project.projectStruct.projectName}
-                  tokenSymbol={project.token.symbol}
-                  idoAddress={project.address}
-                  setIsLoading={setIsLoading}
-                  wallet={wallet}
-                />
-              )
-            );
-            // eslint-disable-next-line no-lone-blocks
-            {
-              /*
-           return project.nft.nfts.map((nft) => {
-              return (
-                !nft.claimed && (
-                  <NFT
-                    nftAddress={project.nft.address}
-                    key={`${project.nft.address}${nft.tokenId}`}
-                    nftID={nft.tokenId}
-                    idoAddress={project.address}
-                    claimableAmount={nft.claimable}
-                    setIsLoading={setIsLoading}
-                    wallet={wallet}
-                  />
-                )
-              );
-            });
-          */
-            }
-          })}
+      <div className="page-wrapper">
+        <div className="content-wrapper">
+          <div className={styles.topSection}>
+            <h3>Claim</h3>
+            <p>Here you can find the list of all your purchases</p>
+          </div>
+          <div className={styles.nftWrapper}>
+            <SwiperWithPaginator
+              paginatorType="num"
+              posLength={projectsWithUnmintedNFTs.length || 1}
+            >
+              {separatedProjectsWithUnmintedNFTs.map((projectsArray, index) => (
+                <SwiperSlide key={index}>
+                  <div className={styles.cardsContainer}>
+                    {projectsArray.map((project) => (
+                      <NFT
+                        key={project.nft.address}
+                        nftContract={project.nft}
+                        projectName={project.projectStruct.projectName}
+                        tokenSymbol={project.token.symbol}
+                        idoAddress={project.address}
+                        setIsLoading={setIsLoading}
+                        wallet={wallet}
+                      />
+                    ))}
+                  </div>
+                </SwiperSlide>
+              ))}
+            </SwiperWithPaginator>
+
+            {/*// return project.nft.nfts.map((nft) => {*/}
+            {/*//    return (*/}
+            {/*//      !nft.claimed && (*/}
+            {/*//        <NFT*/}
+            {/*//          nftAddress={project.nft.address}*/}
+            {/*//          key={`${project.nft.address}${nft.tokenId}`}*/}
+            {/*//          nftID={nft.tokenId}*/}
+            {/*//          idoAddress={project.address}*/}
+            {/*//          claimableAmount={nft.claimable}*/}
+            {/*//          setIsLoading={setIsLoading}*/}
+            {/*//          wallet={wallet}*/}
+            {/*//        />*/}
+            {/*//      )*/}
+            {/*//    );*/}
+            {/*//  });*/}
+          </div>
         </div>
       </div>
     </Loader>
