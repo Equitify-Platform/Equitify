@@ -72,22 +72,6 @@ function Claim() {
                 </SwiperSlide>
               ))}
             </SwiperWithPaginator>
-
-            {/*// return project.nft.nfts.map((nft) => {*/}
-            {/*//    return (*/}
-            {/*//      !nft.claimed && (*/}
-            {/*//        <NFT*/}
-            {/*//          nftAddress={project.nft.address}*/}
-            {/*//          key={`${project.nft.address}${nft.tokenId}`}*/}
-            {/*//          nftID={nft.tokenId}*/}
-            {/*//          idoAddress={project.address}*/}
-            {/*//          claimableAmount={nft.claimable}*/}
-            {/*//          setIsLoading={setIsLoading}*/}
-            {/*//          wallet={wallet}*/}
-            {/*//        />*/}
-            {/*//      )*/}
-            {/*//    );*/}
-            {/*//  });*/}
           </div>
         </div>
       </div>
