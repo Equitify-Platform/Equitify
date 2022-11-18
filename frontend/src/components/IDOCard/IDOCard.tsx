@@ -44,6 +44,7 @@ export const IDOCard: FC<IDOCardProps> = ({
       </div>
       <NavLink to={`/ido/${address}`} style={{ textDecoration: "none" }}>
         <SecondaryButton
+          isScalable={true}
           isBlue={false}
           text="Purchase"
           onMouseEnter={() => setArrowIcon(ArrowIconWhite)}

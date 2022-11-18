@@ -170,6 +170,7 @@ const ExchangeCard: FC<ExchangeCardProps> = ({
       )}
       <div className={styles.buttonWrapper}>
         <SecondaryButton
+          isScalable={false}
           onClick={
             idoStage === IdoStage.SALE ? () => purchase() : () => claim()
           }

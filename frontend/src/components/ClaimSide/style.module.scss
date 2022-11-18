@@ -32,3 +32,13 @@
     color: #2f5fbb;
   }
 }
+
+@media screen and (max-width: 576px) {
+  .claimSide {
+    width: 100%;
+    height: auto;
+    max-width: 328px;
+    margin: 0 auto;
+    justify-content: center;
+  }
+}

@@ -40,3 +40,23 @@
   align-items: center;
   justify-content: space-between;
 }
+
+@media screen and (max-width: 576px) {
+  .exchangeSide {
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
+    margin: 0 auto;
+
+    .projectInfo {
+      margin-top: 0;
+
+      .projectImg {
+        width: 328px;
+        height: 191px;
+        border-radius: 4px;
+        margin-bottom: 16px;
+      }
+    }
+  }
+}

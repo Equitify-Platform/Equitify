@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink, useParams } from "react-router-dom";
 
 import styles from "./style.module.scss";
@@ -7,7 +7,6 @@ import ArrowIconBlue from "../../assets/icons/arrowRightBlue.svg";
 import { ClaimSide } from "../../components/ClaimSide/ClaimSide";
 import { ExchangeSide } from "../../components/ExchangeSide/ExchangeSide";
 import { Loader } from "../../components/Loader";
-import { Option } from "../../components/NftSelect";
 import Presale from "../../components/Presale";
 import { getLaunchpads } from "../../store/actions/launchpads.actions";
 import { getBalance } from "../../store/actions/wallet.actions";
@@ -76,7 +75,6 @@ function IDO() {
               idoStage={idoStage}
               symbol={launchpad?.token.symbol ?? ""}
               balance={parseFloat(balance).toFixed(2)}
-              price={launchpad?.projectStruct.price ?? "0"}
               projectName={launchpad?.projectStruct.projectName ?? ""}
               projectDescription={
                 launchpad?.projectStruct.projectDescription ?? ""

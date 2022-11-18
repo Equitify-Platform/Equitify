@@ -61,3 +61,10 @@
     margin: 24px 0 40px 0;
   }
 }
+
+@media screen and (max-width: 576px) {
+  .exchangeCard {
+    width: 328px;
+    height: 434px;
+  }
+}
