@@ -30,7 +30,7 @@ function IDOList() {
   );
 
   return (
-    <div className="page-wrapper">
+    <div className="page-wrapper" style={{ padding: 0 }}>
       <div className={styles.topSection}>
         <div className={styles.topSectionText}>
           <h1>Lorem ipsum dolor sit amet</h1>
@@ -66,17 +66,7 @@ function IDOList() {
             </SwiperSlide>
           ))}
         </SwiperWithPaginator>
-        {/*{launchpads.projects.map((p) => (*/}
-        {/*  <IDOCard*/}
-        {/*    imageURI={IDOImg}*/}
-        {/*    address={p.address}*/}
-        {/*    key={p.address}*/}
-        {/*    tokenName={p.token.name}*/}
-        {/*    {...p.projectStruct}*/}
-        {/*  />*/}
-        {/*))}*/}
       </div>
-      <div className={styles.idoNavigation}></div>
     </div>
   );
 }
