@@ -1,31 +1,27 @@
-.wrapperTop {
-  display: flex;
-  width: 100%;
-  justify-content: space-between;
-}
-
-.stakingDataWrapper {
-  width: 45%;
-  border: 1px solid black;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-
-  div {
-    border: 1px solid gray;
-    width: 175px;
-    height: 100px;
-    text-align: center;
+.topSection {
+  padding-top: 56px;
+  padding-bottom: 40px;
+  @media screen and (max-width: 576px) {
+    padding-top: unset;
+    padding-bottom: 32px;
+    p {
+      font-size: 14px;
+    }
+    h3 {
+      font-size: 24px;
+    }
   }
 }
 
-.buttonsWrapper {
-  width: 300px;
-  padding: 1rem;
-  margin: 3rem auto;
-  border: 1px solid black;
+.navbar {
+  width: 100%;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 40px;
 }

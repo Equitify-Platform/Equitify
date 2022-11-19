@@ -1,47 +1,30 @@
-import React, { useEffect } from "react";
+import React, { useState } from "react";
 
 import styles from "./style.module.scss";
 
-import {
-  getStakingInfo,
-  getStakingPersonal,
-} from "../../store/actions/staking.actions";
-import { useAppDispatch, useStaking } from "../../store/hooks";
+import { Loader } from "../../components/Loader";
 
 function Staking() {
-  const dispatch = useAppDispatch();
-  const staking = useStaking();
-
-  useEffect(() => {
-    dispatch(getStakingInfo());
-    dispatch(getStakingPersonal(""));
-  }, [dispatch]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   return (
-    <div className="page-wrapper">
-      <h2>Stake your tokens</h2>
-      <div className={styles.wrapperTop}>
-        <div className={styles.stakingDataWrapper}>
-          <p>Number of stakers - {staking.info.numberOfStakers}</p>
-          <p>Total - {staking.info.totalStaked}</p>
-          <p>APY - {staking.info.APY}</p>
-        </div>
-        <div className={styles.stakingDataWrapper}>
-          <div>
-            <p>Staked</p>
-            <p>{staking.personal.staked}</p>
+    <Loader isLoading={isLoading}>
+      <div className="page-wrapper">
+        <div className="content-wrapper">
+          <div className={styles.topSection}>
+            <h3>Offers</h3>
           </div>
-          <div>
-            <p>Rewards</p>
-            <p>{staking.personal.rewards}</p>
+          <div className={styles.navbar}>
+            <div className={styles.nav}>
+              <div>Offers</div>
+              <div>Protections</div>
+              <div>Cancelled</div>
+            </div>
+            <div>Refresh</div>
           </div>
         </div>
       </div>
-      <div className={styles.buttonsWrapper}>
-        <button>Stake</button>
-        <button>Withdraw</button>
-      </div>
-    </div>
+    </Loader>
   );
 }
 

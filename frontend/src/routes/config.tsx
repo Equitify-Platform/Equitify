@@ -16,7 +16,7 @@ export const ROUTES_CONFIG: RouteObject[] = [
     element: <IDO />,
   },
   {
-    path: "/staking",
+    path: "/offers",
     element: <Staking />,
   },
   {
