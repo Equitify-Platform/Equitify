@@ -4,7 +4,7 @@ import { RouteObject } from "react-router-dom";
 import Claim from "../pages/Claim/Claim";
 import IDO from "../pages/IDO/IDO";
 import IDOList from "../pages/IDOList/IDOList";
-import Staking from "../pages/Staking/Staking";
+import Offers from "../pages/Offers/Offers";
 
 export const ROUTES_CONFIG: RouteObject[] = [
   {
@@ -17,7 +17,7 @@ export const ROUTES_CONFIG: RouteObject[] = [
   },
   {
     path: "/offers",
-    element: <Staking />,
+    element: <Offers />,
   },
   {
     path: "/claim",

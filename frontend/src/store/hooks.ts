@@ -15,3 +15,6 @@ export const useLaunchpad = (address: string) =>
   );
 export const useStaking = () => useAppSelector((store) => store.staking);
 export const useWallet = () => useAppSelector((store) => store.wallet);
+export const useOffers = () => useAppSelector((store) => store.equitify.offers);
+export const useProtections = () =>
+  useAppSelector((store) => store.equitify.protections);
