@@ -1,3 +1,5 @@
+import { parseUnits } from "@ethersproject/units";
+import BN from "bn.js";
 import React, {
   Dispatch,
   FC,
@@ -16,13 +18,24 @@ import PlusSvg from "../../assets/icons/Plus.svg";
 import RefreshSvg from "../../assets/icons/Refresh.svg";
 import { Loader } from "../../components/Loader";
 import SecondaryButton from "../../components/SecondaryButton";
+import { NATIVE_DECIMALS } from "../../constants";
+import { OfferCreatorType } from "../../contracts/equitifyPlatform";
 import { Wallet } from "../../near-wallet";
 import {
+  acceptOfferFromGuaranteeProvider,
+  acceptOfferFromNftProvider,
+  cancelOrder,
+  createOfferFromGuaranteeProvider,
+  createOfferFromNftProvider,
   getOffers,
   getProtections,
+  protectionClaimGuarantee,
+  protectionClaimNft,
 } from "../../store/actions/equitify.actions";
+import { getLaunchpads } from "../../store/actions/launchpads.actions";
 import {
   useAppDispatch,
+  useLaunchpads,
   useOffers,
   useProtections,
   useWallet,
@@ -70,6 +83,7 @@ function Offers() {
   >((wallet, dispatch1) => {
     setIsLoading(true);
     Promise.all([
+      dispatch1(getLaunchpads(wallet)),
       dispatch1(getOffers(wallet)),
       dispatch1(getProtections(wallet)),
     ]).then(() => setIsLoading(false));
@@ -78,16 +92,6 @@ function Offers() {
   useEffect(() => {
     refresh(wallet, dispatch);
   }, [wallet, dispatch, refresh]);
-
-  const filteredOffers = useMemo(
-    () =>
-      offers
-        .filter((o) =>
-          o.nftContractId.toLowerCase().includes(nftAddress.toLowerCase())
-        )
-        .filter((o) => o.nftId.toLowerCase().includes(nftId.toLowerCase())),
-    [offers, nftAddress, nftId]
-  );
 
   const filteredProtections = useMemo(
     () =>
@@ -105,6 +109,22 @@ function Offers() {
           p.nftProviderId.toLowerCase().includes(nftId.toLowerCase())
         ),
     [protections, wallet.accountId, nftAddress, nftId]
+  );
+
+  const filteredOffers = useMemo(
+    () =>
+      offers
+        .filter((o) =>
+          o.protection
+            ? new Date(parseInt(o.protection.protectionStart) * 1000) <
+              new Date()
+            : true
+        )
+        .filter((o) =>
+          o.nftContractId.toLowerCase().includes(nftAddress.toLowerCase())
+        )
+        .filter((o) => o.nftId.toLowerCase().includes(nftId.toLowerCase())),
+    [offers, nftAddress, nftId]
   );
 
   return (
@@ -179,15 +199,17 @@ function Offers() {
             <>
               <div className={styles.opened}>Opened</div>
               <div className={styles.offers}>
-                {filteredOffers.map((v, i) => (
+                {filteredOffers.map((v) => (
                   <Offer
+                    creatorType={v.offerCreatorType}
+                    offerId={v.id}
                     nftAddress={v.nftContractId}
                     nftId={v.nftId}
-                    name={`Offer ${i + 1}`}
+                    name={`Offer ${v.id}`}
                     creator={v.offerCreatorId}
                     fee={v.nearFeeAmount}
                     guarantee={v.nearGuaranteeAmount}
-                    key={`${v.offerCreatorId}${v.nftContractId}${v.nftId}`}
+                    key={v.id}
                     protectionStart=""
                     protectionDuration={v.protectionDuration}
                     stage={Stage.Opened}
@@ -199,37 +221,59 @@ function Offers() {
             <>
               <div className={styles.opened}>Ready for Claim</div>
               <div className={styles.offers}>
-                {filteredProtections.map((v, i) => (
-                  <Offer
-                    nftAddress={v.offer.nftContractId}
-                    nftId={v.offer.nftId}
-                    name={`Offer ${i + 1}`}
-                    creator={v.offer.offerCreatorId}
-                    fee={v.offer.nearFeeAmount}
-                    guarantee={v.offer.nearGuaranteeAmount}
-                    key={`${v.offer.offerCreatorId}${v.offer.nftContractId}${v.offer.nftId}`}
-                    protectionStart={v.protectionStart}
-                    protectionDuration={v.offer.protectionDuration}
-                    stage={Stage.Claim}
-                  />
-                ))}
+                {filteredProtections
+                  .filter(
+                    (p) =>
+                      new Date() >
+                      new Date(
+                        parseInt(p.protectionStart) * 1000 +
+                          parseInt(p.offer.protectionDuration) * 1000
+                      )
+                  )
+                  .map((v, i) => (
+                    <Offer
+                      creatorType={v.offer.offerCreatorType}
+                      offerId={v.offerId}
+                      nftAddress={v.offer.nftContractId}
+                      nftId={v.offer.nftId}
+                      name={`Offer ${v.offerId}`}
+                      creator={v.offer.offerCreatorId}
+                      fee={v.offer.nearFeeAmount}
+                      guarantee={v.offer.nearGuaranteeAmount}
+                      key={v.offerId}
+                      protectionStart={v.protectionStart}
+                      protectionDuration={v.offer.protectionDuration}
+                      stage={Stage.Claim}
+                    />
+                  ))}
               </div>
               <div className={styles.waiting}>Waiting for Claim</div>
               <div className={styles.offers}>
-                {filteredProtections.map((v, i) => (
-                  <Offer
-                    nftAddress={v.offer.nftContractId}
-                    nftId={v.offer.nftId}
-                    name={`Offer ${i + 1}`}
-                    creator={v.offer.offerCreatorId}
-                    fee={v.offer.nearFeeAmount}
-                    guarantee={v.offer.nearGuaranteeAmount}
-                    key={`${v.offer.offerCreatorId}${v.offer.nftContractId}${v.offer.nftId}`}
-                    protectionStart={v.protectionStart}
-                    protectionDuration={v.offer.protectionDuration}
-                    stage={Stage.Waiting}
-                  />
-                ))}
+                {filteredProtections
+                  .filter(
+                    (p) =>
+                      new Date() <
+                      new Date(
+                        parseInt(p.protectionStart) * 1000 +
+                          parseInt(p.offer.protectionDuration) * 1000
+                      )
+                  )
+                  .map((v, i) => (
+                    <Offer
+                      creatorType={v.offer.offerCreatorType}
+                      offerId={v.offerId}
+                      nftAddress={v.offer.nftContractId}
+                      nftId={v.offer.nftId}
+                      name={`Offer ${v.offerId}`}
+                      creator={v.offer.offerCreatorId}
+                      fee={v.offer.nearFeeAmount}
+                      guarantee={v.offer.nearGuaranteeAmount}
+                      key={v.offerId}
+                      protectionStart={v.protectionStart}
+                      protectionDuration={v.offer.protectionDuration}
+                      stage={Stage.Waiting}
+                    />
+                  ))}
               </div>
             </>
           ) : null}
@@ -246,6 +290,7 @@ enum Stage {
 }
 
 interface OfferProps {
+  offerId: string;
   name: string;
   creator: string;
   nftAddress: string;
@@ -255,6 +300,7 @@ interface OfferProps {
   stage: Stage;
   protectionStart: string;
   protectionDuration: string;
+  creatorType: OfferCreatorType;
 }
 
 const Offer: FC<OfferProps> = ({
@@ -267,15 +313,73 @@ const Offer: FC<OfferProps> = ({
   stage,
   protectionStart,
   protectionDuration,
+  offerId,
+  creatorType,
 }) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const countdownRef = useRef<any>(null);
+  const { wallet } = useWallet();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     if (countdownRef.current && protectionDuration && protectionStart) {
       countdownRef.current.start();
     }
   }, [countdownRef.current, protectionStart, protectionDuration]);
+
+  const cancelOrderClick = async () => {
+    await dispatch(cancelOrder({ wallet, offer_id: offerId }));
+  };
+
+  const { projects } = useLaunchpads();
+
+  const haveThisNft = () =>
+    !!projects
+      .find((p) => p.nft.address.toLowerCase() === nftAddress.toLowerCase())
+      ?.nft.nfts.find((n) => n.tokenId === nftId);
+
+  const acceptOrderClick = async () => {
+    if (creatorType === OfferCreatorType.NFT_PROVIDER) {
+      await dispatch(
+        acceptOfferFromGuaranteeProvider({
+          wallet,
+          args: {
+            offer_id: offerId,
+            near_guarantee_amount: parseUnits(
+              guarantee,
+              NATIVE_DECIMALS
+            ).toString(),
+          },
+        })
+      );
+    } else {
+      await dispatch(
+        acceptOfferFromNftProvider({
+          wallet,
+          args: {
+            nft_id: nftId,
+            offer_id: offerId,
+            nft_contract_id: nftAddress,
+            near_fee_amount: parseUnits(fee, NATIVE_DECIMALS).toString(),
+          },
+        })
+      );
+    }
+  };
+
+  const claimNft = async () => {
+    await dispatch(protectionClaimNft({ wallet, offerId }));
+  };
+
+  const claimGuarantee = async () => {
+    await dispatch(protectionClaimGuarantee({ wallet, offerId }));
+  };
+
+  const canClaim = () =>
+    (wallet.accountId?.toLowerCase() === creator &&
+      creatorType === OfferCreatorType.NFT_PROVIDER) ||
+    (wallet.accountId?.toLowerCase() !== creator &&
+      creatorType !== OfferCreatorType.NFT_PROVIDER);
 
   return (
     <div className={styles.offerWrapper}>
@@ -288,7 +392,8 @@ const Offer: FC<OfferProps> = ({
                 now={Date.now}
                 date={
                   new Date(
-                    parseInt(protectionStart) + parseInt(protectionDuration)
+                    parseInt(protectionStart) * 1000 +
+                      parseInt(protectionDuration) * 1000
                   )
                 }
                 renderer={({ formatted: f }) => (
@@ -300,13 +405,50 @@ const Offer: FC<OfferProps> = ({
               for Claim
             </div>
           )}
-          {stage !== Stage.Waiting && (
-            <SecondaryButton
-              isBlue={true}
-              text={`${stage === Stage.Opened ? "Accept" : "Claim"}`}
-              isScalable={true}
-            />
-          )}
+          {stage === Stage.Opened &&
+            (creator.toLowerCase() === wallet.accountId?.toLowerCase() ? (
+              <SecondaryButton
+                isBlue={false}
+                text="Cancel"
+                isScalable={true}
+                onClick={cancelOrderClick}
+              />
+            ) : wallet.accountId &&
+              (creatorType === OfferCreatorType.NFT_PROVIDER ||
+                (creatorType === OfferCreatorType.GUARANTEE_PROVIDER &&
+                  haveThisNft())) ? (
+              <SecondaryButton
+                isBlue={true}
+                text={`Accept as ${
+                  creatorType === OfferCreatorType.GUARANTEE_PROVIDER
+                    ? "as NFT provider"
+                    : "as Guarantee provider"
+                }`}
+                onClick={acceptOrderClick}
+                isScalable={true}
+              />
+            ) : null)}
+          {stage === Stage.Claim &&
+            (canClaim() ? (
+              <>
+                <SecondaryButton
+                  isBlue={false}
+                  text="Claim NFT"
+                  onClick={claimNft}
+                  isScalable={true}
+                />
+                <SecondaryButton
+                  isBlue={true}
+                  text="Claim Guarantee"
+                  onClick={claimGuarantee}
+                  isScalable={true}
+                />
+              </>
+            ) : (
+              <div className={styles.timerLabel}>
+                Waiting for NFT provider to claim
+              </div>
+            ))}
         </div>
       </div>
       <div className={styles.offerDesc}>
@@ -342,6 +484,40 @@ const CreateOfferModal: FC<CreateOfferModalProps> = ({ isShow, setIsShow }) => {
   const [guaranteeAmount, setGuaranteeAmount] = useState<string>("");
   const [duration, setDuration] = useState<string>("");
   const [createAs, setCreateAs] = useState<string>("nftBuyer");
+  const dispatch = useAppDispatch();
+  const { wallet } = useWallet();
+
+  const createOffer = async () => {
+    const args = {
+      duration: new BN(parseInt(duration))
+        .mul(new BN(60))
+        .mul(new BN(1_000_000_000))
+        .toString(),
+      near_guarantee_amount: parseUnits(
+        guaranteeAmount,
+        NATIVE_DECIMALS
+      ).toString(),
+      near_fee_amount: parseUnits(feeAmount, NATIVE_DECIMALS).toString(),
+      nft_contract_id: nftAddress,
+      nft_id: nftId,
+    };
+
+    if (createAs === "nftBuyer") {
+      await dispatch(
+        createOfferFromGuaranteeProvider({
+          wallet,
+          args,
+        })
+      );
+    } else {
+      await dispatch(
+        createOfferFromNftProvider({
+          wallet,
+          args,
+        })
+      );
+    }
+  };
 
   return isShow ? (
     <div className={styles.overlay} onClick={() => setIsShow(false)}>
@@ -398,7 +574,7 @@ const CreateOfferModal: FC<CreateOfferModalProps> = ({ isShow, setIsShow }) => {
         <FilterInput
           value={duration}
           setValue={setDuration}
-          placeholder="Enter NFT address"
+          placeholder="Enter durations (minutes)"
           width="100%"
         />
         <div className={styles.modalButtons}>
@@ -408,7 +584,12 @@ const CreateOfferModal: FC<CreateOfferModalProps> = ({ isShow, setIsShow }) => {
             isScalable={true}
             onClick={() => setIsShow(false)}
           />
-          <SecondaryButton isBlue={true} text="Create" isScalable={true} />
+          <SecondaryButton
+            isBlue={true}
+            text="Create"
+            isScalable={true}
+            onClick={createOffer}
+          />
         </div>
       </div>
     </div>

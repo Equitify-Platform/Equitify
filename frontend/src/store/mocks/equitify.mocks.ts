@@ -7,6 +7,7 @@ import {
 export const getOffersMock = (): Promise<Offer[]> =>
   Promise.resolve([
     {
+      id: "1",
       offerCreatorId: "polcraz.testnet",
       offerCreatorType: OfferCreatorType.GUARANTEE_PROVIDER,
       nftId: "1",
@@ -29,6 +30,7 @@ export const getProtectionsMock = (): Promise<Protection[]> =>
       isNftClaimed: false,
       protectionStart: "1668942747000",
       offer: {
+        id: "1",
         offerCreatorId: "polcraz.testnet",
         offerCreatorType: OfferCreatorType.GUARANTEE_PROVIDER,
         nftId: "1",

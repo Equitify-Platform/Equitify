@@ -73,6 +73,10 @@ const NFT: FC<NFTProps> = ({
                 {parseFloat(nft.claimable).toFixed(4) + tokenSymbol}
               </p>
               <p>
+                <span>NFT Address:</span>
+                {nftContract.address}
+              </p>
+              <p>
                 <span>NFT ID:</span>
                 {nft.tokenId}
               </p>

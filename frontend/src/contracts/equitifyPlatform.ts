@@ -43,6 +43,8 @@ export interface AcceptOfferFromNftProviderArgs
   offer_id: string;
   approval_id?: string;
   near_fee_amount: string;
+  nft_id: string;
+  nft_contract_id: string;
 }
 
 export interface AcceptOfferFromGuaranteeProviderArgs
@@ -57,6 +59,7 @@ export enum OfferCreatorType {
 }
 
 export interface Offer {
+  id: string;
   offerCreatorId: string;
   offerCreatorType: OfferCreatorType;
   nftId: string;
@@ -66,6 +69,7 @@ export interface Offer {
   protectionDuration: string;
   isActive: boolean;
   isCancelled: boolean;
+  protection?: Protection;
 }
 
 export interface Protection {
@@ -111,31 +115,88 @@ export class EquitifyPlatform {
   public async createOfferFromNftProvider(
     args: CreateOfferFromNftProviderArgs
   ) {
-    return await this.wallet.call(
-      this.contractId,
-      "create_offer_from_nft_provider",
-      args,
-      THIRTY_TGAS,
-      args.near_fee_amount
-    );
+    return await this.wallet.multicall([
+      {
+        receiverId: args.nft_contract_id,
+        actions: [
+          {
+            type: "FunctionCall",
+            params: {
+              methodName: "nft_approve",
+              args: {
+                token_id: args.nft_id,
+                account_id: this.contractId,
+              },
+              gas: THIRTY_TGAS,
+              deposit: "1",
+            },
+          },
+        ],
+      },
+      {
+        receiverId: this.contractId,
+        actions: [
+          {
+            type: "FunctionCall",
+            params: {
+              methodName: "create_offer_from_nft_provider",
+              args,
+              gas: THIRTY_TGAS,
+              deposit: args.near_fee_amount,
+            },
+          },
+        ],
+      },
+    ]);
   }
 
   public async cancelOrder(offer_id: string) {
-    return await this.wallet.call(this.contractId, "cancel_order", {
-      offer_id,
-    });
+    return await this.wallet.call(
+      this.contractId,
+      "cancel_order",
+      {
+        offer_id,
+      },
+      THIRTY_TGAS
+    );
   }
 
   public async acceptOfferFromNftProvider(
     args: AcceptOfferFromNftProviderArgs
   ) {
-    return await this.wallet.call(
-      this.contractId,
-      "accept_offer_from_nft_provider",
-      args,
-      THIRTY_TGAS,
-      args.near_fee_amount
-    );
+    return await this.wallet.multicall([
+      {
+        receiverId: args.nft_contract_id,
+        actions: [
+          {
+            type: "FunctionCall",
+            params: {
+              methodName: "nft_approve",
+              args: {
+                token_id: args.nft_id,
+                account_id: this.contractId,
+              },
+              gas: THIRTY_TGAS,
+              deposit: "1",
+            },
+          },
+        ],
+      },
+      {
+        receiverId: this.contractId,
+        actions: [
+          {
+            type: "FunctionCall",
+            params: {
+              methodName: "accept_offer_from_nft_provider",
+              args,
+              gas: THIRTY_TGAS,
+              deposit: args.near_fee_amount,
+            },
+          },
+        ],
+      },
+    ]);
   }
 
   public async acceptOfferFromGuaranteeProvider(
