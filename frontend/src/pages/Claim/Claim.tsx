@@ -59,6 +59,7 @@ function Claim() {
                   <div className={styles.cardsContainer}>
                     {projectsArray.map((project) => (
                       <NFT
+                        ftAddress={project.token.address}
                         key={project.nft.address}
                         nftContract={project.nft}
                         projectName={project.projectStruct.projectName}

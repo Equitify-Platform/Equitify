@@ -37,7 +37,7 @@ function IDOList() {
       <div className="content-wrapper">
         <div className={styles.topSection}>
           <div className={styles.topSectionText}>
-            <h1>Lorem ipsum dolor sit amet</h1>
+            <h1>Equitify</h1>
             <p>
               Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
               eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut

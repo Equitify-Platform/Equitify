@@ -19,6 +19,7 @@ interface ExchangeCardProps {
   balance: string;
   symbol: string;
   projectName: string;
+  ftAddress: string;
 }
 
 const ExchangeCard: FC<ExchangeCardProps> = ({
@@ -27,6 +28,7 @@ const ExchangeCard: FC<ExchangeCardProps> = ({
   balance,
   symbol,
   projectName,
+  ftAddress,
 }) => {
   const { address } = useParams<{ address: string }>();
   const launchpad = useLaunchpad(address ?? "");
@@ -95,7 +97,12 @@ const ExchangeCard: FC<ExchangeCardProps> = ({
     try {
       setIsLoading(true);
       await dispatch(
-        claimTokens({ tokenId: option?.id || "0", nftAddress, wallet })
+        claimTokens({
+          tokenId: option?.id || "0",
+          nftAddress,
+          wallet,
+          ftAddress,
+        })
       );
     } catch (e) {
       console.error("Error while claiming tokens:", e);

@@ -74,14 +74,15 @@ export const purchaseTokens = createAsyncThunk<void, PurchaseTokensParams>(
 
 export type ClaimTokensParams = {
   wallet: Wallet;
+  ftAddress: string;
   nftAddress: string;
   tokenId: string;
 };
 
 export const claimTokens = createAsyncThunk<void, ClaimTokensParams>(
   "claimTokens",
-  async ({ nftAddress, tokenId, wallet }) => {
-    return await claimTokensNear(wallet, nftAddress, tokenId);
+  async ({ nftAddress, tokenId, wallet, ftAddress }) => {
+    return await claimTokensNear(wallet, ftAddress, nftAddress, tokenId);
   }
 );
 

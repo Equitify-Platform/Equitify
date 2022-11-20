@@ -17,6 +17,7 @@ interface NFTProps {
   projectName: string;
   tokenSymbol: string;
   idoAddress: string;
+  ftAddress: string;
   setIsLoading: Dispatch<SetStateAction<boolean>>;
   wallet: Wallet;
 }
@@ -26,6 +27,7 @@ const NFT: FC<NFTProps> = ({
   tokenSymbol,
   nftContract,
   idoAddress,
+  ftAddress,
   setIsLoading,
   wallet,
 }) => {
@@ -38,7 +40,9 @@ const NFT: FC<NFTProps> = ({
   const onClaim = async (nftID: string) => {
     setIsLoading(true);
     try {
-      await dispatch(claimTokens({ tokenId: nftID, nftAddress, wallet }));
+      await dispatch(
+        claimTokens({ tokenId: nftID, nftAddress, wallet, ftAddress })
+      );
     } catch (e) {
       console.error("Error while claiming:", e);
     } finally {
