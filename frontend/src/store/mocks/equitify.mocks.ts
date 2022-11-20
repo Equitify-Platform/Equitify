@@ -27,5 +27,17 @@ export const getProtectionsMock = (): Promise<Protection[]> =>
       guaranteeProviderId: "polcraz.testnet",
       isGuaranteeClaimed: false,
       isNftClaimed: false,
+      protectionStart: "1668942747000",
+      offer: {
+        offerCreatorId: "polcraz.testnet",
+        offerCreatorType: OfferCreatorType.GUARANTEE_PROVIDER,
+        nftId: "1",
+        nftContractId: "nft-test.testnet",
+        nearFeeAmount: "1000",
+        nearGuaranteeAmount: "3000",
+        protectionDuration: "3600000",
+        isActive: true,
+        isCancelled: false,
+      },
     },
   ]);

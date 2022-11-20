@@ -74,6 +74,8 @@ export interface Protection {
   guaranteeProviderId: string;
   isGuaranteeClaimed: boolean;
   isNftClaimed: boolean;
+  protectionStart: string;
+  offer: Offer;
 }
 
 export class EquitifyPlatform {

@@ -1,9 +1,10 @@
 import { formatUnits, parseUnits } from "@ethersproject/units";
 import BN from "bn.js";
 
-import { LAUNCHPADS_ADDRESSES, NATIVE_DECIMALS } from "../../constants";
+import { LAUNCHPAD_FACTORY_ADDRESS, NATIVE_DECIMALS } from "../../constants";
 import { FungibleToken } from "../../contracts/ft";
 import { Launchpad } from "../../contracts/launchpad";
+import { LaunchpadFactory } from "../../contracts/launchpad-factory";
 import { NonFungibleToken } from "../../contracts/nft";
 import { Wallet } from "../../near-wallet";
 import { NftType, ProjectType } from "../actions/launchpads.actions";
@@ -11,8 +12,10 @@ import { NftType, ProjectType } from "../actions/launchpads.actions";
 export const getLaunchpadsNear = async (
   wallet: Wallet
 ): Promise<ProjectType[]> => {
+  const factory = new LaunchpadFactory(LAUNCHPAD_FACTORY_ADDRESS, wallet);
+  const addresses = await factory.getLaunchpads();
   return Promise.all(
-    LAUNCHPADS_ADDRESSES.map<Promise<ProjectType>>(async (address) => {
+    addresses.map<Promise<ProjectType>>(async (address) => {
       const launchpad = new Launchpad(address, wallet);
       const data = await launchpad.getIdoInfo();
       console.log("data", data);

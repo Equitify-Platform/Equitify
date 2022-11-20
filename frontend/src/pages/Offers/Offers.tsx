@@ -5,8 +5,10 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
+import Countdown from "react-countdown";
 
 import styles from "./style.module.scss";
 
@@ -186,6 +188,8 @@ function Offers() {
                     fee={v.nearFeeAmount}
                     guarantee={v.nearGuaranteeAmount}
                     key={`${v.offerCreatorId}${v.nftContractId}${v.nftId}`}
+                    protectionStart=""
+                    protectionDuration={v.protectionDuration}
                     stage={Stage.Opened}
                   />
                 ))}
@@ -195,30 +199,34 @@ function Offers() {
             <>
               <div className={styles.opened}>Ready for Claim</div>
               <div className={styles.offers}>
-                {filteredOffers.map((v, i) => (
+                {filteredProtections.map((v, i) => (
                   <Offer
-                    nftAddress={v.nftContractId}
-                    nftId={v.nftId}
+                    nftAddress={v.offer.nftContractId}
+                    nftId={v.offer.nftId}
                     name={`Offer ${i + 1}`}
-                    creator={v.offerCreatorId}
-                    fee={v.nearFeeAmount}
-                    guarantee={v.nearGuaranteeAmount}
-                    key={`${v.offerCreatorId}${v.nftContractId}${v.nftId}`}
+                    creator={v.offer.offerCreatorId}
+                    fee={v.offer.nearFeeAmount}
+                    guarantee={v.offer.nearGuaranteeAmount}
+                    key={`${v.offer.offerCreatorId}${v.offer.nftContractId}${v.offer.nftId}`}
+                    protectionStart={v.protectionStart}
+                    protectionDuration={v.offer.protectionDuration}
                     stage={Stage.Claim}
                   />
                 ))}
               </div>
               <div className={styles.waiting}>Waiting for Claim</div>
               <div className={styles.offers}>
-                {filteredOffers.map((v, i) => (
+                {filteredProtections.map((v, i) => (
                   <Offer
-                    nftAddress={v.nftContractId}
-                    nftId={v.nftId}
+                    nftAddress={v.offer.nftContractId}
+                    nftId={v.offer.nftId}
                     name={`Offer ${i + 1}`}
-                    creator={v.offerCreatorId}
-                    fee={v.nearFeeAmount}
-                    guarantee={v.nearGuaranteeAmount}
-                    key={`${v.offerCreatorId}${v.nftContractId}${v.nftId}`}
+                    creator={v.offer.offerCreatorId}
+                    fee={v.offer.nearFeeAmount}
+                    guarantee={v.offer.nearGuaranteeAmount}
+                    key={`${v.offer.offerCreatorId}${v.offer.nftContractId}${v.offer.nftId}`}
+                    protectionStart={v.protectionStart}
+                    protectionDuration={v.offer.protectionDuration}
                     stage={Stage.Waiting}
                   />
                 ))}
@@ -245,6 +253,8 @@ interface OfferProps {
   fee: string;
   guarantee: string;
   stage: Stage;
+  protectionStart: string;
+  protectionDuration: string;
 }
 
 const Offer: FC<OfferProps> = ({
@@ -255,14 +265,40 @@ const Offer: FC<OfferProps> = ({
   nftAddress,
   guarantee,
   stage,
+  protectionStart,
+  protectionDuration,
 }) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const countdownRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (countdownRef.current && protectionDuration && protectionStart) {
+      countdownRef.current.start();
+    }
+  }, [countdownRef.current, protectionStart, protectionDuration]);
+
   return (
     <div className={styles.offerWrapper}>
       <div className={styles.offerHeader}>
         <div className={styles.offerName}>{name}</div>
         <div className={styles.offerActions}>
           {stage === Stage.Waiting && (
-            <div className={styles.timerLabel}>01:24:20 for Claim</div>
+            <div className={styles.timerLabel}>
+              <Countdown
+                now={Date.now}
+                date={
+                  new Date(
+                    parseInt(protectionStart) + parseInt(protectionDuration)
+                  )
+                }
+                renderer={({ formatted: f }) => (
+                  <span>
+                    {f.days}:{f.hours}:{f.minutes}:{f.seconds}
+                  </span>
+                )}
+              />{" "}
+              for Claim
+            </div>
           )}
           {stage !== Stage.Waiting && (
             <SecondaryButton
