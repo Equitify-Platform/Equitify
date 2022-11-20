@@ -134,6 +134,7 @@
 
 .offers {
   display: flex;
+  flex-direction: column;
   width: 100%;
   align-items: center;
   justify-content: center;
@@ -219,4 +220,12 @@
   display: flex;
   align-items: center;
   gap: 24px;
+}
+
+.timerLabel {
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 21px;
+  letter-spacing: 0.02em;
+  color: #F5A200;
 }

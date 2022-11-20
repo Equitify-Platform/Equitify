@@ -5,6 +5,7 @@ import {
   setupWalletSelector,
   WalletSelector,
   Wallet as W,
+  Action,
 } from "@near-wallet-selector/core";
 import { setupModal } from "@near-wallet-selector/modal-ui";
 import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
@@ -148,6 +149,23 @@ export class Wallet {
           },
         },
       ],
+    });
+  }
+
+  public async multicall(
+    txs: {
+      receiverId: string;
+      actions: Action[];
+    }[]
+  ) {
+    if (!this.wallet || !this.accountId)
+      throw new Error("Wallet or/and accountId is/are null or undefined.");
+
+    return await this.wallet.signAndSendTransactions({
+      transactions: txs.map((tx) => ({
+        ...tx,
+        signerId: this.accountId ?? "",
+      })),
     });
   }
 

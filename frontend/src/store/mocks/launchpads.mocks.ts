@@ -29,6 +29,7 @@ export const getLaunchpadsMock = (): Promise<ProjectType[]> =>
         saleEndTime: "1666732500",
         saleStartTime: "1666732380",
         softCap: "0.1",
+        projectPreviewImageBase64: "",
       },
       stakingContract: "test_staking_address",
       token: {

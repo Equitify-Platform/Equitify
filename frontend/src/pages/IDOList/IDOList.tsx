@@ -64,7 +64,7 @@ function IDOList() {
                 <div className={styles.cardsContainer}>
                   {projectsArray.map((p) => (
                     <IDOCard
-                      imageURI={IDOImg}
+                      imageURI={p.projectStruct.projectPreviewImageBase64}
                       address={p.address}
                       key={p.address}
                       tokenName={p.token.name}

@@ -97,9 +97,9 @@ const Navbar: FC = () => {
             </NavLink>
             <NavLink
               className={({ isActive }) => (isActive ? styles.activePage : "")}
-              to="/staking"
+              to="/offers"
             >
-              3rd page
+              Offers
             </NavLink>
           </div>
         </div>

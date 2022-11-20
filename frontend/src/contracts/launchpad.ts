@@ -28,6 +28,7 @@ interface Project {
   projectName: string;
   projectDescription: string;
   projectSignatures: string;
+  projectPreviewImageBase64: string;
 }
 
 interface GetIdoDataResult {
