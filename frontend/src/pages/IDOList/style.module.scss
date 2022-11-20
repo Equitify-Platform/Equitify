@@ -1,7 +1,69 @@
+.topSection {
+  width: 100%;
+  display: flex;
+  justify-content: start;
+
+  .topSectionText {
+    padding-top: 96px;
+    max-width: 550px;
+  }
+}
+
 .idoSection {
   width: 100%;
   display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  margin: 2rem 0;
+  flex-direction: column;
+  align-items: start;
+  gap: 24px;
+  margin: 0 auto;
+  margin-top: 174px;
+  @media screen and (max-width: 576px) {
+    margin-top: 305px;
+  }
+}
+
+.cardsContainer {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+@media screen and (max-width: 576px) {
+  .topSection {
+    padding-left: 0;
+    flex-direction: column;
+    margin-bottom: 56px;
+
+    .topSectionText {
+      padding: unset;
+      max-width: unset;
+
+      h1 {
+        margin-bottom: 8px;
+      }
+
+      p {
+        line-height: 24px;
+      }
+    }
+
+    img {
+      width: 100%;
+    }
+  }
+}
+
+.handImage {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  width: 802px;
+  height: 535px;
+
+  @media screen and (max-width: 576px) {
+    width: 344px;
+    height: 225px;
+    top: 298px;
+    right: 0;
+  }
 }

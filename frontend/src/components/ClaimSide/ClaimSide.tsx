@@ -61,28 +61,42 @@ export const ClaimSide: FC<ClaimSideProps> = ({
 
   return (
     <div className={styles.claimSide}>
-      <h2>{text[idoStage]}</h2>
+      <h4>{text[idoStage]}</h4>
       {idoStage !== IdoStage.CLAIM && (
-        <Countdown
-          ref={clockRef}
-          date={date}
-          onComplete={nextStageFn}
-          renderer={({ formatted: f }) => (
-            <ClaimCountdown
-              days={f.days}
-              hours={f.hours}
-              minutes={f.minutes}
-              seconds={f.seconds}
-            />
-          )}
-        />
+        <div className={styles.countdown}>
+          <Countdown
+            ref={clockRef}
+            date={date}
+            onComplete={nextStageFn}
+            renderer={({ formatted: f }) => (
+              <ClaimCountdown
+                days={f.days}
+                hours={f.hours}
+                minutes={f.minutes}
+                seconds={f.seconds}
+                idoStage={idoStage}
+              />
+            )}
+          />
+        </div>
       )}
-      <h4>Total raised: {totalRaised.toFixed(4)} NEAR</h4>
-      <h4>Soft cap: {softCap.toFixed(4)} NEAR</h4>
-      <h4>Hard cap: {hardCap.toFixed(4)} NEAR</h4>
-      <h4>
+      <div className={styles.saleStats}>
+        <div className={styles.saleStatsField}>
+          <p className={styles.fieldTitle}>Total raised:</p>
+          <p>{totalRaised.toFixed(4)} NEAR</p>
+        </div>
+        <div className={styles.saleStatsField}>
+          <p className={styles.fieldTitle}>Soft cap:</p>
+          <p>{softCap.toFixed(4)} NEAR</p>
+        </div>
+        <div className={styles.saleStatsField}>
+          <p className={styles.fieldTitle}>Hard cap:</p>
+          <p>{hardCap.toFixed(4)} NEAR</p>
+        </div>
+      </div>
+      <p className={styles.price}>
         1 NEAR = {price.toFixed(4)} {symbol}
-      </h4>
+      </p>
     </div>
   );
 };

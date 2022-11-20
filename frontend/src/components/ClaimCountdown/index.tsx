@@ -1,17 +1,23 @@
 import React, { FC } from "react";
 
-import styles from "./style.module.scss";
+import { getStyles } from "./styles";
+
+import { useWindowSize } from "../../hooks/useWindowSize";
+import { IdoStage } from "../../types/IdoStage";
 
 interface CountdownItemProps {
   value: string;
   label: string;
+  idoStage: IdoStage;
 }
 
-const CountdownItem: FC<CountdownItemProps> = ({ value, label }) => {
+const CountdownItem: FC<CountdownItemProps> = ({ value, label, idoStage }) => {
+  const [width] = useWindowSize();
+  const styles = getStyles(idoStage, width);
   return (
-    <div className={styles.item}>
-      <div className={styles.value}>{value}</div>
-      <div className={styles.label}>{label}</div>
+    <div style={styles.item}>
+      <div style={styles.value}>{value}</div>
+      <div style={styles.label}>{label}</div>
     </div>
   );
 };
@@ -21,6 +27,7 @@ interface IDOCountdownProps {
   hours: string;
   minutes: string;
   seconds: string;
+  idoStage: IdoStage;
 }
 
 const ClaimCountdown: FC<IDOCountdownProps> = ({
@@ -28,14 +35,19 @@ const ClaimCountdown: FC<IDOCountdownProps> = ({
   hours,
   minutes,
   seconds,
+  idoStage,
 }) => {
+  const [width] = useWindowSize();
+  const styles = getStyles(idoStage, width);
   return (
-    <div className={styles.wrapper}>
-      <CountdownItem value={days} label="days" />
-      <CountdownItem value={hours} label="hrs" />
-      <CountdownItem value={minutes} label="min" />
-      <CountdownItem value={seconds} label="sec" />
-    </div>
+    <>
+      <div style={styles.wrapper}>
+        <CountdownItem idoStage={idoStage} value={days} label="days" />
+        <CountdownItem idoStage={idoStage} value={hours} label="hours" />
+        <CountdownItem idoStage={idoStage} value={minutes} label="min" />
+        <CountdownItem idoStage={idoStage} value={seconds} label="sec" />
+      </div>
+    </>
   );
 };
 

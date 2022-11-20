@@ -1,8 +1,7 @@
 .exchangeSide {
-  width: 550px;
-  height: 650px;
-  border: 2px solid black;
-  text-align: center;
+  height: 498px;
+  display: flex;
+  justify-content: space-between;
 }
 
 .balances {
@@ -26,4 +25,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+@media screen and (max-width: 576px) {
+  .exchangeSide {
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
+    margin: 0 auto;
+  }
 }

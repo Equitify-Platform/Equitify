@@ -1,0 +1,222 @@
+.topSection {
+  padding-top: 56px;
+  padding-bottom: 40px;
+  @media screen and (max-width: 576px) {
+    padding-top: unset;
+    padding-bottom: 32px;
+    p {
+      font-size: 14px;
+    }
+    h3 {
+      font-size: 24px;
+    }
+  }
+}
+
+.navbar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+
+.navItem {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 21px;
+  letter-spacing: 0.02em;
+  color: #414660;
+  cursor: pointer;
+}
+
+.navActive {
+  font-weight: 700;
+  color: #0F1138;
+  text-decoration: underline #0F1138;
+  text-underline-offset: 5px;
+}
+
+.refresh {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.refreshLabel {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 18px;
+  letter-spacing: 0.02em;
+  color: #2F5FBB;
+}
+
+.filterBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 36px;
+}
+
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filterInput {
+  background: #FFFFFF;
+  border: 1px solid #D0D7DE;
+  border-radius: 4px;
+  padding: 8px 16px;
+  height: 37px;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 21px;
+  letter-spacing: 0.02em;
+}
+
+.opened {
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 21px;
+  letter-spacing: 0.02em;
+  color: #44B27B;
+  margin-top: 40px;
+}
+
+.waiting {
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 21px;
+  letter-spacing: 0.02em;
+  color: #F5A200;
+  margin-top: 40px;
+}
+
+.offerWrapper {
+  background: #FFFFFF;
+  border-radius: 8px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+}
+
+.offerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.offerName {
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 31px;
+  letter-spacing: 0.02em;
+  color: #0F1138;
+}
+
+.offerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.offers {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.offerDesc {
+  margin-top: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 21px;
+  letter-spacing: 0.02em;
+  color: #414660;
+
+  & b {
+    font-weight: 700;
+    color: #0F1138;
+  }
+}
+
+.overlay {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 17, 56, 0.18);
+  backdrop-filter: blur(1px);
+}
+
+.modal {
+  display: flex;
+  flex-direction: column;
+  padding: 40px 24px;
+  gap: 20px;
+  background: #FFFFFF;
+  box-shadow: 0 4px 13px 1px rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  width: 100%;
+  max-width: 450px;
+}
+
+.createHeader {
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 31px;
+  text-align: center;
+  letter-spacing: 0.02em;
+  color: #0F1138;
+}
+
+.createAsLabel {
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.02em;
+  color: #6C6E78;
+}
+
+.createAs {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  margin-top: -20px;
+  label {
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 21px;
+    letter-spacing: 0.02em;
+    color: #0F1138;
+  }
+}
+
+.modalButtons {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}

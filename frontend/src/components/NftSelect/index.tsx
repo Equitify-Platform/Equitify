@@ -3,6 +3,7 @@ import Select, { SingleValue } from "react-select";
 
 import styles from "./style.module.scss";
 
+import NearIcon from "../../assets/icons/NearIcon.svg";
 import { useWindowSize } from "../../hooks/useWindowSize";
 import { IdoStage } from "../../types/IdoStage";
 
@@ -17,6 +18,8 @@ interface NftSelectProps {
   options: Option[];
   onChange: (id: string) => void | Promise<void>;
   idoStage: IdoStage;
+  className: string;
+  projectName: string;
 }
 
 interface SelectElement {
@@ -38,49 +41,13 @@ export const NftSelect: FC<NftSelectProps> = (props) => {
             value: option.id,
             label: (
               <div className={styles.optionWrapper}>
-                <div>
-                  <img
-                    src={option.imageUrl}
-                    alt=""
-                    width="60px"
-                    height="60px"
-                  />
-                </div>
-                <div style={{ width: "100%" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <div className={styles.title}>TITLE</div>
-                    <div>{option.id}</div>
-                  </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      width: "100%",
-                      marginTop: "5px",
-                    }}
-                  >
-                    <div className={styles.secondary}>Locked Balance:</div>
-                    <div className={styles.secondary}>{option.locked}</div>
-                  </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      marginTop: "4px",
-                    }}
-                  >
-                    <div className={styles.secondary}>Claimed Balance:</div>
-                    <div className={styles.secondary}>{option.claimed}</div>
-                  </div>
-                </div>
+                <img
+                  src={option.imageUrl ? option.imageUrl : NearIcon}
+                  alt=""
+                />
+                <p className={styles.nftName}>
+                  {props.projectName} NFT #{option.id}
+                </p>
               </div>
             ),
           };
@@ -88,7 +55,14 @@ export const NftSelect: FC<NftSelectProps> = (props) => {
       : [];
 
     if (props.idoStage !== IdoStage.CLAIM) {
-      res.push({ value: "0", label: <div>Mint new NFT</div> });
+      res.push({
+        value: "0",
+        label: (
+          <div className={styles.optionWrapper}>
+            <p className={styles.nftName}>Mint new NFT</p>
+          </div>
+        ),
+      });
     }
 
     return res.sort((a, b) => parseInt(a.value) - parseInt(b.value));
@@ -100,37 +74,35 @@ export const NftSelect: FC<NftSelectProps> = (props) => {
       control: (provided: any) => ({
         ...provided,
         caretColor: "transparent",
-        width: width <= 540 ? "289px" : width <= 760 ? "330px" : "auto",
-        height: width <= 540 ? "66px" : width <= 760 ? "80px" : "82px",
+        width: "100%",
+        height: "45px",
         background: "rgba(255, 255, 255, 0.1)",
-        border: "1px solid #FF7100",
+        border: "1px solid #D0D7DE",
+        borderRadius: "4px",
         outline: 0,
         boxShadow: 0,
-        margin: "1rem",
+
         ":hover": {
-          border: "1px solid #FF7100",
+          border: "1px solid #2F5FBB",
+          cursor: "pointer",
           outline: 0,
           boxShadow: 0,
-        },
-        [`.${styles.secondary}`]: {
-          display: "none",
         },
       }),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       placeholder: (provided: any) => ({
         ...provided,
-        paddingLeft: "21px",
-        fontFamily: "Jura, sans-serif",
+        marginLeft: "12px",
         fontStyle: "normal",
-        fontWeight: "700",
+        fontWeight: "400",
         fontSize: "16px",
-        lineHeight: "19px",
-        color: "#F3CFB3",
+        lineHeight: "21px",
+        color: "#6C6E78",
       }),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       dropdownIndicator: (provided: any) => ({
         ...provided,
-        visibility: "hidden",
+        color: "#0F1138",
       }),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       indicatorSeparator: (provided: any) => ({
@@ -140,35 +112,40 @@ export const NftSelect: FC<NftSelectProps> = (props) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       indicatorsContainer: (provided: any) => ({
         ...provided,
-        backgroundRepeat: "no-repeat",
-        backgroundPosition: "center",
-        paddingRight: "9px",
         marginRight: "10px",
-        border: "none",
       }),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      option: (provided: any, state: any) => ({
+      option: (provided: any) => ({
         ...provided,
-        background: state.isFocused ? "#262625" : "#262625",
         width: "100%",
+        height: "37px",
+        padding: 0,
+        marginBottom: "12px",
+        backgroundColor: "#fff",
+
         ":hover": {
-          background: state.isFocused ? "#262625" : "#262625",
+          backgroundColor: "rgba(47, 95, 187, 0.12)",
+        },
+
+        ":last-child": {
+          marginBottom: 0,
         },
       }),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       menu: (provided: any) => ({
         ...provided,
-        background: "#262625",
+        background: "#FFFFFF",
+        border: "1px solid #2F5FBB",
+        boxShadow: "0px 4px 13px 1px rgba(0, 0, 0, 0.08)",
+        borderRadius: "4px",
         width: "100%",
-        padding: "10px 0",
-        margin: 0,
+        maxHeight: "212px",
+        padding: "16px 0",
+        marginTop: "3px",
       }),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       menuList: (provided: any) => ({
         ...provided,
-        background: "#262625",
-        marginRight: "10px",
-        marginLeft: "10px",
 
         "::-webkit-scrollbar": {
           width: "4px",
@@ -191,13 +168,15 @@ export const NftSelect: FC<NftSelectProps> = (props) => {
   }, [props.idoStage]);
 
   return (
-    <Select
-      styles={colourStyles}
-      isSearchable={false}
-      placeholder="Choose NFT"
-      onChange={handleNftChange}
-      options={options}
-      defaultValue={defaultValue}
-    />
+    <div className={props.className}>
+      <Select
+        styles={colourStyles}
+        isSearchable={false}
+        placeholder="Choose NFT"
+        onChange={handleNftChange}
+        options={options}
+        defaultValue={defaultValue}
+      />
+    </div>
   );
 };

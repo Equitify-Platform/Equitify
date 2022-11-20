@@ -1,33 +1,74 @@
-import React, { FC } from "react";
+import React, { FC, useState } from "react";
 import { NavLink } from "react-router-dom";
 
 import styles from "./style.module.scss";
 
+import ArrowIconBlue from "../../assets/icons/arrowRightBlue.svg";
+import ArrowIconWhite from "../../assets/icons/arrowRightWhite.svg";
+import ClaimCountdown from "../ClaimCountdown";
+import { CountdownHOC } from "../common/CountdownHOC/CountdownHOC";
+import SecondaryButton from "../SecondaryButton";
+
 interface IDOCardProps {
-  projectSignatures: string;
+  projectName: string;
   saleStartTime: string;
-  projectDescription: string;
   price: string;
   tokenName: string;
   address: string;
+  imageURI: string;
 }
 
 export const IDOCard: FC<IDOCardProps> = ({
+  projectName,
   tokenName,
   price,
-  projectDescription,
-  projectSignatures,
   saleStartTime,
   address,
+  imageURI,
 }) => {
+  const [arrowIcon, setArrowIcon] = useState(ArrowIconBlue);
+
   return (
     <div className={styles.idoCard}>
-      <NavLink to={`/ido/${address}`}>
-        <h2>{projectSignatures}</h2>
-        <div>Price: {price} NEAR</div>
-        <div>Token: $ {tokenName}</div>
-        <div>{projectDescription}</div>
-        <div>Starts in: {saleStartTime}</div>
+      <img className={styles.projectImg} src={imageURI} alt="" />
+      <h4>{projectName}</h4>
+      <div className={styles.fieldsWrapper}>
+        <div className={styles.fieldTitlesWrapper}>
+          <p>Price:</p>
+          <p>Token:</p>
+          <p>Starts in:</p>
+        </div>
+        <div className={styles.fieldDataWrapper}>
+          <p>{price} NEAR</p>
+          <p>${tokenName}</p>
+          <p>
+            <CountdownHOC
+              date={new Date(+saleStartTime * 1000)}
+              now={() => Date.now()}
+              renderer={({ formatted: f, completed }) => (
+                <>
+                  {completed && <>00 : 00 : 00 : 00</>}
+                  {!completed && (
+                    <>
+                      {f.days} : {f.hours} : {f.minutes} : {f.seconds}
+                    </>
+                  )}
+                </>
+              )}
+            />
+          </p>
+        </div>
+      </div>
+      <NavLink to={`/ido/${address}`} style={{ textDecoration: "none" }}>
+        <SecondaryButton
+          isScalable={true}
+          isBlue={false}
+          text="Purchase"
+          onMouseEnter={() => setArrowIcon(ArrowIconWhite)}
+          onMouseLeave={() => setArrowIcon(ArrowIconBlue)}
+        >
+          <img src={arrowIcon} alt="" />
+        </SecondaryButton>
       </NavLink>
     </div>
   );

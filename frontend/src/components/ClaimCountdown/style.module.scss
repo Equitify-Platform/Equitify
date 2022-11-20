@@ -1,4 +1,4 @@
-.item {
+/*.item {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -9,16 +9,22 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 78px;
-  height: 86px;
-  font-size: 32px;
+
+  font-weight: 700;
+  font-size: 64px;
+  line-height: 72px;
+  color: var(--secondary);
 }
 
 .label {
-  font-size: 18px;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--primary);
 }
 
 .wrapper {
   display: flex;
-  gap: 7px;
-}
+  justify-content: center;
+  gap: 89px;
+}*/

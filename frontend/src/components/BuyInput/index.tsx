@@ -2,21 +2,22 @@ import React, { FC, useCallback } from "react";
 
 import styles from "./style.module.scss";
 
-interface ShelterInputProps {
+import NearIcon from "../../assets/icons/NearIcon.svg";
+
+interface BuyInputProps {
   value: number;
   setValue: React.Dispatch<React.SetStateAction<number>>;
-  left?: boolean;
-  leftLabel: string;
-  rightLabel: string;
+  label: string;
+  symbol: string;
+
   onChange: (e: number) => void | Promise<void>;
 }
 
-export const BuyInput: FC<ShelterInputProps> = ({
+export const BuyInput: FC<BuyInputProps> = ({
   value,
   setValue,
-  left,
-  leftLabel,
-  rightLabel,
+  label,
+  symbol,
   onChange,
 }) => {
   const handleInput = useCallback(
@@ -29,21 +30,20 @@ export const BuyInput: FC<ShelterInputProps> = ({
   );
 
   return (
-    <div className={styles.wrapper}>
-      <div className={styles.inputWrapper}>
-        <div className={styles.label}>
-          <div className={styles.left}>{leftLabel}</div>
-          <div className={styles.right}>{rightLabel}</div>
+    <>
+      <p className={styles.label}>{label}</p>
+      <div className={styles.inputContainer}>
+        <div className={styles.symbolContainer}>
+          {symbol === "NEAR" && <img src={NearIcon} alt="" />}
+          <p>{symbol}</p>
         </div>
-        <div>
-          <input
-            className={styles.input}
-            type="number"
-            value={value}
-            onChange={handleInput}
-          />
-        </div>
+        <input
+          className={styles.input}
+          type="number"
+          value={value}
+          onChange={handleInput}
+        />
       </div>
-    </div>
+    </>
   );
 };

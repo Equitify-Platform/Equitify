@@ -1,0 +1,58 @@
+.secondaryButton,
+.scalableSecondaryButton {
+  width: 100%;
+  height: 50px;
+  padding: 16px 24px;
+  background: #ffffff;
+  border: 1px solid #2f5fbb;
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .childrenWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    p {
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 18px;
+      letter-spacing: 0.02em;
+      color: #2f5fbb;
+      margin-right: 11px;
+    }
+  }
+
+  &:hover {
+    background: var(--hover);
+    p {
+      color: #ffffff;
+    }
+  }
+
+  &:active {
+    background: var(--active);
+    p {
+      color: #ffffff;
+    }
+  }
+
+  &:disabled {
+    opacity: var(--disabled);
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .scalableSecondaryButton {
+    height: 32px;
+
+    .childrenWrapper {
+      p {
+        font-size: 12px;
+        line-height: 16px;
+      }
+    }
+  }
+}
