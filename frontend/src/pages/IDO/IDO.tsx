@@ -88,6 +88,7 @@ function IDO() {
                     <p>{launchpad?.projectStruct.projectDescription ?? ""}</p>
                   </div>
                   <ExchangeSide
+                    ftAddress={launchpad?.token.address ?? ""}
                     setIsLoading={setIsLoading}
                     idoStage={idoStage}
                     symbol={launchpad?.token.symbol ?? ""}
@@ -127,6 +128,7 @@ function IDO() {
                   <SwiperSlide>
                     <div style={{ display: "flex", flexDirection: "column" }}>
                       <ExchangeSide
+                        ftAddress={launchpad?.token.address ?? ""}
                         setIsLoading={setIsLoading}
                         idoStage={idoStage}
                         symbol={launchpad?.token.symbol ?? ""}

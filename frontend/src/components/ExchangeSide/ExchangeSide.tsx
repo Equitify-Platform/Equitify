@@ -11,6 +11,7 @@ interface ExchangeSideProps {
   balance: string;
   setIsLoading: Dispatch<SetStateAction<boolean>>;
   projectName: string;
+  ftAddress: string;
 }
 
 export const ExchangeSide: FC<ExchangeSideProps> = ({
@@ -19,10 +20,12 @@ export const ExchangeSide: FC<ExchangeSideProps> = ({
   balance,
   setIsLoading,
   projectName,
+  ftAddress,
 }) => {
   return (
     <div className={styles.exchangeSide}>
       <ExchangeCard
+        ftAddress={ftAddress}
         idoStage={idoStage}
         setIsLoading={setIsLoading}
         balance={balance}

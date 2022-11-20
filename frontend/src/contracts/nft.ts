@@ -1,3 +1,6 @@
+import { parseUnits } from "@ethersproject/units";
+
+import { NATIVE_DECIMALS } from "../constants";
 import { THIRTY_TGAS, Wallet } from "../near-wallet";
 
 export interface TokenData {
@@ -55,7 +58,39 @@ export class NonFungibleToken {
     );
   }
 
-  public async claimVestedTokens(token_id: string) {
+  public async claimVestedTokens(ft_address: string, token_id: string) {
+    return this.wallet.multicall([
+      {
+        receiverId: ft_address,
+        actions: [
+          {
+            type: "FunctionCall",
+            params: {
+              methodName: "storage_deposit",
+              args: {
+                account_id: this.wallet.accountId,
+              },
+              gas: THIRTY_TGAS,
+              deposit: parseUnits("0.1", NATIVE_DECIMALS).toString(),
+            },
+          },
+        ],
+      },
+      {
+        receiverId: this.contractId,
+        actions: [
+          {
+            type: "FunctionCall",
+            params: {
+              methodName: "make_claim",
+              args: { token_id },
+              gas: THIRTY_TGAS,
+              deposit: "1",
+            },
+          },
+        ],
+      },
+    ]);
     return this.wallet.call(
       this.contractId,
       "make_claim",

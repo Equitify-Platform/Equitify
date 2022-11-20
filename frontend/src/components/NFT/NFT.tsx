@@ -17,6 +17,7 @@ interface NFTProps {
   projectName: string;
   tokenSymbol: string;
   idoAddress: string;
+  ftAddress: string;
   setIsLoading: Dispatch<SetStateAction<boolean>>;
   wallet: Wallet;
 }
@@ -26,6 +27,7 @@ const NFT: FC<NFTProps> = ({
   tokenSymbol,
   nftContract,
   idoAddress,
+  ftAddress,
   setIsLoading,
   wallet,
 }) => {
@@ -38,7 +40,9 @@ const NFT: FC<NFTProps> = ({
   const onClaim = async (nftID: string) => {
     setIsLoading(true);
     try {
-      await dispatch(claimTokens({ tokenId: nftID, nftAddress, wallet }));
+      await dispatch(
+        claimTokens({ tokenId: nftID, nftAddress, wallet, ftAddress })
+      );
     } catch (e) {
       console.error("Error while claiming:", e);
     } finally {
@@ -46,7 +50,7 @@ const NFT: FC<NFTProps> = ({
     }
   };
 
-  const handleOpen = () => setIsModalShown(true);
+  // const handleOpen = () => setIsModalShown(true);
 
   const handleTransfer = async (nftID: string) => {
     setIsLoading(true);
@@ -82,9 +86,6 @@ const NFT: FC<NFTProps> = ({
               </p>
             </div>
             <div className={styles.buttonsContainer}>
-              <button className={styles.transferBtn} onClick={handleOpen}>
-                Transfer
-              </button>
               <NavLink to={`/ido/${idoAddress}`}>
                 <button className={styles.toIdoBtn}>Go to IDO</button>
               </NavLink>

@@ -107,11 +107,12 @@ export const purchaseTokensNear = async (
 
 export const claimTokensNear = async (
   wallet: Wallet,
+  ftAddress: string,
   nftAddress: string,
   tokenId: string
 ): Promise<void> => {
   const nft = new NonFungibleToken(nftAddress, wallet);
-  await nft.claimVestedTokens(tokenId);
+  await nft.claimVestedTokens(ftAddress, tokenId);
 };
 
 export const transferNftNear = async (
