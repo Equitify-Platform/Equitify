@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+          "type": "command",
+          "name": "Start",
+          "program": "yarn",
+          "args": ["start"],
+        },
+        {
+          "type": "command",
+          "name": "Build contracts",
+          "program": "yarn",
+          "args": ["build:contracts"],
+        },
+        {
+          "type": "command",
+          "name": "Run tests",
+          "program": "yarn",
+          "args": ["test"],
+        },
+    ]
+}

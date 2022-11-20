@@ -1,0 +1,125 @@
+.nav {
+  width: 100%;
+  height: 98px;
+
+  padding: 0 154px;
+
+  background-color: var(--fg);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  border-bottom: 1px solid #e3e7ee;
+  box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.05);
+
+  img {
+    cursor: pointer;
+  }
+
+  .navLinks {
+    width: 239px;
+
+    display: flex;
+    justify-content: space-between;
+
+    * {
+      color: var(--primary);
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 21px;
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+  }
+
+  .walletButton {
+    width: 149px;
+    height: 50px;
+
+    background: #2f5fbb;
+    border-radius: 4px;
+
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 18px;
+    letter-spacing: 0.02em;
+    color: white;
+
+    &:hover {
+      background: var(--hover);
+    }
+
+    &:active {
+      background: var(--active);
+    }
+
+    &:disabled {
+      opacity: var(--disabled);
+    }
+  }
+
+  .activePage {
+    font-weight: 700;
+    border-bottom: 1px solid #0f1138;
+  }
+}
+
+/* For mobile layout */
+
+@media screen and (max-width: 576px) {
+  .nav {
+    height: 66px;
+    width: 100%;
+    padding: 16px;
+
+    .navLogo {
+      width: 30px;
+      height: 26px;
+    }
+
+    .walletButton {
+      width: 133px;
+      height: 34px;
+    }
+
+    .buttonsWrapper {
+      display: flex;
+      align-items: center;
+      gap: 29px;
+    }
+  }
+  .openedMenu {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 16px;
+    gap: 286px;
+
+    width: 100%;
+    height: 54px;
+
+    background: #ffffff;
+    border-bottom: 1px solid #e3e7ee;
+
+    box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.05);
+
+    .activePage {
+      font-weight: 700;
+      border-bottom: 1px solid #0f1138;
+    }
+
+    .navLinks {
+      width: 185px;
+      display: flex;
+      justify-content: space-between;
+
+      * {
+        font-size: 14px;
+        line-height: 18px;
+        letter-spacing: 0.02em;
+        text-decoration: none;
+      }
+    }
+  }
+}

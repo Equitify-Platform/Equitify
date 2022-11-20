@@ -1,0 +1,65 @@
+.backLink {
+  margin-top: 32px;
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+
+  img {
+    transform: rotate(-180deg);
+    margin-right: 10px;
+  }
+
+  p {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 18px;
+    letter-spacing: 0.02em;
+    color: #2f5fbb;
+  }
+}
+
+.pageTitle {
+  margin-bottom: 56px;
+}
+
+.topWrapper {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 115px;
+}
+
+.projectInfo {
+  width: 259px;
+  margin-top: 40px;
+
+  .projectImg {
+    width: 100%;
+    height: 151px;
+    border-radius: 4px;
+    margin-top: 16px;
+    margin-bottom: 8px;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .backLink {
+    margin-top: 0;
+    margin-bottom: 24px;
+  }
+
+  .pageTitle {
+    margin-bottom: 32px;
+  }
+
+  .projectInfo {
+    width: 100%;
+    margin-top: 0;
+
+    .projectImg {
+      width: 100%;
+      height: 191px;
+      border-radius: 4px;
+      margin-bottom: 16px;
+    }
+  }
+}

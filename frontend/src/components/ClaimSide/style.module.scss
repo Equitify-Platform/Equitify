@@ -1,0 +1,44 @@
+.claimSide {
+  width: 259px;
+  height: 329px;
+  display: flex;
+  flex-direction: column;
+
+  .countdown {
+    margin-top: 40px;
+  }
+
+  .saleStats {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    .saleStatsField {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+
+      .fieldTitle {
+        font-weight: 700;
+      }
+    }
+  }
+  .price {
+    margin-top: 40px;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0.02em;
+    color: #2f5fbb;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .claimSide {
+    width: 100%;
+    height: auto;
+    max-width: 328px;
+    margin: 0 auto;
+    justify-content: center;
+  }
+}

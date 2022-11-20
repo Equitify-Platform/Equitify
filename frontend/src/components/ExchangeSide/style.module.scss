@@ -1,0 +1,37 @@
+.exchangeSide {
+  height: 498px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.balances {
+  display: flex;
+  flex-direction: column;
+  margin: 1rem;
+}
+
+.totalBalance {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tokens {
+  background-color: #444444;
+  padding: 1rem;
+}
+
+.space {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@media screen and (max-width: 576px) {
+  .exchangeSide {
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
+    margin: 0 auto;
+  }
+}
