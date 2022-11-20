@@ -7,7 +7,7 @@ import { testnetConfig } from "./config";
 import { IDOParams, Project } from "../../launchpad";
 const { keyStores, KeyPair, connect } = nearAPI;
 
-const KEY_STORE_PATH = '/home/kostya/near/keystore' // process.env.KEY_STORE ?? "~/near/keystore";
+const KEY_STORE_PATH = "~/near/keystore"; // process.env.KEY_STORE ?? "~/near/keystore";
 const keyStore = new keyStores.UnencryptedFileSystemKeyStore(KEY_STORE_PATH);
 
 console.log("keystore path is ", KEY_STORE_PATH);
@@ -24,14 +24,14 @@ const connectionConfig = {
 let nearConnection: Near;
 let launchpadFactory: Account;
 
-const DEPLOYER_PK = '' //process.env.SIGNER_PK;
-const DEPLOYER_NAME = 'launchpad-deployer.testnet' //process.env.SIGNER_PK;
+const DEPLOYER_PK = ""; //process.env.SIGNER_PK;
+const DEPLOYER_NAME = "launchpad-deployer.testnet"; //process.env.SIGNER_PK;
 
 const globalDeployPrefix = process.argv[2] ?? "default";
 
-console.log('globalDeployPrefix', globalDeployPrefix)
+console.log("globalDeployPrefix", globalDeployPrefix);
 
-const idoImage = 'https://i.imgur.com/JrGGLWq.png';
+const idoImage = "https://i.imgur.com/JrGGLWq.png";
 
 const init = async () => {
   // creates a public / private key pair using the provided private key
@@ -41,7 +41,9 @@ const init = async () => {
 
   nearConnection = await connect(connectionConfig);
 
-  launchpadFactory = await nearConnection.account('factory-test45.launchpad-deployer.testnet');
+  launchpadFactory = await nearConnection.account(
+    "factory-test45.launchpad-deployer.testnet"
+  );
 
   console.log("account id", await nearConnection.account(DEPLOYER_NAME));
 };
@@ -69,10 +71,7 @@ async function createAccount(
 
   return nearConnection.account(newAccountId);
 }
-function getDeployAddress(
-  creatorAccountId: string,
-  newAccountId: string
-) {
+function getDeployAddress(creatorAccountId: string, newAccountId: string) {
   return `${newAccountId}-${globalDeployPrefix}.${creatorAccountId}`;
 }
 
@@ -82,7 +81,7 @@ async function createAccountAndDeploy(
   bytecode: Uint8Array,
   amount: string
 ) {
-  const newAccountFullId = getDeployAddress(creatorAccountId,newAccountId);
+  const newAccountFullId = getDeployAddress(creatorAccountId, newAccountId);
   // return await nearConnection.account(newAccountFullId);
 
   const creatorAccount = await nearConnection.account(creatorAccountId);
@@ -125,7 +124,7 @@ const main = async () => {
     (v) => v.name.toLowerCase() === globalDeployPrefix
   );
   if (!config) throw "Config is not found";
-  else console.log('Config found')
+  else console.log("Config found");
   const deployer = await nearConnection.account(DEPLOYER_NAME);
 
   // const factory = await createAccountAndDeploy(
@@ -135,18 +134,18 @@ const main = async () => {
   //   "5.5"
   // );
 
-  const platform = await createAccountAndDeploy(
-    deployer.accountId,
-    `platform`,
-    getContract("equitify_platform"),
-    "5.5"
-  );
-
-  await platform.functionCall({
-    contractId: platform.accountId,
-    methodName: "init",
-    args: {},
-  })
+  // const platform = await createAccountAndDeploy(
+  //   deployer.accountId,
+  //   `platform`,
+  //   getContract("equitify_platform"),
+  //   "5.5"
+  // );
+  //
+  // await platform.functionCall({
+  //   contractId: platform.accountId,
+  //   methodName: "init",
+  //   args: {},
+  // });
 
   const idoToken = await createAccountAndDeploy(
     deployer.accountId,
@@ -210,7 +209,9 @@ const main = async () => {
     },
   });
 
-  const saleStart = (Math.floor((new Date().getTime()) * 1_000_000) + secondsToNearTimestamp(3 * 60));
+  const saleStart =
+    Math.floor(new Date().getTime() * 1_000_000) +
+    secondsToNearTimestamp(5 * 60);
   const saleEnd = (saleStart + 60 * 10 * 1 * 1000 * 1_000_000).toString();
 
   await launchpad.functionCall({
@@ -227,10 +228,11 @@ const main = async () => {
         saleStartTime: saleStart.toString(),
         saleEndTime: saleEnd,
         price: "1",
-        projectDescription: 'Its test project for NEAR MetaBUILD III Hackathon :)',
-        projectName: 'Near Launchpad',
-        projectSignature: 'LNEAR',
-        projectPreviewImageBase64: idoImage
+        projectDescription:
+          "Its test project for NEAR MetaBUILD III Hackathon :)",
+        projectName: "Near Launchpad",
+        projectSignature: "LNEAR",
+        projectPreviewImageBase64: idoImage,
       } as Project,
       cliffDuration: secondsToNearTimestamp(2 * 60).toString(),
       cliffStart: saleEnd,
@@ -241,14 +243,13 @@ const main = async () => {
   });
 
   await launchpadFactory.functionCall({
-    contractId: launchpadFactory.accountId, 
-    methodName: 'add_ido', 
+    contractId: launchpadFactory.accountId,
+    methodName: "add_ido",
     args: {
-      account_id: launchpad.accountId
+      account_id: launchpad.accountId,
     },
-    attachedDeposit: utils.format.parseNearAmount("0.1")
-  })
-
+    attachedDeposit: utils.format.parseNearAmount("0.1"),
+  });
 };
 
 main().catch((e) => console.log("Error", e));

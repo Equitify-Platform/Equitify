@@ -50,7 +50,7 @@ const NFT: FC<NFTProps> = ({
     }
   };
 
-  const handleOpen = () => setIsModalShown(true);
+  // const handleOpen = () => setIsModalShown(true);
 
   const handleTransfer = async (nftID: string) => {
     setIsLoading(true);
@@ -86,9 +86,6 @@ const NFT: FC<NFTProps> = ({
               </p>
             </div>
             <div className={styles.buttonsContainer}>
-              <button className={styles.transferBtn} onClick={handleOpen}>
-                Transfer
-              </button>
               <NavLink to={`/ido/${idoAddress}`}>
                 <button className={styles.toIdoBtn}>Go to IDO</button>
               </NavLink>
