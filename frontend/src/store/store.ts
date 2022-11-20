@@ -5,6 +5,7 @@ import {
   Action,
 } from "@reduxjs/toolkit";
 
+import { equitifyReducer } from "./reducers/equitify.reducer";
 import { launchpadsReducer } from "./reducers/launchpads.reducer";
 import { stakingReducer } from "./reducers/staking.reducer";
 import { walletReducer } from "./reducers/wallet.reducer";
@@ -13,6 +14,7 @@ const rootReducer = combineReducers({
   launchpads: launchpadsReducer,
   staking: stakingReducer,
   wallet: walletReducer,
+  equitify: equitifyReducer,
 });
 
 export const store = configureStore({
