@@ -154,6 +154,10 @@ test.beforeEach(async (t) => {
       saleStartTime: '0',// Math.floor(new Date().getTime() / 1000).toString(),
       saleEndTime: saleEnd.toString(),
       price: config.price,
+      projectDescription: '',
+      projectName: '',
+      projectPreviewImageBase64: '',
+      projectSignature: ''
     },
     cliffDuration: cliffDuration.toString(),
     cliffStart: cliffStart.toString(),
