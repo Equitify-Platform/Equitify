@@ -261,6 +261,9 @@ const Offer: FC<OfferProps> = ({
       <div className={styles.offerHeader}>
         <div className={styles.offerName}>{name}</div>
         <div className={styles.offerActions}>
+          {stage === Stage.Waiting && (
+            <div className={styles.timerLabel}>01:24:20 for Claim</div>
+          )}
           {stage !== Stage.Waiting && (
             <SecondaryButton
               isBlue={true}
