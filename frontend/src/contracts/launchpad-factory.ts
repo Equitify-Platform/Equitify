@@ -7,9 +7,6 @@ export class LaunchpadFactory {
   ) {}
 
   public async getLaunchpads(): Promise<string[]> {
-    return await this.wallet.view<string[]>(
-      this.contractId,
-      "get_all_idos_info"
-    );
+    return await this.wallet.view<string[]>(this.contractId, "get_all_idos");
   }
 }

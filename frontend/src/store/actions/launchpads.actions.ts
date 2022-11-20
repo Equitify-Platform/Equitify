@@ -17,6 +17,7 @@ export type ProjectStruct = {
   saleStartTime: string;
   saleEndTime: string;
   price: string;
+  projectPreviewImageBase64: string;
 };
 
 export type NftType = {

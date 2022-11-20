@@ -76,6 +76,7 @@ export const getLaunchpadsNear = async (
           saleStartTime: new BN(project.saleStartTime)
             .div(new BN(1_000_000_000))
             .toString(),
+          projectPreviewImageBase64: project.projectPreviewImageBase64,
         },
         stakingContract: "",
         token: {

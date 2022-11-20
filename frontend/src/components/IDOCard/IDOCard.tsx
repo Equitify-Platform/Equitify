@@ -1,4 +1,5 @@
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useRef, useState } from "react";
+import Countdown from "react-countdown";
 import { NavLink } from "react-router-dom";
 
 import styles from "./style.module.scss";
@@ -27,6 +28,14 @@ export const IDOCard: FC<IDOCardProps> = ({
   imageURI,
 }) => {
   const [arrowIcon, setArrowIcon] = useState(ArrowIconBlue);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const countdownRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (saleStartTime) {
+      countdownRef.current?.start();
+    }
+  }, [saleStartTime]);
 
   return (
     <div className={styles.idoCard}>
@@ -42,17 +51,13 @@ export const IDOCard: FC<IDOCardProps> = ({
           <p>{price} NEAR</p>
           <p>${tokenName}</p>
           <p>
-            <CountdownHOC
+            <Countdown
+              ref={countdownRef}
               date={new Date(+saleStartTime * 1000)}
-              now={() => Date.now()}
+              now={Date.now}
               renderer={({ formatted: f, completed }) => (
                 <>
-                  {completed && <>00 : 00 : 00 : 00</>}
-                  {!completed && (
-                    <>
-                      {f.days} : {f.hours} : {f.minutes} : {f.seconds}
-                    </>
-                  )}
+                  {f.days} : {f.hours} : {f.minutes} : {f.seconds}
                 </>
               )}
             />
