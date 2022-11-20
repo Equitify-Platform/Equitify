@@ -39,10 +39,12 @@ function IDOList() {
           <div className={styles.topSectionText}>
             <h1>Equitify</h1>
             <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat.
+              We empower the Investors and provide an ease of liquidating their
+              future investment position through NFT technology - by tokenizing
+              a user’s participation in an IDO. Every time tokens are vested,
+              the IDO smart contracts mint an NFT, and put the tokens inside of
+              it, with a vesting rule applied to it (cliff duration, unlock
+              formula (linear/graded/etc.).
             </p>
           </div>
         </div>
@@ -64,7 +66,9 @@ function IDOList() {
                 <div className={styles.cardsContainer}>
                   {projectsArray.map((p) => (
                     <IDOCard
-                      imageURI={p.projectStruct.projectPreviewImageBase64}
+                      imageURI={
+                        p.projectStruct.projectPreviewImageBase64 || IDOImg
+                      }
                       address={p.address}
                       key={p.address}
                       tokenName={p.token.name}
