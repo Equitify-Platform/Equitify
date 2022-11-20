@@ -22,6 +22,8 @@ export type Offer = {
 export type Protection = {
     offerId: string,
 
+    protectionStart: string;
+
     nftProviderId: string,
     guaranteeProviderId: string,
 
@@ -331,7 +333,7 @@ export class EquitifyPlatform extends WithCallback {
     }
 
   
-    private acceptOffer(protection: Omit<Protection, 'nftProviderId' | 'isGuaranteeClaimed' | 'isNftClaimed' | 'guaranteeProviderId'>) {
+    private acceptOffer(protection: Omit<Protection, 'nftProviderId' | 'isGuaranteeClaimed' | 'isNftClaimed' | 'guaranteeProviderId' | 'protectionStart'>) {
         const offer = this.offers.get(protection.offerId)
 
         assert(offer, 'Offer is not exists');
@@ -350,6 +352,7 @@ export class EquitifyPlatform extends WithCallback {
             nftProviderId: offer.offerCreatorType === OfferCreatorType.NFT_PROVIDER ?
                 offer.offerCreatorId :
                 near.predecessorAccountId(),
+            protectionStart: near.blockTimestamp().toString()
         } as Protection
 
         this.protections.set(protection.offerId, _protection);
@@ -377,6 +380,7 @@ export class EquitifyPlatform extends WithCallback {
 
         const protection = this.protections.get(offer_id)
 
+        assert(BigInt(protection.protectionStart) + BigInt(offer.protectionDuration) < near.blockTimestamp() , "Protection is not over yet");
         assert(protection.nftProviderId === near.predecessorAccountId(), "Predecessor is not a protection taker");
         assert(!protection.isNftClaimed && !protection.isGuaranteeClaimed, "Guarantee/Nft is already claimed");
 

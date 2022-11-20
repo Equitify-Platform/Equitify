@@ -31,6 +31,7 @@ export type Project = {
     projectName: string;
     projectDescription: string;
     projectSignature: string;
+    projectPreviewImageBase64: string
 }
 
 export type IDOParams = {
@@ -115,7 +116,8 @@ class Launchpad extends Ownable {
             softCap: '0',
             projectDescription: '',
             projectName: '',
-            projectSignature: ''
+            projectSignature: '',
+            projectPreviewImageBase64: ''
         }
 
     }
