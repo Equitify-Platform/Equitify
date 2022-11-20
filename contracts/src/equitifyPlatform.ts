@@ -250,7 +250,16 @@ export class EquitifyPlatform extends WithCallback {
         if (is_cancelled)
             result = result.filter(v => v.isCancelled === is_cancelled);
 
-        return result.filter((_, i) => BigInt(i) >= BigInt(from_id) && BigInt(i) < BigInt(to_id));
+        result = result.filter((_, i) => BigInt(i) >= BigInt(from_id) && BigInt(i) < BigInt(to_id));
+
+        return result.map(r=> {
+            const p = this.protections.get(r.id);
+            
+            return {
+                ...r,
+                protection: p
+            }
+        })
     }
 
     @view({})
@@ -286,7 +295,16 @@ export class EquitifyPlatform extends WithCallback {
         if (is_active)
             result = result.filter(v => !v.isGuaranteeClaimed && !v.isNftClaimed);
 
-        return result.filter((_, i) => BigInt(i) >= BigInt(from_id) && BigInt(i) < BigInt(to_id));
+        result = result.filter((_, i) => BigInt(i) >= BigInt(from_id) && BigInt(i) < BigInt(to_id));
+
+        return result.map(r=> {
+            const offer = this.offers.get(r.offerId);
+            
+            return {
+                ...r,
+                offer
+            }
+        })
     }
 
     private createOffer(offer: Omit<Offer, 'isActive' | 'isCancelled' | 'offerCreatorId'>) {
