@@ -1,12 +1,10 @@
-import React, { FC, useEffect, useRef, useState } from "react";
-import Countdown from "react-countdown";
+import React, { FC, useState } from "react";
 import { NavLink } from "react-router-dom";
 
 import styles from "./style.module.scss";
 
 import ArrowIconBlue from "../../assets/icons/arrowRightBlue.svg";
 import ArrowIconWhite from "../../assets/icons/arrowRightWhite.svg";
-import ClaimCountdown from "../ClaimCountdown";
 import { CountdownHOC } from "../common/CountdownHOC/CountdownHOC";
 import SecondaryButton from "../SecondaryButton";
 
@@ -28,14 +26,6 @@ export const IDOCard: FC<IDOCardProps> = ({
   imageURI,
 }) => {
   const [arrowIcon, setArrowIcon] = useState(ArrowIconBlue);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const countdownRef = useRef<any>(null);
-
-  useEffect(() => {
-    if (saleStartTime) {
-      countdownRef.current?.start();
-    }
-  }, [saleStartTime]);
 
   return (
     <div className={styles.idoCard}>
@@ -51,8 +41,7 @@ export const IDOCard: FC<IDOCardProps> = ({
           <p>{price} NEAR</p>
           <p>${tokenName}</p>
           <p>
-            <Countdown
-              ref={countdownRef}
+            <CountdownHOC
               date={new Date(+saleStartTime * 1000)}
               now={Date.now}
               renderer={({ formatted: f, completed }) => (
